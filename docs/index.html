@@ -125,12 +125,12 @@
     <div class="shell hero">
       <div class="hero-grid">
         <div>
-          <div class="eyebrow">v0.3.0-alpha.2 · open source in evoluzione</div>
+          <div class="eyebrow">v0.3.0-alpha.3 · open source in evoluzione</div>
           <h1>Il cielo visibile dal tuo <em>balcone.</em></h1>
           <p class="lead">AstroChecker aiuta gli astrofotografi a capire se un oggetto resterà nella finestra di cielo accessibile, al buio, per tutta la durata della ripresa.</p>
           <div class="actions">
             <a class="button primary" href="#come-funziona">Scopri come funziona <span aria-hidden="true">↓</span></a>
-            <a class="button" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2">Release alpha.2 ↗</a>
+            <a class="button" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.3">Release alpha.3 ↗</a>
           </div>
         </div>
         <div class="sky-card" aria-label="Illustrazione di una traiettoria nel cielo">
@@ -151,7 +151,7 @@
         <div class="requirement"><span class="check">✓</span><span><strong>Cercare un oggetto</strong><span>Sigle M, NGC, IC, Sh2, vdB e LDN, più nomi comuni verificati.</span></span></div>
         <div class="requirement"><span class="check">✓</span><span><strong>Descrivere la postazione</strong><span>Latitudine, longitudine, fuso IANA e limiti dell’orizzonte del balcone.</span></span></div>
         <div class="requirement"><span class="check">✓</span><span><strong>Chiedere una durata</strong><span>Una ripresa continua, espressa in minuti, a partire da un’ora locale.</span></span></div>
-        <div class="requirement"><span class="check">✓</span><span><strong>Ricevere una decisione</strong><span>Completa, parziale o non visibile, con la prima finestra utile quando esiste.</span></span></div>
+        <div class="requirement"><span class="check">✓</span><span><strong>Ricevere una decisione</strong><span>Completa, parziale o non visibile, con una proposta prioritaria quando l'orario non è sufficiente.</span></span></div>
       </div>
     </div></section>
 
@@ -161,7 +161,7 @@
         <article class="card"><h3>Scegli il bersaglio</h3><p>Digita una sigla o un alias e seleziona il record del catalogo.</p></article>
         <article class="card"><h3>Imposta il balcone</h3><p>Indica coordinate, altezza minima e massima e settore di azimut.</p></article>
         <article class="card"><h3>Definisci la ripresa</h3><p>Scegli data, ora, fuso della postazione e durata continua.</p></article>
-        <article class="card"><h3>Leggi la finestra</h3><p>Il motore scandisce le prossime 24 ore e mostra il risultato.</p></article>
+        <article class="card"><h3>Leggi la finestra</h3><p>Il motore scandisce 24 ore e, se serve, cerca una proposta futura entro 90 giorni.</p></article>
       </div>
     </div></section>
 
@@ -169,7 +169,7 @@
       <div class="section-heading"><div><div class="eyebrow">Il risultato</div><h2>Non somma pezzi di notte.</h2></div><p class="section-intro">Una durata continua deve stare dentro un unico intervallo che rispetta insieme balcone e buio astronomico.</p></div>
       <div class="results">
         <article class="result full"><h3>Visibile per tutta la durata</h3><p>La ripresa può iniziare all’ora scelta e resta dentro i vincoli.</p></article>
-        <article class="result partial"><h3>Visibile solo in parte</h3><p>Esiste tempo utile, ma nessun intervallo continuo copre l’intera durata.</p></article>
+        <article class="result partial"><h3>Visibile solo in parte</h3><p>Se la durata non entra, propone prima un nuovo orario, poi una data futura entro 90 giorni o la finestra continua più ampia.</p></article>
         <article class="result none"><h3>Non visibile nel periodo</h3><p>Non c’è una finestra sufficiente nelle 24 ore analizzate.</p></article>
       </div>
     </div></section>
@@ -182,12 +182,12 @@
     <section id="privacy"><div class="shell cards">
       <article class="card"><div class="eyebrow">Privacy</div><h3>La postazione resta tua</h3><p>Le coordinate possono essere inserite manualmente o proposte dal browser. L’app chiede conferma e salva un solo profilo locale.</p></article>
       <article class="card"><div class="eyebrow">Determinismo</div><h3>Nessun LLM nel calcolo</h3><p>Le decisioni sono regole e numeri: catalogo, coordinate, Sole, altezza, azimut e durata.</p></article>
-      <article class="card"><div class="eyebrow">Verifica</div><h3>ATDD in evidenza</h3><p>La release è protetta da test di accettazione, backend e browser. Il gate attuale conta 168 test passati.</p></article>
+      <article class="card"><div class="eyebrow">Verifica</div><h3>ATDD in evidenza</h3><p>La release è protetta da test di accettazione, backend e browser. Il gate attuale conta 176 test passati.</p></article>
     </div></section>
 
     <section id="limiti"><div class="shell">
       <div class="section-heading"><div><div class="eyebrow">Confini dichiarati</div><h2>Quello che ancora non promette.</h2></div><p class="section-intro">Una buona risposta contiene anche il suo perimetro. Questi punti restano fuori dalla release.</p></div>
-      <ul class="limits"><li>La ricerca copre i sei cataloghi DSO inclusi, non un catalogo stellare generale: Arturo non è disponibile.</li><li>Il calcolo usa altezze geometriche, senza rifrazione atmosferica.</li><li>Le 24 ore sono un orizzonte di ricerca, non una previsione per tutti i giorni futuri.</li><li>Un intervallo che tocca il bordo viene segnalato come possibile prosecuzione, senza fondere intervalli separati.</li><li>Non valuta meteo, Luna, qualità del cielo, campo fotografico o attrezzatura.</li><li>Export verso NINA, EQMOD, animazioni e plate solving sono nella lista dei desideri.</li></ul>
+      <ul class="limits"><li>La ricerca copre i sei cataloghi DSO inclusi, non un catalogo stellare generale: Arturo non è disponibile.</li><li>Il calcolo usa altezze geometriche, senza rifrazione atmosferica.</li><li>La finestra principale copre 24 ore; le proposte future sono cercate al massimo nei 90 giorni successivi.</li><li>Un intervallo che tocca il bordo viene segnalato come possibile prosecuzione, senza fondere intervalli separati.</li><li>Non valuta meteo, Luna, qualità del cielo, campo fotografico o attrezzatura.</li><li>Export verso NINA, EQMOD, animazioni e plate solving sono nella lista dei desideri.</li></ul>
     </div></section>
 
     <section id="avvio"><div class="shell launch">
@@ -196,7 +196,7 @@ cd letscheck
 python -m venv .venv
 pip install -r requirements.txt
 python run.py</code></pre></div>
-      <div class="card"><div class="eyebrow">Release corrente</div><h3>AstroChecker v0.3.0-alpha.2</h3><p>Cataloghi locali, alias comuni, indicazione dei bordi temporali e selettore data/ora più fluido.</p><p style="margin-top:18px"><a class="button primary" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2">Apri la release ↗</a></p><p style="margin-top:22px"><a href="https://github.com/Voloire/letscheck">Codice sorgente su GitHub ↗</a></p></div>
+      <div class="card"><div class="eyebrow">Release corrente</div><h3>AstroChecker v0.3.0-alpha.3</h3><p>Cataloghi locali, alias comuni, suggerimenti ordinati e ricerca futura limitata a 90 giorni.</p><p style="margin-top:18px"><a class="button primary" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.3">Apri la release ↗</a></p><p style="margin-top:22px"><a href="https://github.com/Voloire/letscheck">Codice sorgente su GitHub ↗</a></p></div>
     </div></section>
   </main>
 
