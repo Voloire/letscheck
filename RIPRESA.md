@@ -48,3 +48,7 @@ Report approfonditi in `.runtime/`: `local-progress.md`, `catalog-report.md`, `b
 La quota è passata dal 100% al 20% durante **l'intero percorso della conversazione**, comprese ricerca iniziale, prima alfa, pubblicazione e refactoring. Non attribuire l'80% al solo refactoring: mancano misure per fase. L'utente riferisce ora un reset settimanale e intende usare un modello meno costoso per i nuovi fix; non ne ha specificato qui il nome. Nessun cambio di modello/configurazione effettuato.
 
 Conservare qualità e ATDD con meno orchestrazione: interventi piccoli, un esecutore e revisione mirata quando utile, niente riletture globali, fan-out o documentazione ripetitiva. Il vincolo prioritario resta: niente overengineering, verificare le funzioni, mantenere la UI apprezzata.
+
+## Chiusura release v0.3.0-alpha.2
+
+Fix eseguiti: i nomi comuni verificati OpenNGC sono alias ricercabili; il planner espone `horizon_edges` e la UI segnala i tratti che toccano il bordo delle 24 ore senza fondere intervalli separati; il cambio del controllo `datetime-local` rimuove il focus per chiudere il popup. Suite completa: 168 test passati. Commit, tag e merge su `main` saranno registrati dopo la verifica finale.

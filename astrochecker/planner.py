@@ -156,6 +156,10 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
         "longest_visible_seconds": longest,
         "first_window": first_window,
         "intervals": intervals,
+        "horizon_edges": {
+            "start": bool(intervals and intervals[0]["start"] == 0),
+            "end": bool(intervals and intervals[-1]["end"] == horizon_end),
+        },
         "horizon_seconds": tidy(values["horizon_seconds"]),
         "resolution_seconds": RESOLUTION_SECONDS,
     }

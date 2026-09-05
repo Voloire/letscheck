@@ -8,8 +8,8 @@ from http.client import HTTPConnection
 import pytest
 
 from astrochecker.astronomy import equatorial_to_horizontal, interpolate_equatorial
+from astrochecker.legacy_skychart import AstroCheckerService, target_is_static
 from astrochecker.server import ApiError, create_server, validate_check_request
-from astrochecker.service import AstroCheckerService, target_is_static
 from astrochecker.skychart import (
     SkyChartClient,
     SkyChartObjectError,
@@ -351,7 +351,7 @@ def test_ui_defaults_to_supported_objects_and_full_azimuth(running_server):
         page.goto(f"http://127.0.0.1:{running_server.server_port}/")
         assert page.locator("#az-start").input_value() == "0"
         assert page.locator("#az-end").input_value() == "360"
-        assert "Stelle e oggetti del cielo profondo" in page.locator("#object-help").inner_text()
+        assert "Cataloghi locali M, NGC, IC, Sh2, vdB e LDN" in page.locator("#object-help").inner_text()
         assert "finestre stimate" in page.get_by_text("Metodo e limiti dell’alfa").locator("..").inner_text()
         browser.close()
 

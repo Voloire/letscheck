@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Pianificazione locale della visibilità astronomica con SkyChart.">
+  <meta name="description" content="Pianificazione locale della visibilità astronomica con cataloghi e calcoli sul computer.">
   <title>AstroChecker</title>
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -21,10 +21,10 @@
         </svg>
         <div>
           <div class="brand-row">
-            <span class="eyebrow">ALFA LOCALE</span>
+            <span class="eyebrow">ALFA LOCALE · 0.3.0-alpha.1</span>
             <span class="connection-pill" id="header-connection">
               <span class="status-dot" aria-hidden="true"></span>
-              <span>Da verificare</span>
+              <span>Controllo cataloghi…</span>
             </span>
           </div>
           <h1>AstroChecker</h1>
@@ -40,27 +40,23 @@
             <span class="step-number" aria-hidden="true">1</span>
             <div>
               <p class="section-kicker">PREREQUISITO</p>
-              <h2 id="connection-title">Collega SkyChart</h2>
+              <h2 id="connection-title">Cataloghi locali</h2>
             </div>
           </div>
 
-          <details class="connection-details" id="connection-details" open>
-            <summary>Impostazioni SkyChart</summary>
-            <ol class="instruction-list">
-              <li><span>Avvia SkyChart.</span></li>
-              <li><span>Apri <strong>Generale → Server</strong>.</span></li>
-              <li><span>Attiva <strong>Use TCP/IP Server</strong> e imposta <code>127.0.0.1:3292</code>.</span></li>
-              <li><span>Se hai cambiato questa impostazione, riavvia SkyChart.</span></li>
-            </ol>
-          </details>
+          <p class="catalog-lead">M · NGC · IC · Sh2 · vdB · LDN disponibili su questo computer</p>
+          <div class="catalog-meta" aria-live="polite">
+            <span id="catalog-version">Versione in controllo</span>
+            <span id="catalog-summary">Controllo dei cataloghi locali…</span>
+          </div>
 
           <div class="connection-actions">
-            <button class="button button-secondary" id="verify-connection" type="button">
-              <span class="button-label">Verifica connessione</span>
+            <button class="button button-secondary" id="verify-connection" type="button" hidden>
+              <span class="button-label">Riprova controllo</span>
               <span class="spinner" aria-hidden="true"></span>
             </button>
             <p class="status-message" id="connection-status" role="status" aria-live="polite">
-              SkyChart non verificato.
+              Controllo del catalogo locale in corso…
             </p>
           </div>
         </section>
@@ -74,20 +70,26 @@
             </div>
           </div>
 
-          <p class="unlock-note" id="unlock-note">Verifica la connessione per sbloccare il pianificatore.</p>
+          <p class="unlock-note" id="unlock-note">Attendi il controllo dei cataloghi locali.</p>
 
           <form id="planner-form" novalidate>
             <fieldset id="planner-fields" disabled>
               <legend class="visually-hidden">Parametri della ricerca</legend>
 
-              <div class="field field-wide">
+              <div class="field field-wide search-field">
                 <label for="object">Oggetto celeste</label>
-                <input id="object" name="object" type="text" value="M13" maxlength="200" required autocomplete="off" aria-describedby="object-help">
-                <p class="field-help" id="object-help">Stelle e oggetti del cielo profondo disponibili in SkyChart, per esempio M13 o NGC 6205.</p>
+                <input id="object" name="object" type="text" value="M13" maxlength="200" required autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="object-results" aria-expanded="false" aria-describedby="object-help object-search-status">
+                <ul class="object-results" id="object-results" role="listbox" hidden></ul>
+                <p class="field-help" id="object-help">Cataloghi locali M, NGC, IC, Sh2, vdB e LDN. Digita una sigla o un nome comune e scegli il risultato.</p>
+                <p class="search-status" id="object-search-status" role="status" aria-live="polite"></p>
               </div>
 
               <div class="field-group field-wide" role="group" aria-labelledby="position-group-label">
-                <p class="group-label" id="position-group-label">Posizione di osservazione</p>
+                <p class="group-label" id="position-group-label">Postazione di osservazione</p>
+                <div class="field site-name-field">
+                  <label for="site-name">Nome postazione</label>
+                  <input id="site-name" name="site_name" type="text" value="Balcone di Chiusanico" maxlength="80" autocomplete="off">
+                </div>
                 <div class="field-grid two-columns">
                   <div class="field">
                     <label for="latitude">Latitudine</label>
@@ -99,19 +101,46 @@
                   </div>
                 </div>
                 <p class="field-help">Valori positivi: nord/est. Valori negativi: sud/ovest.</p>
+                <div class="site-actions">
+                  <button class="button button-compact button-secondary" id="save-site" type="button">
+                    <span class="button-label">Salva postazione</span>
+                    <span class="spinner" aria-hidden="true"></span>
+                  </button>
+                  <button class="button button-compact button-secondary" id="detect-location" type="button">
+                    <span class="button-label">Usa la mia posizione</span>
+                    <span class="spinner" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <div class="location-proposal" id="location-proposal" hidden>
+                  <div>
+                    <strong>Posizione rilevata</strong>
+                    <p><span id="proposal-latitude"></span> · <span id="proposal-longitude"></span></p>
+                    <p id="proposal-accuracy"></p>
+                  </div>
+                  <div class="location-proposal-actions">
+                    <button class="button button-compact button-primary" id="accept-location" type="button">Usa questa posizione</button>
+                    <button class="button button-compact button-secondary" id="cancel-location" type="button">Annulla</button>
+                  </div>
+                </div>
+                <p class="site-status" id="site-status" role="status" aria-live="polite"></p>
               </div>
 
               <div class="field-grid two-columns field-wide">
                 <div class="field date-field">
-                  <label for="start">Data e ora locale</label>
+                  <label for="start">Data e ora della postazione</label>
                   <input id="start" name="start" type="datetime-local" required>
                 </div>
                 <div class="field">
-                  <label for="duration">Durata continua</label>
-                  <div class="input-unit"><input id="duration" name="duration" type="number" value="60" min="0" max="1440" step="any" required><span>min</span></div>
+                  <label for="timezone">Fuso della postazione (IANA)</label>
+                  <input id="timezone" name="timezone" type="text" value="Europe/Rome" maxlength="200" required autocomplete="off" list="common-timezones" placeholder="Europe/Rome">
+                  <datalist id="common-timezones"><option value="Europe/Rome"><option value="Europe/Paris"><option value="America/New_York"><option value="UTC"></datalist>
                 </div>
               </div>
-              <p class="field-help field-wide time-note">Fuso orario Europe/Rome. Le 24 ore analizzate partono dall’istante scelto.</p>
+              <div class="field field-wide duration-field">
+                <label for="duration">Durata continua</label>
+                <div class="input-unit"><input id="duration" name="duration" type="number" value="60" min="0" max="1440" step="any" required><span>min</span></div>
+              </div>
+              <p class="field-help field-wide time-note">Le 24 ore analizzate partono dall’istante scelto nel fuso <strong id="time-zone-note">Europe/Rome</strong>.</p>
 
               <div class="field-group field-wide balcony-group" role="group" aria-labelledby="balcony-group-label">
                 <div class="group-title-row">
@@ -152,7 +181,7 @@
                 <span class="button-label">Calcola visibilità</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
-              <p class="calculation-note field-wide">SkyChart prepara le prossime 24 ore; il calcolo può richiedere 1–2 minuti.</p>
+              <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore.</p>
             </fieldset>
           </form>
         </section>
@@ -198,11 +227,15 @@
 
           <article class="first-window" id="first-window-card">
             <div class="window-marker" aria-hidden="true"></div>
-            <div>
+            <div class="first-window-content">
               <p class="section-kicker">PROSSIMA OCCASIONE</p>
               <h3 id="first-window-title"></h3>
               <p id="first-window-time"></p>
               <p class="first-window-note" id="first-window-note"></p>
+              <div class="nina-action">
+                <button class="button button-secondary nina-button" type="button" disabled>Export TARGET to NINA</button>
+                <span class="coming-soon">Prossimamente</span>
+              </div>
             </div>
           </article>
 
@@ -213,6 +246,13 @@
                 <p>Verde: intervalli continui disponibili. Ambra: periodo richiesto.</p>
               </div>
               <span class="timeline-date" id="timeline-date"></span>
+            </div>
+            <div class="darkness-panel">
+              <p class="darkness-summary" id="darkness-summary"></p>
+              <div class="darkness-events" id="darkness-events">
+                <div><span>Inizio buio astronomico</span><strong id="darkness-start">—</strong></div>
+                <div><span>Fine buio astronomico</span><strong id="darkness-end">—</strong></div>
+              </div>
             </div>
             <div class="timeline-wrap">
               <div class="timeline" id="timeline" role="img" aria-label="Timeline della visibilità nelle 24 ore">
@@ -250,7 +290,7 @@
             <details>
               <summary>Metodo e limiti dell’alfa</summary>
               <ul id="method-notes"></ul>
-              <p>SkyChart fornisce le coordinate. AstroChecker calcola localmente finestre stimate, altezza e azimut geometrici, senza rifrazione. Le effemeridi orarie sono interpolate; nei dettagli è riportato un confronto locale dell’interpolazione. La griglia decisionale di 1 secondo è una risoluzione di calcolo, non una garanzia di accuratezza astronomica al secondo. Meteo, Luna, qualità del cielo e attrezzatura non sono valutati.</p>
+              <p>I cataloghi inclusi forniscono coordinate ICRS. AstroChecker calcola localmente finestre stimate, altezza, azimut e Sole, senza rifrazione e senza richieste remote. La griglia decisionale di 1 secondo è una risoluzione di calcolo, non una garanzia di accuratezza astronomica al secondo. Meteo, Luna, qualità del cielo e attrezzatura non sono valutati.</p>
             </details>
           </article>
         </div>
@@ -259,7 +299,7 @@
 
     <footer>
       <span>Funziona solo su questo computer.</span>
-      <span>Europe/Rome · geometria + Sole ≤ −18°</span>
+      <span>Cataloghi locali · geometria + Sole ≤ −18°</span>
     </footer>
   </div>
   <script src="/app.js" defer></script>

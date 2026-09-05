@@ -1,4 +1,6 @@
-# AstroChecker — alfa locale
+# Contratto storico — AstroChecker v0.2.0-alpha.1
+
+Questo documento descrive l'alfa con SkyChart. Il refactoring con cataloghi locali è descritto in PIANO-LOCALE.md; i criteri osservativi sottostanti rimangono protetti dai test.
 
 Applicazione Python per Windows, disponibile esclusivamente su localhost in un browser. Nessun servizio esterno, account, LLM, telemetria o esportazione NINA durante l'uso. SkyChart installato e avviato è un prerequisito.
 

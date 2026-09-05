@@ -1,5 +1,7 @@
 ﻿# Piano esecutivo breve
 
+Piano storico della prima alfa con SkyChart. Il refactoring successivo è descritto in PIANO-LOCALE.md.
+
 Specifica: ALPHA.md. Obiettivo: prima alfa locale realmente utilizzabile, senza esportazione NINA.
 
 1. Dimostrare protocollo SkyChart e convenzioni coordinate. Nessuna astrometria legata al cursore manuale.
