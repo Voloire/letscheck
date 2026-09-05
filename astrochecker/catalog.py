@@ -104,6 +104,10 @@ class Catalog:
             "dec_deg": row["dec_deg"],
             "frame": "icrs",
             "type": row["object_type"],
+            "major_axis_arcmin": row["major_axis_arcmin"],
+            "minor_axis_arcmin": row["minor_axis_arcmin"],
+            "visual_mag": row["visual_mag"],
+            "surface_brightness": row["surface_brightness"],
             "aliases": aliases,
             "source": row["source"],
         }
@@ -164,5 +168,33 @@ class Catalog:
                     (normalized, normalized + "%", bounded_limit),
                 ).fetchall()
                 return [self._result(connection, row) for row in rows]
+        except sqlite3.Error as exc:
+            raise CatalogError(f"Catalogo locale non valido: {exc}") from exc
+
+    def idea_candidates(self, *, include_ineligible: bool = False) -> list[dict]:
+        """Return deterministic catalog records annotated for the ideas planner."""
+        from .idea_profiles import classify_candidate
+
+        try:
+            with closing(self._connect()) as connection:
+                rows = connection.execute("SELECT * FROM objects ORDER BY name, id").fetchall()
+                candidates = []
+                for row in rows:
+                    result = self._result(connection, row)
+                    result["id"] = row["id"]
+                    result["canonical_key"] = row["canonical_key"]
+                    profile = classify_candidate(result)
+                    result["profile"] = profile
+                    result["eligible"] = profile["eligible"]
+                    if include_ineligible or profile["eligible"]:
+                        candidates.append(result)
+                candidates.sort(
+                    key=lambda item: (
+                        -int(item["profile"]["priority"]),
+                        item["name"].casefold(),
+                        item["canonical_key"],
+                    )
+                )
+                return candidates
         except sqlite3.Error as exc:
             raise CatalogError(f"Catalogo locale non valido: {exc}") from exc

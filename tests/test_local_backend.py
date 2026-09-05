@@ -180,6 +180,24 @@ def test_coarse_ephemeris_exposes_only_requested_probe_grid():
         ephemeris.position_at(15)
 
 
+def test_catalog_ephemerides_transform_multiple_targets_in_one_grid():
+    astronomy = astronomy_module()
+    from astrochecker.planner import parse_start
+
+    ephemerides = astronomy.build_catalog_ephemerides(
+        [(250.423455, 36.461301), (10.0, 20.0)],
+        parse_start("2026-09-06T03:15", "UTC"),
+        43.9729,
+        7.9944,
+        horizon_seconds=60,
+        knot_step_seconds=30,
+        output_step_seconds=30,
+    )
+
+    assert len(ephemerides) == 2
+    assert ephemerides[0].position_at(30)["alt"] != ephemerides[1].position_at(30)["alt"]
+
+
 def test_iers_coverage_checks_the_search_end_as_well_as_the_start():
     astronomy = astronomy_module()
     from astropy.time import Time

@@ -131,6 +131,42 @@ def validate_site_request(payload):
     }
 
 
+def validate_ideas_request(payload):
+    """Validate a multi-object ideas request without resolving an object."""
+    if not isinstance(payload, dict):
+        raise ValueError("Il corpo JSON deve essere un oggetto")
+    latitude = _number(payload, "latitude", "latitudine")
+    longitude = _number(payload, "longitude", "longitudine")
+    if not -90 <= latitude <= 90:
+        raise ValueError("La latitudine deve essere compresa tra -90 e 90 gradi")
+    if not -180 <= longitude <= 180:
+        raise ValueError("La longitudine deve essere compresa tra -180 e 180 gradi")
+    timezone_name = _timezone(payload, default="Europe/Rome")
+    start = parse_start(payload.get("start"), timezone_name)
+    values = validate_limits(
+        duration_seconds=_number(payload, "duration_minutes", "durata") * 60,
+        horizon_seconds=86400,
+        min_alt=payload.get("min_alt"),
+        max_alt=payload.get("max_alt"),
+        az_start=payload.get("az_start"),
+        az_end=payload.get("az_end"),
+    )
+    mode = payload.get("darkness_mode", "astronomical")
+    if mode not in ("astronomical", "nautical"):
+        raise ValueError("La modalita di buio deve essere astronomica o nautica")
+    search_days = payload.get("search_days", 1)
+    if isinstance(search_days, bool) or not isinstance(search_days, Real) or not float(search_days).is_integer():
+        raise ValueError("Il periodo di ricerca deve essere espresso in giorni interi")
+    search_days = int(search_days)
+    if not 1 <= search_days <= 90:
+        raise ValueError("Il periodo di ricerca deve essere compreso tra 1 e 90 giorni")
+    return {
+        "latitude": latitude, "longitude": longitude, "start": start,
+        "timezone": timezone_name, "darkness_mode": mode,
+        "search_days": search_days, **values,
+    }
+
+
 class AstroCheckerHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -307,7 +343,7 @@ def make_handler(service):
             if self._reject_nonlocal():
                 return
             parsed = urlparse(self.path)
-            if parsed.path not in ("/api/check", "/api/site"):
+            if parsed.path not in ("/api/check", "/api/ideas", "/api/site"):
                 self._early_json(
                     404,
                     {"error": "Risorsa non trovata", "code": "validation"},
@@ -320,6 +356,11 @@ def make_handler(service):
                 self._service_json(
                     lambda: service.check(payload),
                     generic_message="Calcolo non riuscito",
+                )
+            elif parsed.path == "/api/ideas":
+                self._service_json(
+                    lambda: service.ideas(payload),
+                    generic_message="Pianificazione delle idee non riuscita",
                 )
             else:
                 self._service_json(

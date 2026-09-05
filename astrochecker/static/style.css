@@ -368,6 +368,15 @@ fieldset:disabled { opacity: .42; }
 .interval-duration { color: var(--text); font-size: .72rem; font-weight: 650; white-space: nowrap; }
 .empty-intervals { color: var(--text-dim); font-size: .78rem; padding: 11px 0; }
 
+.ideas-button { margin-top: 8px; }
+.ideas-card { border-color: rgba(105,215,201,.28); }
+.idea-list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.idea-list li { display: grid; grid-template-columns: 25px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border: 1px solid rgba(80,105,130,.35); border-radius: 8px; background: rgba(23,34,49,.65); }
+.idea-index { color: var(--teal); font-size: .7rem; font-weight: 750; }
+.idea-object { color: var(--text); font-size: .78rem; font-weight: 700; }
+.idea-detail { color: var(--text-soft); font-size: .7rem; line-height: 1.35; }
+.idea-duration { color: var(--amber); font-size: .72rem; font-weight: 650; white-space: nowrap; }
+
 .criteria-card { display: grid; gap: 12px; }
 .reason-list { display: flex; flex-wrap: wrap; gap: 7px; }
 .reason-chip { padding: 5px 8px; border-radius: 999px; color: var(--text-soft); background: var(--surface-2); font-size: .67rem; }

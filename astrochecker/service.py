@@ -14,9 +14,11 @@ from .catalog import (
     CatalogError,
     ObjectNotFoundError,
 )
+from .idea_profiles import IDEA_MIN_BLOCK_SECONDS
 from .local_astronomy import (
     AstronomyDataError,
     build_ephemeris,
+    build_catalog_ephemerides,
     summarize_darkness,
 )
 from .planner import (
@@ -25,17 +27,42 @@ from .planner import (
     elapsed_end,
     position_is_visible,
     solve_visibility,
+    plan_ideas,
 )
-from .server import ApiError, validate_check_request, validate_site_request
+from .server import ApiError, validate_check_request, validate_ideas_request, validate_site_request
 
 
 HORIZON_SECONDS = 86400
 CHART_STEP_SECONDS = 300
 FUTURE_PROBE_STEP_SECONDS = 300
+IDEA_PROBE_STEP_SECONDS = 300
 
 
 def _tidy(number):
     return int(number) if float(number).is_integer() else number
+
+
+def _select_idea_candidates(records, *, limit=120):
+    """Keep a fast, deterministic shortlist while preserving profile variety."""
+    eligible = [
+        item for item in records
+        if (item.get("profile") or {}).get("eligible", item.get("eligible", False))
+    ]
+    if limit is None:
+        return eligible
+    bounded_limit = max(1, int(limit))
+    selected = []
+    seen_types = set()
+    for item in eligible:
+        object_type = str(item.get("type", "")).upper()
+        if object_type and object_type not in seen_types:
+            selected.append(item)
+            seen_types.add(object_type)
+        if len(selected) >= bounded_limit:
+            return selected[:bounded_limit]
+    selected_ids = {id(item) for item in selected}
+    selected.extend(item for item in eligible if id(item) not in selected_ids)
+    return selected[:bounded_limit]
 
 
 def default_site_path():
@@ -295,6 +322,103 @@ class AstroCheckerService:
                 "Se la richiesta non e completa, le alternative future vengono cercate localmente fino a 90 giorni; la prima finestra completa viene poi verificata con la griglia di un secondo.",
             ],
         }
+
+    def ideas(self, payload):
+        """Build one deterministic multi-object plan from local ephemerides."""
+        request = validate_ideas_request(payload)
+        try:
+            records = self.catalog.idea_candidates(include_ineligible=True)
+        except CatalogError as exc:
+            raise ApiError(str(exc), "catalog", 503) from exc
+        eligible = [item for item in records if (item.get("profile") or {}).get("eligible")]
+        selected_records = _select_idea_candidates(eligible, limit=None)
+        horizon = HORIZON_SECONDS
+        try:
+            darkness_ephemeris = build_ephemeris(
+                0, 0, request["start"], request["latitude"], request["longitude"],
+                horizon_seconds=horizon,
+                knot_step_seconds=IDEA_PROBE_STEP_SECONDS,
+                output_step_seconds=IDEA_PROBE_STEP_SECONDS,
+            )
+        except AstronomyDataError as exc:
+            raise ApiError(str(exc), "calculation", 502) from exc
+        astronomical = self._idea_darkness_summary(darkness_ephemeris, -18, horizon)
+        nautical = self._idea_darkness_summary(darkness_ephemeris, -12, horizon)
+        darkness = {
+            "mode": request["darkness_mode"],
+            "astronomical": astronomical,
+            "nautical": nautical,
+        }
+        selected_darkness = darkness[request["darkness_mode"]]["intervals"]
+        candidates = []
+        try:
+            ephemerides = build_catalog_ephemerides(
+                [(item["ra_deg"], item["dec_deg"]) for item in selected_records],
+                request["start"], request["latitude"], request["longitude"],
+                horizon_seconds=horizon,
+                knot_step_seconds=IDEA_PROBE_STEP_SECONDS,
+                output_step_seconds=IDEA_PROBE_STEP_SECONDS,
+            )
+        except AstronomyDataError as exc:
+            raise ApiError(str(exc), "calculation", 502) from exc
+        for candidate, ephemeris in zip(selected_records, ephemerides):
+            visibility = solve_visibility(
+                ephemeris.position_at,
+                duration_seconds=1,
+                horizon_seconds=horizon,
+                min_alt=request["min_alt"], max_alt=request["max_alt"],
+                az_start=request["az_start"], az_end=request["az_end"],
+                resolution_seconds=IDEA_PROBE_STEP_SECONDS,
+            )
+            candidates.append({**candidate, "intervals": visibility["intervals"]})
+        result = plan_ideas(
+            candidates, selected_darkness, request["duration_seconds"],
+            minimum_block_seconds=IDEA_MIN_BLOCK_SECONDS,
+        )
+        for block in result["blocks"]:
+            block["offset_start"] = block["start"]
+            block["offset_end"] = block["end"]
+            block["start"] = elapsed_end(request["start"], block["offset_start"]).isoformat()
+            block["end"] = elapsed_end(request["start"], block["offset_end"]).isoformat()
+        result.update({
+            "start": request["start"].isoformat(),
+            "end": elapsed_end(request["start"], request["duration_seconds"]).isoformat(),
+            "timezone": request["timezone"],
+            "duration_seconds": _tidy(request["duration_seconds"]),
+            "darkness": darkness,
+            "darkness_mode": request["darkness_mode"],
+            "search_days": request["search_days"],
+            "search_limit_days": MAX_FUTURE_SEARCH_DAYS,
+            "candidate_count": len(eligible),
+            "evaluated_candidate_count": len(selected_records),
+            "skipped": {
+                **result["skipped"],
+                "catalog_excluded": max(0, len(records) - len(eligible)),
+                "not_evaluated": max(0, len(eligible) - len(selected_records)),
+            },
+            "notes": [
+                "Piano calcolato localmente dal catalogo SQLite e da effemeridi offline.",
+                "Il buio astronomico (Sole <= -18 gradi) e il criterio predefinito; il buio nautico usa -12 gradi.",
+                "Ogni oggetto richiede un blocco continuo di almeno due ore; meteo, Luna e attrezzatura non sono valutati.",
+            ],
+        })
+        return result
+
+    @staticmethod
+    def _idea_darkness_summary(ephemeris, limit, horizon):
+        summary = summarize_darkness(ephemeris.sun_alt, limit)
+        offsets = getattr(ephemeris, "sample_offsets", None)
+        if offsets is None:
+            step = horizon / max(1, len(ephemeris.sun_alt) - 1)
+            offsets = [index * step for index in range(len(ephemeris.sun_alt))]
+        else:
+            offsets = list(offsets)
+        for interval in summary["intervals"]:
+            interval["start"] = int(offsets[interval["start"]])
+            interval["end"] = int(offsets[interval["end"]])
+        for event in summary["events"]:
+            event["offset"] = int(offsets[event["offset"]])
+        return summary
 
     def get_site(self):
         with self._site_lock:

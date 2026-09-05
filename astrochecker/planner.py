@@ -7,10 +7,130 @@ import math
 from numbers import Real
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from .idea_profiles import IDEA_MIN_BLOCK_SECONDS
+
 
 RESOLUTION_SECONDS = 1
 SUN_LIMIT_DEGREES = -18.0
 MAX_FUTURE_SEARCH_DAYS = 90
+
+
+def plan_ideas(candidates, darkness_intervals, total_seconds, minimum_block_seconds=7200):
+    """Choose deterministic, non-overlapping DSO blocks from supplied intervals.
+
+    Visibility and darkness intervals are offsets from the requested start.  No
+    astronomical calls are made here; callers may therefore test and reuse the
+    planner with cached or precomputed intervals.
+    """
+    try:
+        total = int(total_seconds)
+        minimum = int(minimum_block_seconds)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("La durata del piano deve essere espressa in secondi interi") from exc
+    if total <= 0 or minimum <= 0:
+        raise ValueError("La durata del piano e il blocco minimo devono essere positivi")
+
+    if isinstance(darkness_intervals, dict):
+        darkness_intervals = darkness_intervals.get("intervals", [])
+    dark = _normalise_intervals(darkness_intervals, 0, max(total, 90 * 86400))
+    options = []
+    skipped = {"ineligible": 0, "short": 0, "no_window": 0}
+    for candidate in candidates or []:
+        profile = candidate.get("profile") or {}
+        if profile.get("eligible", candidate.get("eligible", True)) is False:
+            skipped["ineligible"] += 1
+            continue
+        visibility = candidate.get("intervals") or candidate.get("visibility_intervals") or []
+        visibility = _normalise_intervals(visibility, 0, max(total, 90 * 86400))
+        clipped = []
+        for start, end in visibility:
+            for dark_start, dark_end in dark:
+                left, right = max(start, dark_start), min(end, dark_end)
+                if right > left:
+                    clipped.append((left, right))
+        if not clipped:
+            skipped["no_window"] += 1
+            continue
+        usable = [interval for interval in clipped if interval[1] - interval[0] >= minimum]
+        if not usable:
+            skipped["short"] += 1
+            continue
+        # One target gets one continuous block.  Separate source intervals are
+        # never joined; select its longest deterministic interval.
+        start, end = min(usable, key=lambda item: (-(item[1] - item[0]), item[0], item[1]))
+        priority = int(profile.get("priority", candidate.get("priority", 0)) or 0)
+        name = str(candidate.get("name", candidate.get("object", "")))
+        options.append({
+            "object": name,
+            "type": candidate.get("type", profile.get("category", "DSO")),
+            "start": start,
+            "end": end,
+            "priority": priority,
+            "reason": profile.get("reason", candidate.get("reason", "Finestra continua disponibile.")),
+        })
+
+    options.sort(key=lambda item: (item["end"], item["start"], -item["priority"], item["object"].casefold()))
+    previous = []
+    for index, item in enumerate(options):
+        previous.append(max((j for j in range(index) if options[j]["end"] <= item["start"]), default=-1))
+
+    def score(blocks):
+        return (
+            min(total, sum(item["end"] - item["start"] for item in blocks)),
+            sum(item["priority"] for item in blocks),
+            -len(blocks),
+        )
+
+    best = [[] for _ in options]
+    for index, item in enumerate(options):
+        include = (best[previous[index]] if previous[index] >= 0 else []) + [item]
+        exclude = best[index - 1] if index else []
+        best[index] = include if score(include) > score(exclude) else exclude
+    selected = list(best[-1]) if best else []
+    selected.sort(key=lambda item: (item["start"], item["end"], -item["priority"], item["object"].casefold()))
+    blocks = []
+    remaining = total
+    for item in selected:
+        if remaining <= 0:
+            break
+        duration = min(item["end"] - item["start"], remaining)
+        if duration < minimum:
+            continue
+        block = {**item, "end": item["start"] + duration, "duration_seconds": duration}
+        blocks.append(block)
+        remaining -= duration
+    covered = total - remaining
+    return {
+        "status": "full" if covered >= total else ("partial" if covered else "none"),
+        "requested_duration_seconds": total,
+        "covered_duration_seconds": covered,
+        "darkness_mode": "astronomical",
+        "blocks": blocks,
+        "object_count": len(blocks),
+        "skipped": skipped,
+        "note": (
+            "Piano completo con blocchi continui di almeno due ore."
+            if covered >= total else
+            "Piano parziale: le finestre continue disponibili non coprono tutta la durata richiesta."
+            if covered else
+            "Nessun oggetto dispone di una finestra continua di almeno due ore nel buio richiesto."
+        ),
+    }
+
+
+def _normalise_intervals(intervals, lower, upper):
+    result = []
+    for item in intervals or []:
+        if not isinstance(item, dict):
+            continue
+        try:
+            start, end = int(item["start"]), int(item["end"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        start, end = max(lower, start), min(upper, end)
+        if end > start:
+            result.append((start, end))
+    return sorted(set(result))
 
 
 def _finite_number(name: str, value: object) -> float:

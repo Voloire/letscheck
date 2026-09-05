@@ -1,4 +1,4 @@
-"""Build data/catalog.sqlite3 from versioned local source snapshots.
+﻿"""Build data/catalog.sqlite3 from versioned local source snapshots.
 
 This command is deliberately offline. Downloading or refreshing snapshots is a
 separate, reviewed operation; runtime code only opens the resulting SQLite file.
@@ -25,7 +25,7 @@ import astropy.units as u
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 DEFAULT_OUTPUT = ROOT / "data" / "catalog.sqlite3"
-VERSION = "2026.09.05-2"
+VERSION = "2026.09.05-3"
 OPENNGC_COMMIT = "da90466031b0372c896588b85be6016c617e205b"
 CATALOG_ORDER = ("messier", "ngc", "ic", "sh2", "vdb", "ldn")
 
@@ -91,6 +91,10 @@ CREATE TABLE objects (
     ra_deg REAL NOT NULL CHECK(ra_deg >= 0 AND ra_deg < 360),
     dec_deg REAL NOT NULL CHECK(dec_deg >= -90 AND dec_deg <= 90),
     object_type TEXT NOT NULL,
+    major_axis_arcmin REAL,
+    minor_axis_arcmin REAL,
+    visual_mag REAL,
+    surface_brightness REAL,
     source TEXT NOT NULL,
     original_ra TEXT NOT NULL,
     original_dec TEXT NOT NULL,
@@ -170,15 +174,21 @@ class Writer:
         original_ra: str,
         original_dec: str,
         original_frame: str,
+        major_axis_arcmin: float | None = None,
+        minor_axis_arcmin: float | None = None,
+        visual_mag: float | None = None,
+        surface_brightness: float | None = None,
     ) -> int:
         cursor = self.connection.execute(
             """
             INSERT INTO objects(
-                canonical_key, name, ra_deg, dec_deg, object_type, source,
+                canonical_key, name, ra_deg, dec_deg, object_type,
+                major_axis_arcmin, minor_axis_arcmin, visual_mag, surface_brightness, source,
                 original_ra, original_dec, original_frame
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (key, name, ra, dec, object_type, source, original_ra, original_dec, original_frame),
+            (key, name, ra, dec, object_type, major_axis_arcmin, minor_axis_arcmin,
+             visual_mag, surface_brightness, source, original_ra, original_dec, original_frame),
         )
         object_id = int(cursor.lastrowid)
         self.ids[key] = object_id
@@ -207,6 +217,14 @@ def split_common_names(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def optional_float(value: object) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
 def import_openngc(writer: Writer) -> dict[str, int]:
     rows = []
     with (RAW / "openngc-ngc.csv").open(encoding="utf-8", newline="") as source:
@@ -230,6 +248,10 @@ def import_openngc(writer: Writer) -> dict[str, int]:
             row["RA"],
             row["Dec"],
             "FK5 J2000",
+            major_axis_arcmin=optional_float(row.get("MajAx")),
+            minor_axis_arcmin=optional_float(row.get("MinAx")),
+            visual_mag=optional_float(row.get("V-Mag")),
+            surface_brightness=optional_float(row.get("SurfBr")),
         )
         writer.alias(object_id, prefix.lower(), name, primary=True)
         for number in split_numbers(row["M"]):
@@ -279,6 +301,10 @@ def import_openngc(writer: Writer) -> dict[str, int]:
             row["RA"],
             row["Dec"],
             "FK5 J2000",
+            major_axis_arcmin=optional_float(row.get("MajAx")),
+            minor_axis_arcmin=optional_float(row.get("MinAx")),
+            visual_mag=optional_float(row.get("V-Mag")),
+            surface_brightness=optional_float(row.get("SurfBr")),
         )
         writer.alias(object_id, "messier", name, primary=True)
 
