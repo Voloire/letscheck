@@ -39,18 +39,27 @@ class LocalEphemeris:
     uses_prediction: bool
     iers_coverage_start: str
     iers_coverage_end_exclusive: str
+    sample_offsets: np.ndarray | None = None
 
     def position_at(self, offset):
         try:
             index = operator.index(offset)
         except TypeError as exc:
             raise ValueError("L'offset astronomico deve essere un secondo intero") from exc
-        if not 0 <= index < len(self.target_alt):
-            raise ValueError("L'offset astronomico e fuori dal periodo calcolato")
+        if self.sample_offsets is None:
+            if not 0 <= index < len(self.target_alt):
+                raise ValueError("L'offset astronomico e fuori dal periodo calcolato")
+            sample_index = index
+        else:
+            if not 0 <= index <= int(self.sample_offsets[-1]):
+                raise ValueError("L'offset astronomico e fuori dal periodo calcolato")
+            sample_index = int(np.searchsorted(self.sample_offsets, index))
+            if sample_index >= len(self.sample_offsets) or int(self.sample_offsets[sample_index]) != index:
+                raise ValueError("L'offset astronomico non coincide con la griglia calcolata")
         return {
-            "alt": float(self.target_alt[index]),
-            "az": float(self.target_az[index]),
-            "sun_alt": float(self.sun_alt[index]),
+            "alt": float(self.target_alt[sample_index]),
+            "az": float(self.target_az[sample_index]),
+            "sun_alt": float(self.sun_alt[sample_index]),
         }
 
 
@@ -137,6 +146,7 @@ def build_ephemeris(
     *,
     horizon_seconds=DEFAULT_HORIZON_SECONDS,
     knot_step_seconds=DEFAULT_KNOT_STEP_SECONDS,
+    output_step_seconds=1,
 ):
     """Build one-second local positions from vectorized Astropy knots."""
     if not isinstance(start, datetime) or start.tzinfo is None:
@@ -149,6 +159,10 @@ def build_ephemeris(
         raise ValueError("Il passo astronomico deve essere espresso in secondi interi")
     if knot_step_seconds <= 0:
         raise ValueError("Il passo astronomico deve essere maggiore di zero")
+    if isinstance(output_step_seconds, bool) or not isinstance(output_step_seconds, int):
+        raise ValueError("Il passo di uscita astronomico deve essere espresso in secondi interi")
+    if output_step_seconds <= 0:
+        raise ValueError("Il passo di uscita astronomico deve essere maggiore di zero")
 
     table = _bundled_iers_table()
     start_utc, uses_prediction, coverage_start, coverage_end = _time_metadata(
@@ -159,7 +173,9 @@ def build_ephemeris(
     )
     if knot_offsets[-1] != horizon_seconds:
         knot_offsets = np.append(knot_offsets, float(horizon_seconds))
-    offsets = np.arange(0, horizon_seconds + 1, dtype=float)
+    offsets = np.arange(0, horizon_seconds + 1, output_step_seconds, dtype=float)
+    if offsets[-1] != horizon_seconds:
+        offsets = np.append(offsets, float(horizon_seconds))
 
     try:
         times = Time(start_utc, scale="utc") + TimeDelta(knot_offsets, format="sec")
@@ -207,6 +223,7 @@ def build_ephemeris(
         uses_prediction=uses_prediction,
         iers_coverage_start=coverage_start,
         iers_coverage_end_exclusive=coverage_end,
+        sample_offsets=offsets.astype(int),
     )
 
 

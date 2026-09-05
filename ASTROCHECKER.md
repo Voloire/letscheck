@@ -1,4 +1,4 @@
-# AstroChecker - v0.3.0-alpha.2
+# AstroChecker - v0.3.0-alpha.3
 
 Un pianificatore locale per verificare se un bersaglio del cielo profondo resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
 
@@ -35,6 +35,8 @@ Il fuso è quello della postazione, non necessariamente quello del computer. Gli
 - **Non visibile:** nessun tratto utile nell'intervallo richiesto.
 - **Prima finestra completa:** prima occasione sufficiente la cui fine rientra nelle 24 ore successive all'inizio scelto.
 - **Nessuna soluzione:** nessuna finestra continua sufficiente in queste 24 ore, non una previsione per tutti i giorni futuri.
+
+Quando la richiesta non e completa, il servizio propone una sola alternativa prioritaria, sempre nello stesso ordine: prima corregge l'orario nella finestra analizzata mantenendo la durata; se non basta cerca la prima data futura completa; infine mostra la finestra continua piu ampia anche se piu breve. La ricerca futura e limitata a 90 giorni e il limite e indicato nella UI. Se il bersaglio non compare in alcuna finestra, il risultato lo dichiara esplicitamente; se compare solo per meno tempo, sono mostrate durata richiesta e durata massima ottenibile.
 
 Se un intervallo tocca l'inizio o la fine delle 24 ore, il risultato lo segnala come possibile prosecuzione oltre il periodo analizzato. Gli intervalli separati non vengono uniti automaticamente: per confermare ciò che accade oltre il bordo occorre avviare un'analisi con un inizio diverso.
 

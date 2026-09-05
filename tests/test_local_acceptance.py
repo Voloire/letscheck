@@ -126,3 +126,65 @@ def test_polar_summer_has_no_invented_astronomical_twilight(local_service):
     assert result['darkness']['intervals'] == []
     assert result['darkness']['events'] == []
     assert result['darkness']['at_start'] is False
+
+
+def test_invalid_request_exposes_ranked_future_suggestion_limited_to_90_days(
+    monkeypatch, tmp_path
+):
+    import numpy as np
+    from astrochecker.local_astronomy import LocalEphemeris
+    from astrochecker.service import AstroCheckerService
+
+    class StubCatalog:
+        def resolve(self, _query):
+            return {
+                'name': 'Stub target', 'ra_deg': 10, 'dec_deg': 20,
+                'frame': 'icrs', 'type': 'DSO', 'aliases': [], 'source': 'test',
+            }
+
+    requested_start = REQUEST['start']
+    base_date = __import__('datetime').datetime.fromisoformat(requested_start)
+
+    def fake_ephemeris(_ra, _dec, start, _lat, _lon, *, horizon_seconds,
+                       output_step_seconds=1, knot_step_seconds=30):
+        day = (start.replace(tzinfo=None).date() - base_date.date()).days
+        def visible(day_index, offset):
+            if day_index == 0:
+                return offset < 1200
+            if day_index == 1:
+                return 1800 <= offset < 3000
+            if day_index == 2:
+                return 600 <= offset < 5000
+            return False
+        if horizon_seconds > 86400:
+            class Probe:
+                uses_prediction = False
+                iers_coverage_start = 'test'
+                iers_coverage_end_exclusive = 'test'
+                sun_alt = np.array([-20.0])
+
+                @staticmethod
+                def position_at(offset):
+                    relative_day, relative_offset = divmod(offset, 86400)
+                    if relative_day == 0:
+                        relative_day = day
+                    return {
+                        'alt': 45 if visible(day + relative_day, relative_offset) else -10,
+                        'az': 180,
+                        'sun_alt': -20,
+                    }
+
+            return Probe()
+        alt = np.array([45 if visible(day, offset) else -10 for offset in range(horizon_seconds + 1)], dtype=float)
+        az = np.full(horizon_seconds + 1, 180.0)
+        sun = np.full(horizon_seconds + 1, -20.0)
+        return LocalEphemeris(alt, az, sun, False, 'test', 'test')
+
+    monkeypatch.setattr('astrochecker.service.build_ephemeris', fake_ephemeris)
+    service = AstroCheckerService(catalog=StubCatalog(), site_path=tmp_path / 'site.json')
+    result = service.check(REQUEST | {'duration_minutes': 60})
+
+    assert result['status'] == 'partial'
+    assert result['suggestions'][0]['tier'] == 'future'
+    assert result['suggestions'][0]['start'].startswith('2026-09-07T23:10')
+    assert result['suggestion_search_days'] == 90

@@ -798,6 +798,43 @@ function renderNotes(data) {
   });
 }
 
+function renderSuggestions(data) {
+  const card = field("#suggestions-card");
+  const items = Array.isArray(data.suggestions) ? data.suggestions : [];
+  if (data.status === "full") {
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
+  const note = field("#suggestions-note");
+  const tier = field("#suggestion-tier");
+  const label = field("#suggestion-label");
+  const time = field("#suggestion-time");
+  const detail = field("#suggestion-detail");
+  const suggestion = items[0];
+  if (!suggestion) {
+    tier.textContent = "—";
+    label.textContent = "Nessun criterio valido soddisfatto";
+    time.textContent = "";
+    detail.textContent = data.suggestion_note || "Non esiste una finestra utile.";
+    note.textContent = "L'oggetto non offre una proposta valida con i parametri indicati.";
+    return;
+  }
+  const labels = {
+    adjust: ["1", "Correggi l'orario attuale"],
+    future: ["2", "Scegli una data futura"],
+    widest: ["3", "Usa la finestra continua piu ampia"],
+  };
+  const [number, title] = labels[suggestion.tier] || ["", "Proposta"];
+  tier.textContent = number;
+  label.textContent = title;
+  time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
+  detail.textContent = suggestion.tier === "widest"
+    ? `Disponibile ${formatDuration(suggestion.duration_seconds)} su ${formatDuration(suggestion.requested_duration_seconds)} richiesti.`
+    : `Durata continua: ${formatDuration(suggestion.duration_seconds)}.`;
+  note.textContent = data.suggestion_note || "Proposta calcolata localmente.";
+}
+
 function renderResult(data, payload) {
   emptyResult.hidden = true;
   resultError.hidden = true;
@@ -850,6 +887,7 @@ function renderResult(data, payload) {
   renderIntervals(data);
   renderReasons(data, payload);
   renderNotes(data);
+  renderSuggestions(data);
   resultLive.textContent = `${data.object?.name || payload.object}: ${label}. Orari nel fuso ${data.timezone}.`;
 }
 

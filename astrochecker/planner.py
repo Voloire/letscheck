@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 RESOLUTION_SECONDS = 1
 SUN_LIMIT_DEGREES = -18.0
+MAX_FUTURE_SEARCH_DAYS = 90
 
 
 def _finite_number(name: str, value: object) -> float:
@@ -90,7 +91,8 @@ def position_is_visible(position: object, *, min_alt: float, max_alt: float,
 
 
 def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
-                     min_alt, max_alt, az_start, az_end):
+                     min_alt, max_alt, az_start, az_end,
+                     resolution_seconds=RESOLUTION_SECONDS):
     """Search valid continuous intervals using conservative one-second samples."""
     values = validate_limits(
         duration_seconds=duration_seconds,
@@ -102,13 +104,21 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
     )
     if not callable(position_at):
         raise ValueError("La sorgente delle posizioni non e valida")
+    if isinstance(resolution_seconds, bool) or not isinstance(resolution_seconds, int):
+        raise ValueError("La risoluzione deve essere espressa in secondi interi")
+    if resolution_seconds <= 0:
+        raise ValueError("La risoluzione deve essere maggiore di zero")
 
     horizon_end = int(math.floor(values["horizon_seconds"]))
     required = values["duration_seconds"]
     intervals: list[dict[str, int]] = []
     current_start: int | None = None
+    offsets = list(range(0, horizon_end + 1, resolution_seconds))
+    if offsets[-1] != horizon_end:
+        offsets.append(horizon_end)
+    previous_offset = None
 
-    for elapsed in range(0, horizon_end + 1, RESOLUTION_SECONDS):
+    for elapsed in offsets:
         visible = position_is_visible(
             position_at(elapsed),
             min_alt=values["min_alt"],
@@ -119,8 +129,9 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
         if visible and current_start is None:
             current_start = elapsed
         elif not visible and current_start is not None:
-            intervals.append({"start": current_start, "end": elapsed - RESOLUTION_SECONDS})
+            intervals.append({"start": current_start, "end": previous_offset})
             current_start = None
+        previous_offset = elapsed
     if current_start is not None:
         intervals.append({"start": current_start, "end": horizon_end})
 
@@ -163,6 +174,57 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
         "horizon_seconds": tidy(values["horizon_seconds"]),
         "resolution_seconds": RESOLUTION_SECONDS,
     }
+
+
+def choose_suggestion(*, start, duration_seconds, current_intervals, future_windows):
+    """Choose one deterministic fallback proposal for an invalid request.
+
+    ``future_windows`` contains records with an aware/naive ``start`` and
+    intervals expressed as seconds from that start.  The first usable tier is
+    a same-period adjustment, then the earliest future complete window, then
+    the longest continuous window available in the searched records.
+    """
+    required = int(duration_seconds)
+
+    def length(item):
+        return max(0, int(item["end"]) - int(item["start"]))
+
+    def proposal(tier, window_start, available):
+        return {
+            "tier": tier,
+            "start": window_start,
+            "end": window_start + timedelta(seconds=required if tier != "widest" else available),
+            "duration_seconds": required if tier != "widest" else available,
+            "requested_duration_seconds": required,
+        }
+
+    current = list(current_intervals or [])
+    if any(int(item["start"]) == 0 and length(item) >= required for item in current):
+        return None
+
+    adjustments = [item for item in current if int(item["start"]) > 0 and length(item) >= required]
+    if adjustments:
+        item = min(adjustments, key=lambda candidate: int(candidate["start"]))
+        return proposal("adjust", start + timedelta(seconds=int(item["start"])), required)
+
+    future_complete = []
+    all_windows = [(start, item) for item in current]
+    for record in future_windows or []:
+        period_start = record["start"]
+        for item in record.get("intervals", []):
+            window_start = period_start + timedelta(seconds=int(item["start"]))
+            all_windows.append((window_start, item))
+            if length(item) >= required and window_start > start:
+                future_complete.append((window_start, item))
+    if future_complete:
+        window_start, _ = min(future_complete, key=lambda candidate: candidate[0])
+        return proposal("future", window_start, required)
+
+    available = [(window_start, length(item)) for window_start, item in all_windows if length(item) > 0]
+    if not available:
+        return None
+    window_start, longest = min(available, key=lambda candidate: (-candidate[1], candidate[0]))
+    return proposal("widest", window_start, longest)
 
 
 def parse_start(value, timezone="Europe/Rome"):

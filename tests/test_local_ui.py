@@ -200,6 +200,20 @@ class UiService(AstroCheckerService):
             result["requested_visible_seconds"] = 0
             result["longest_visible_seconds"] = 7200
             return result
+        if normalized == "SUGGESTION":
+            result = result_fixture(object_name="Suggestion")
+            result["status"] = "partial"
+            result["first_window"] = None
+            result["suggestions"] = [{
+                "tier": "future",
+                "start": "2026-09-07T23:10:00+02:00",
+                "end": "2026-09-08T00:10:00+02:00",
+                "duration_seconds": 3600,
+                "requested_duration_seconds": 3600,
+            }]
+            result["suggestion_note"] = "Prima data futura entro 90 giorni."
+            result["suggestion_search_days"] = 90
+            return result
         timezone = str(payload.get("timezone", "Europe/Rome"))
         return result_fixture(timezone=timezone)
 
@@ -415,6 +429,21 @@ def test_site_save_reloads_from_real_temporary_backend_on_another_port(tmp_path,
             assert len(second_service.check_payloads) == calls_before
             assert not second_errors
             second_page.close()
+        assert not errors
+        page.close()
+
+
+def test_prioritized_suggestion_is_visible_and_states_90_day_limit(tmp_path, ui_browser):
+    service = UiService(tmp_path / "suggestion-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        submit_object(page, "Suggestion")
+        expect(page.locator("#suggestions-card")).to_be_visible()
+        expect(page.locator("#suggestion-tier")).to_have_text("2")
+        expect(page.locator("#suggestion-label")).to_contain_text("data futura")
+        expect(page.locator("#suggestion-time")).to_contain_text("07 set")
+        expect(page.locator("#suggestions-card")).to_contain_text("90 giorni")
         assert not errors
         page.close()
 
