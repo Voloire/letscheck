@@ -21,7 +21,7 @@
         </svg>
         <div>
           <div class="brand-row">
-            <span class="eyebrow">ALFA LOCALE · 0.3.0-alpha.5</span>
+            <span class="eyebrow">ALFA LOCALE · 0.4.0-alpha.1</span>
             <span class="connection-pill" id="header-connection">
               <span class="status-dot" aria-hidden="true"></span>
               <span>Controllo cataloghi…</span>
@@ -185,6 +185,7 @@
                 <span class="button-label">Cerchi Idee?</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
+              <p class="calculation-note field-wide" id="ideas-explanation">Pianifica la data scelta dal crepuscolo astronomico serale a quello mattutino. Ora e durata restano riferite al calcolo del singolo bersaglio.</p>
             <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore; le proposte future cercano fino a 90 giorni.</p>
             </fieldset>
           </form>
@@ -251,25 +252,14 @@
               </div>
               <span class="suggestion-limit">Ricerca futura: 90 giorni</span>
             </div>
-            <div class="suggestion-item" id="suggestion-item">
+            <button class="suggestion-item" id="suggestion-item" type="button" aria-pressed="false">
               <span class="suggestion-tier" id="suggestion-tier"></span>
-              <div>
+              <span class="suggestion-copy">
                 <strong id="suggestion-label"></strong>
-                <p id="suggestion-time"></p>
+                <span id="suggestion-time"></span>
                 <small id="suggestion-detail"></small>
-              </div>
-            </div>
-          </article>
-
-          <article class="suggestions-card ideas-card" id="ideas-card" hidden aria-labelledby="ideas-title">
-            <div class="article-heading">
-              <div>
-                <h3 id="ideas-title">Idee per la sessione</h3>
-                <p id="ideas-note"></p>
-              </div>
-              <span class="suggestion-limit" id="ideas-darkness">Buio astronomico</span>
-            </div>
-            <ol class="idea-list" id="ideas-list"></ol>
+              </span>
+            </button>
           </article>
 
           <article class="visual-card" aria-labelledby="timeline-title">
@@ -326,6 +316,57 @@
               <p>I cataloghi inclusi forniscono coordinate ICRS. AstroChecker calcola localmente finestre stimate, altezza, azimut e Sole, senza rifrazione e senza richieste remote. La griglia decisionale di 1 secondo è una risoluzione di calcolo, non una garanzia di accuratezza astronomica al secondo. Meteo, Luna, qualità del cielo e attrezzatura non sono valutati.</p>
             </details>
           </article>
+        </div>
+
+        <div id="night-plan" class="night-plan" hidden>
+          <article class="night-summary" aria-labelledby="night-plan-title">
+            <div>
+              <p class="section-kicker">CERCHI IDEE?</p>
+              <h3 id="night-plan-title">Sequenza completa</h3>
+              <p id="night-period"></p>
+            </div>
+            <div class="night-coverage-box">
+              <strong id="night-coverage">0%</strong>
+              <span>notte coperta</span>
+            </div>
+          </article>
+
+          <article class="night-chain-card" aria-labelledby="night-chain-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="night-chain-title">Sequenza operativa</h3>
+                <p id="night-note"></p>
+              </div>
+              <span class="suggestion-limit">Buio astronomico</span>
+            </div>
+            <p class="night-chain" id="night-chain"></p>
+            <div class="night-timeline" id="night-timeline" role="img" aria-label="Sequenza dei bersagli nella notte astronomica"></div>
+          </article>
+
+          <article class="night-list-card" aria-labelledby="night-blocks-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="night-blocks-title">Bersagli in ordine</h3>
+                <p>Ogni riga &egrave; una tappa continua della sequenza.</p>
+              </div>
+            </div>
+            <ol class="night-blocks" id="night-blocks"></ol>
+          </article>
+
+          <article class="night-gaps-card" id="night-gaps-card" aria-labelledby="night-gaps-title" hidden>
+            <div class="article-heading">
+              <div>
+                <h3 id="night-gaps-title">Intervalli scoperti</h3>
+                <p>I buchi rimangono espliciti: non vengono nascosti o sommati.</p>
+              </div>
+            </div>
+            <ul class="night-gaps" id="night-gaps"></ul>
+          </article>
+
+          <div class="night-actions">
+            <button class="button button-secondary" id="export-night-nina" type="button" disabled>Esporta in NINA</button>
+            <span class="coming-soon">Struttura pronta · esportazione futura</span>
+          </div>
         </div>
       </section>
     </main>

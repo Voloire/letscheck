@@ -15,6 +15,244 @@ SUN_LIMIT_DEGREES = -18.0
 MAX_FUTURE_SEARCH_DAYS = 90
 
 
+def select_astronomical_night(intervals, horizon_seconds=86400):
+    """Return the first darkness interval bounded inside the noon-to-noon horizon."""
+    normalised = _normalise_intervals(intervals, 0, horizon_seconds)
+    for start, end in normalised:
+        if start > 0 and end < horizon_seconds:
+            return {"start": start, "end": end}
+    return None
+
+
+def plan_night_sequence(
+    candidates,
+    night_interval,
+    *,
+    slot_seconds=300,
+    preferred_block_seconds=7200,
+):
+    """Build a deterministic coverage-first target chain for one complete night."""
+    def integer(name, value):
+        if isinstance(value, bool) or not isinstance(value, Real) or not float(value).is_integer():
+            raise ValueError(f"{name} deve essere un intero")
+        return int(value)
+
+    try:
+        night_start = integer("L'inizio della notte", night_interval["start"])
+        night_end = integer("La fine della notte", night_interval["end"])
+        slot = integer("La granularita", slot_seconds)
+        preferred = integer("Il blocco preferito", preferred_block_seconds)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Intervallo notturno e granularita devono essere interi") from exc
+    if night_end <= night_start or slot <= 0 or preferred <= 0:
+        raise ValueError("Intervallo notturno e granularita devono essere positivi")
+
+    prepared = []
+    candidate_keys = set()
+    for item in candidates or []:
+        if not isinstance(item, dict):
+            raise ValueError("Ogni candidato del piano deve essere una mappa")
+        profile = item.get("profile") or {}
+        if not isinstance(profile, dict):
+            raise ValueError("Il profilo del candidato deve essere una mappa")
+        if profile.get("eligible", item.get("eligible", True)) is False:
+            continue
+        raw_intervals = item.get("intervals") or []
+        if not isinstance(raw_intervals, (list, tuple)):
+            raise ValueError("Gli intervalli del candidato devono essere una sequenza")
+        validated_intervals = []
+        for interval in raw_intervals:
+            if not isinstance(interval, dict) or "start" not in interval or "end" not in interval:
+                raise ValueError("Gli intervalli del candidato devono avere inizio e fine interi")
+            try:
+                start = integer("L'inizio degli intervalli", interval["start"])
+                end = integer("La fine degli intervalli", interval["end"])
+            except ValueError as exc:
+                raise ValueError("Gli intervalli del candidato devono avere inizio e fine interi") from exc
+            validated_intervals.append({"start": start, "end": end})
+        intervals = _normalise_intervals(validated_intervals, night_start, night_end)
+        if not intervals:
+            continue
+        name = str(item.get("name", item.get("object", ""))).strip()
+        if not name:
+            continue
+        key = str(item.get("id") or name).casefold()
+        if key in candidate_keys:
+            raise ValueError("I candidati del piano devono avere identificativi univoci")
+        candidate_keys.add(key)
+        merged = []
+        for start, end in intervals:
+            if merged and start <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+            else:
+                merged.append((start, end))
+        prepared.append({
+            "key": key,
+            "priority": integer("La priorita", profile.get("priority", item.get("priority", 0)) or 0),
+            "intervals": merged,
+            "target": {
+                "name": name,
+                "type": item.get("type", profile.get("category", "DSO")),
+                "ra_deg": item.get("ra_deg"),
+                "dec_deg": item.get("dec_deg"),
+                "aliases": list(item.get("aliases") or []),
+            },
+            "reason": profile.get("reason", item.get("reason", "Finestra continua disponibile.")),
+        })
+    prepared.sort(key=lambda item: (-item["priority"], item["key"]))
+
+    slots = []
+    cursor = night_start
+    while cursor < night_end:
+        right = min(night_end, cursor + slot)
+        slots.append((cursor, right))
+        cursor = right
+    boundaries = [slots[0][0], *(right for _, right in slots)] if slots else [night_start]
+
+    # Candidates with identical slot availability are interchangeable.  Keeping
+    # only the highest-priority canonical one is a correctness-preserving
+    # reduction that matters for the full local catalogue.
+    representatives = {}
+    for item in prepared:
+        visible_slots = tuple(
+            index for index, (left, right) in enumerate(slots)
+            if any(start <= left and end >= right for start, end in item["intervals"])
+        )
+        if not visible_slots:
+            continue
+        fingerprint = visible_slots
+        current = representatives.get(fingerprint)
+        if current is None or item["priority"] > current["priority"] or (
+            item["priority"] == current["priority"] and item["key"] < current["key"]
+        ):
+            representatives[fingerprint] = item
+    prepared = sorted(representatives.values(), key=lambda item: (-item["priority"], item["key"]))
+    by_key = {item["key"]: item for item in prepared}
+
+    options_by_end = [[] for _ in boundaries]
+    for item in prepared:
+        visible = [
+            any(start <= left and end >= right for start, end in item["intervals"])
+            for left, right in slots
+        ]
+        run_start = None
+        runs = []
+        for index, is_visible in enumerate([*visible, False]):
+            if is_visible and run_start is None:
+                run_start = index
+            elif not is_visible and run_start is not None:
+                runs.append((run_start, index))
+                run_start = None
+        for left_index, right_index in runs:
+            run_duration = boundaries[right_index] - boundaries[left_index]
+            if run_duration < preferred:
+                for start_index in range(left_index, right_index):
+                    for end_index in range(start_index + 1, right_index + 1):
+                        options_by_end[end_index].append((start_index, item["key"], True))
+                continue
+            for start_index in range(left_index, right_index):
+                for end_index in range(start_index + 1, right_index + 1):
+                    if boundaries[end_index] - boundaries[start_index] >= preferred:
+                        options_by_end[end_index].append((start_index, item["key"], False))
+
+    def path_rank(path):
+        return (
+            path["covered_seconds"],
+            -path["short_blocks"],
+            path["priority_seconds"],
+            -len(path["blocks"]),
+        )
+
+    def is_better(candidate_path, existing_path):
+        if existing_path is None:
+            return True
+        candidate_rank = path_rank(candidate_path)
+        existing_rank = path_rank(existing_path)
+        if candidate_rank != existing_rank:
+            return candidate_rank > existing_rank
+        return candidate_path["signature"] < existing_path["signature"]
+
+    empty_path = {
+        "covered_seconds": 0,
+        "priority_seconds": 0,
+        "short_blocks": 0,
+        "blocks": (),
+        "signature": (),
+    }
+    best_at = [empty_path]
+    for end_index in range(1, len(boundaries)):
+        best = best_at[end_index - 1]
+        for start_index, key, short_fill in options_by_end[end_index]:
+            previous = best_at[start_index]
+            start = boundaries[start_index]
+            end = boundaries[end_index]
+            duration = end - start
+            candidate_path = {
+                "covered_seconds": previous["covered_seconds"] + duration,
+                "priority_seconds": previous["priority_seconds"] + by_key[key]["priority"] * duration,
+                "short_blocks": previous["short_blocks"] + int(short_fill),
+                "blocks": (*previous["blocks"], (start, end, key, short_fill)),
+                "signature": (*previous["signature"], (start, end, key)),
+            }
+            if is_better(candidate_path, best):
+                best = candidate_path
+        best_at.append(best)
+
+    winner = best_at[-1]
+    blocks = []
+    for start, end, key, short_fill in winner["blocks"]:
+        duration = end - start
+        item = by_key[key]
+        blocks.append({
+            "target": item["target"],
+            "start": start,
+            "end": end,
+            "duration_seconds": duration,
+            "priority": item["priority"],
+            "reason": item["reason"],
+            "short_fill": short_fill,
+        })
+
+    gaps = []
+    cursor = night_start
+    for block in blocks:
+        if block["start"] > cursor:
+            gaps.append({
+                "start": cursor,
+                "end": block["start"],
+                "duration_seconds": block["start"] - cursor,
+            })
+        cursor = block["end"]
+    if cursor < night_end:
+        gaps.append({"start": cursor, "end": night_end, "duration_seconds": night_end - cursor})
+
+    night_duration = night_end - night_start
+    covered = sum(block["duration_seconds"] for block in blocks)
+    percentage = round(100 * covered / night_duration, 1)
+    if percentage.is_integer():
+        percentage = int(percentage)
+    status = "full" if covered == night_duration else ("partial" if covered else "none")
+    return {
+        "status": status,
+        "night_start": night_start,
+        "night_end": night_end,
+        "night_duration_seconds": night_duration,
+        "covered_duration_seconds": covered,
+        "coverage_percent": percentage,
+        "preferred_block_seconds": preferred,
+        "blocks": blocks,
+        "gaps": gaps,
+        "object_count": len(blocks),
+        "note": (
+            "Piano completo dal crepuscolo astronomico serale a quello mattutino."
+            if status == "full" else
+            "Piano parziale: alcuni tratti della notte non hanno bersagli visibili compatibili."
+            if status == "partial" else
+            "Nessun bersaglio compatibile e visibile durante la notte astronomica."
+        ),
+    }
+
+
 def plan_ideas(candidates, darkness_intervals, total_seconds, minimum_block_seconds=7200):
     """Choose deterministic, non-overlapping DSO blocks from supplied intervals.
 

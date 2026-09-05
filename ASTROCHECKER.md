@@ -1,4 +1,4 @@
-# AstroChecker - v0.3.0-alpha.5
+# AstroChecker - v0.4.0-alpha.1
 
 Un pianificatore locale per verificare se un bersaglio del cielo profondo resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
 
@@ -46,7 +46,13 @@ La durata è tempo continuo, non somma delle esposizioni. Il pulsante **Export T
 
 ### Cerchi Idee?
 
-Il pulsante **Cerchi Idee?** costruisce una sequenza locale di piu oggetti usando il catalogo SQLite e le effemeridi offline. Ogni oggetto richiede un unico blocco continuo di almeno due ore; il piano riporta stato completo, parziale o nessuna soluzione, durata e oggetti saltati. Il buio astronomico (-18 gradi) e predefinito e il buio nautico (-12 gradi) e disponibile come alternativa. La ricerca e deterministica e limitata a 90 giorni; meteo, Luna, qualita del cielo e attrezzatura non vengono valutati.
+Il pulsante **Cerchi Idee?** costruisce una sequenza operativa per l'intera notte, dal crepuscolo astronomico serale a quello mattutino. La data scelta identifica la sera da pianificare; l'ora e la durata continua restano parametri del calcolo su un singolo bersaglio e non accorciano il piano notturno.
+
+La vista dedicata mostra copertura, catena cronologica dei bersagli, timeline, durata e motivazione di ogni blocco e gli eventuali intervalli scoperti. Due ore sono il blocco preferito per bersaglio; un riempimento piu breve e ammesso soltanto se aumenta la copertura utile ed e segnalato chiaramente. La sequenza rispetta coordinate, fuso, altezza e settore di azimut del balcone.
+
+Il piano include nome canonico, alias, coordinate e orari assoluti necessari a una futura esportazione, ma **Esporta in NINA** resta disabilitato. Meteo, Luna, qualita del cielo, attrezzatura, meridian flip e tempi operativi non vengono valutati.
+
+Nel risultato normale, il suggerimento prioritario e selezionabile: il clic mostra **Proposta acquisita** e conserva la scelta soltanto nella pagina corrente, senza avviare altre azioni. Il selettore data/ora rilascia il focus dopo la scelta completa dei minuti.
 
 ## Dati e limiti
 

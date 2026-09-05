@@ -1,5 +1,12 @@
 # Registro versioni
 
+## v0.4.0-alpha.1 — 2026-09-06
+
+- `Cerchi Idee?` pianifica l'intera notte dal crepuscolo astronomico serale a quello mattutino.
+- Nuova vista dedicata con catena cronologica, copertura, timeline, blocchi brevi segnalati e intervalli scoperti.
+- Il contratto del piano conserva identita, coordinate e orari utili a una futura esportazione NINA, ancora disabilitata.
+- Il suggerimento prioritario supporta un acknowledgement locale e il selettore data/ora si chiude dopo la selezione completa dei minuti.
+
 ## Cerchi Idee? - 2026-09-05
 
 - Planner locale deterministico multi-oggetto con blocchi continui minimi di due ore.

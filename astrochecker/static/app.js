@@ -20,16 +20,18 @@ const emptyResult = document.querySelector("#empty-result");
 const resultContent = document.querySelector("#result-content");
 const resultLive = document.querySelector("#result-live");
 const staleBadge = document.querySelector("#stale-badge");
+const resultsTitle = document.querySelector("#results-title");
 const objectInput = document.querySelector("#object");
 const objectResults = document.querySelector("#object-results");
 const objectSearchStatus = document.querySelector("#object-search-status");
 const siteStatus = document.querySelector("#site-status");
 const timezoneInput = document.querySelector("#timezone");
 const startInput = document.querySelector("#start");
-const ideasCard = document.querySelector("#ideas-card");
-const ideasList = document.querySelector("#ideas-list");
-const ideasNote = document.querySelector("#ideas-note");
-const ideasDarkness = document.querySelector("#ideas-darkness");
+const suggestionItem = document.querySelector("#suggestion-item");
+const nightPlan = document.querySelector("#night-plan");
+const nightBlocks = document.querySelector("#night-blocks");
+const nightGaps = document.querySelector("#night-gaps");
+const nightTimeline = document.querySelector("#night-timeline");
 
 let catalogReady = false;
 let siteLoaded = false;
@@ -41,6 +43,7 @@ let activeObjectIndex = -1;
 let searchTimer = null;
 let searchGeneration = 0;
 let proposedLocation = null;
+let selectedSuggestion = null;
 
 function localDateAtTenPm(timeZone = DEFAULT_TIME_ZONE) {
   let formatter;
@@ -352,6 +355,7 @@ function markStale() {
   if (!hasResult || calculationRunning) return;
   staleBadge.hidden = false;
   resultContent.classList.add("is-stale");
+  nightPlan.classList.add("is-stale");
 }
 
 function updateTimeZoneNote() {
@@ -818,6 +822,9 @@ function renderSuggestions(data) {
   const time = field("#suggestion-time");
   const detail = field("#suggestion-detail");
   const suggestion = items[0];
+  selectedSuggestion = null;
+  suggestionItem.classList.remove("selected");
+  suggestionItem.setAttribute("aria-pressed", "false");
   if (!suggestion) {
     tier.textContent = "—";
     label.textContent = "Nessun criterio valido soddisfatto";
@@ -826,6 +833,7 @@ function renderSuggestions(data) {
     note.textContent = "L'oggetto non offre una proposta valida con i parametri indicati.";
     return;
   }
+  selectedSuggestion = suggestion;
   const labels = {
     adjust: ["1", "Correggi l'orario attuale"],
     future: ["2", "Scegli una data futura"],
@@ -841,46 +849,108 @@ function renderSuggestions(data) {
   note.textContent = data.suggestion_note || "Proposta calcolata localmente.";
 }
 
-function renderIdeas(data) {
-  ideasCard.hidden = false;
-  ideasList.replaceChildren();
-  ideasNote.textContent = data.note || "Piano calcolato localmente.";
-  ideasDarkness.textContent = data.darkness_mode === "nautical" ? "Buio nautico" : "Buio astronomico";
+function renderNightPlan(data) {
+  resultsTitle.textContent = "Piano della notte";
+  emptyResult.hidden = true;
+  resultError.hidden = true;
+  resultContent.hidden = true;
+  nightPlan.hidden = false;
+  nightPlan.classList.remove("is-stale");
+  staleBadge.hidden = true;
+  hasResult = true;
+
   const blocks = Array.isArray(data.blocks) ? data.blocks : [];
-  if (!blocks.length) {
-    const empty = document.createElement("li");
-    empty.className = "empty-intervals";
-    empty.textContent = data.note || "Nessun blocco continuo di almeno due ore disponibile.";
-    ideasList.append(empty);
-    return;
+  const gaps = Array.isArray(data.gaps) ? data.gaps : [];
+  nightBlocks.replaceChildren();
+  nightGaps.replaceChildren();
+  nightTimeline.replaceChildren();
+  field("#night-note").textContent = data.note || "Piano calcolato localmente.";
+  field("#night-coverage").textContent = `${Number(data.coverage_percent || 0).toLocaleString("it-IT")}%`;
+
+  if (data.night_start && data.night_end) {
+    field("#night-period").textContent = `${formatInstant(data.night_start, 0, data.timezone)} → ${formatInstant(data.night_end, 0, data.timezone)} · ${formatDuration(data.night_duration_seconds)}`;
+  } else {
+    field("#night-period").textContent = "Nessuna notte astronomica completa per la data e la postazione selezionate.";
   }
+  field("#night-chain").textContent = blocks.length
+    ? blocks.map((block) => block.target?.name || block.object || "Bersaglio").join(" → ")
+    : "Nessuna sequenza disponibile";
+
   blocks.forEach((block, index) => {
     const item = document.createElement("li");
     const number = document.createElement("span");
     number.className = "idea-index";
     number.textContent = String(index + 1);
     const detail = document.createElement("div");
-    const object = document.createElement("strong");
-    object.className = "idea-object";
-    object.textContent = `${block.object} - ${block.type}`;
-    const times = document.createElement("div");
-    times.className = "idea-detail";
-    times.textContent = `${formatInstant(block.start, 0, data.timezone)} - ${formatInstant(block.end, 0, data.timezone)}`;
-    detail.append(object, times);
-    const duration = document.createElement("span");
-    duration.className = "idea-duration";
-    duration.textContent = formatDuration(block.duration_seconds);
-    item.append(number, detail, duration);
-    ideasList.append(item);
+    detail.className = "night-block-detail";
+    const title = document.createElement("strong");
+    const target = block.target || {};
+    title.textContent = `${target.name || block.object || "Bersaglio"} · ${target.type || block.type || "DSO"}`;
+    const times = document.createElement("span");
+    times.textContent = `${formatInstant(block.start, 0, data.timezone)} → ${formatInstant(block.end, 0, data.timezone)} · ${formatDuration(block.duration_seconds)}`;
+    const reason = document.createElement("small");
+    reason.textContent = block.reason || "Visibile nella finestra del balcone.";
+    detail.append(title, times, reason);
+    if (block.short_fill) {
+      const badge = document.createElement("span");
+      badge.className = "short-fill-badge";
+      badge.textContent = "Blocco breve";
+      detail.append(badge);
+    }
+    item.append(number, detail);
+    nightBlocks.append(item);
+  });
+  if (!blocks.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty-intervals";
+    empty.textContent = data.note || "Nessun bersaglio visibile durante la notte astronomica.";
+    nightBlocks.append(empty);
+  }
+
+  gaps.forEach((gap) => {
+    const item = document.createElement("li");
+    item.textContent = `Intervallo scoperto · ${formatInstant(gap.start, 0, data.timezone)} → ${formatInstant(gap.end, 0, data.timezone)} · ${formatDuration(gap.duration_seconds)}`;
+    nightGaps.append(item);
+  });
+  field("#night-gaps-card").hidden = gaps.length === 0;
+
+  const total = Number(data.night_duration_seconds || 0);
+  const segments = [
+    ...blocks.map((block, index) => ({...block, kind: "target", colorIndex: index})),
+    ...gaps.map((gap) => ({...gap, kind: "gap"})),
+  ].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  segments.forEach((segment) => {
+    const bar = document.createElement("span");
+    bar.className = segment.kind === "gap" ? "night-segment gap" : `night-segment target target-${segment.colorIndex % 5}`;
+    bar.style.flexBasis = total > 0 ? `${100 * Number(segment.duration_seconds || 0) / total}%` : "0%";
+    bar.title = segment.kind === "gap"
+      ? `Intervallo scoperto · ${formatDuration(segment.duration_seconds)}`
+      : `${segment.target?.name || "Bersaglio"} · ${formatDuration(segment.duration_seconds)}`;
+    nightTimeline.append(bar);
   });
 }
 
+function clearSuggestionAcknowledgement() {
+  selectedSuggestion = null;
+  suggestionItem.classList.remove("selected");
+  suggestionItem.setAttribute("aria-pressed", "false");
+}
+
+suggestionItem.addEventListener("click", () => {
+  if (!selectedSuggestion) return;
+  suggestionItem.classList.add("selected");
+  suggestionItem.setAttribute("aria-pressed", "true");
+  resultLive.textContent = "Proposta acquisita";
+});
+
 function renderResult(data, payload) {
-  ideasCard.hidden = true;
+  resultsTitle.textContent = "Finestra osservativa";
+  nightPlan.hidden = true;
   emptyResult.hidden = true;
   resultError.hidden = true;
   resultContent.hidden = false;
   resultContent.classList.remove("is-stale");
+  nightPlan.classList.remove("is-stale");
   staleBadge.hidden = true;
   hasResult = true;
 
@@ -939,11 +1009,13 @@ async function requestIdeas() {
     return;
   }
   if (!validateForm({requireObject: false})) return;
+  clearSuggestionAcknowledgement();
   calculationRunning = true;
   updatePlannerAvailability();
   setButtonLoading(ideasButton, true, "Cerco idee...");
   emptyResult.hidden = true;
-  resultContent.hidden = false;
+  resultContent.hidden = true;
+  nightPlan.hidden = true;
   resultError.hidden = true;
   resultLive.textContent = "Ricerca locale di una sequenza osservativa in corso.";
   try {
@@ -954,11 +1026,11 @@ async function requestIdeas() {
     });
     const data = await readJson(response);
     if (!response.ok) throw new Error(data.error || "Pianificazione delle idee non riuscita.");
-    renderIdeas(data);
+    renderNightPlan(data);
     resultLive.textContent = data.note || "Piano idee disponibile.";
   } catch (error) {
     showResultError(error instanceof Error ? error.message : "Pianificazione delle idee non riuscita.");
-    ideasCard.hidden = true;
+    nightPlan.hidden = true;
   } finally {
     calculationRunning = false;
     updatePlannerAvailability();
@@ -968,11 +1040,16 @@ async function requestIdeas() {
 
 ideasButton.addEventListener("click", requestIdeas);
 
-startInput.addEventListener("change", () => {
+function releaseDateTimePickerFocus() {
+  const completeMinute = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(startInput.value);
+  if (!completeMinute || Number.isNaN(startInput.valueAsNumber)) return;
   window.setTimeout(() => {
     if (document.activeElement === startInput) startInput.blur();
   }, 0);
-});
+}
+
+startInput.addEventListener("input", releaseDateTimePickerFocus);
+startInput.addEventListener("change", releaseDateTimePickerFocus);
 
 function showResultError(message) {
   resultError.textContent = message;
@@ -990,6 +1067,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   if (!validateForm()) return;
+  clearSuggestionAcknowledgement();
 
   const payload = currentPayload();
   window.clearTimeout(searchTimer);

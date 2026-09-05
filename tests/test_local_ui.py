@@ -1,4 +1,5 @@
 import copy
+import re
 import threading
 from contextlib import contextmanager
 from urllib.parse import urlparse
@@ -287,7 +288,7 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
     service = UiService(tmp_path / "version-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
-        expect(page.locator(".eyebrow").first).to_contain_text("0.3.0-alpha.5")
+        expect(page.locator(".eyebrow").first).to_contain_text("0.4.0-alpha.1")
         assert not errors
         page.close()
 
@@ -457,19 +458,41 @@ def test_prioritized_suggestion_is_visible_and_states_90_day_limit(tmp_path, ui_
         page.close()
 
 
-def test_ideas_button_does_not_require_a_single_target(tmp_path, ui_browser):
+def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_browser):
     class IdeasUiService(UiService):
         def ideas(self, payload):
             return {
                 "status": "full",
-                "note": "Piano completo con blocchi continui di almeno due ore.",
+                "note": "Piano completo dal crepuscolo astronomico serale a quello mattutino.",
                 "darkness_mode": "astronomical",
-                "blocks": [{
-                    "object": "Sh 2-31", "type": "HII",
-                    "start": "2026-09-05T23:00:00+02:00",
-                    "end": "2026-09-06T01:00:00+02:00",
-                    "duration_seconds": 7200,
-                }],
+                "timezone": "Europe/Rome",
+                "night_start": "2026-09-05T21:00:00+02:00",
+                "night_end": "2026-09-06T05:00:00+02:00",
+                "night_duration_seconds": 28800,
+                "covered_duration_seconds": 28800,
+                "coverage_percent": 100,
+                "preferred_block_seconds": 7200,
+                "blocks": [
+                    {
+                        "target": {"name": "X", "type": "HII", "aliases": [], "ra_deg": 1, "dec_deg": 2},
+                        "start": "2026-09-05T21:00:00+02:00", "end": "2026-09-05T23:30:00+02:00",
+                        "offset_start": 32400, "offset_end": 41400, "duration_seconds": 9000,
+                        "reason": "Nebulosa visibile dal balcone.", "short_fill": False,
+                    },
+                    {
+                        "target": {"name": "Y", "type": "GCl", "aliases": [], "ra_deg": 3, "dec_deg": 4},
+                        "start": "2026-09-05T23:30:00+02:00", "end": "2026-09-06T02:30:00+02:00",
+                        "offset_start": 41400, "offset_end": 52200, "duration_seconds": 10800,
+                        "reason": "Ammasso nella finestra utile.", "short_fill": False,
+                    },
+                    {
+                        "target": {"name": "Z", "type": "OCl", "aliases": [], "ra_deg": 5, "dec_deg": 6},
+                        "start": "2026-09-06T02:30:00+02:00", "end": "2026-09-06T05:00:00+02:00",
+                        "offset_start": 52200, "offset_end": 61200, "duration_seconds": 9000,
+                        "reason": "Completa la notte.", "short_fill": False,
+                    },
+                ],
+                "gaps": [],
             }
 
     service = IdeasUiService(tmp_path / "ideas-site.json")
@@ -478,8 +501,108 @@ def test_ideas_button_does_not_require_a_single_target(tmp_path, ui_browser):
         wait_until_ready(page)
         page.locator("#object").fill("")
         page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
-        expect(page.locator("#ideas-card")).to_be_visible()
-        expect(page.locator("#ideas-list")).to_contain_text("Sh 2-31")
+        expect(page.locator("#night-plan")).to_be_visible()
+        assert page.locator("#night-plan").evaluate("element => element.parentElement.classList.contains('results-column')")
+        expect(page.locator("#result-content")).to_be_hidden()
+        expect(page.locator("#results-title")).to_have_text("Piano della notte")
+        expect(page.get_by_role("heading", name="Sequenza completa", exact=True)).to_be_visible()
+        expect(page.locator("#night-period")).to_contain_text("21:00")
+        expect(page.locator("#night-period")).to_contain_text("05:00")
+        expect(page.locator("#night-coverage")).to_have_text("100%")
+        expect(page.locator("#night-chain")).to_have_text("X → Y → Z")
+        expect(page.locator("#night-blocks li")).to_have_count(3)
+        expect(page.locator("#night-timeline .night-segment")).to_have_count(3)
+        expect(page.get_by_role("button", name="Esporta in NINA", exact=True)).to_be_disabled()
+        assert not errors
+        page.close()
+
+
+def test_ideas_button_explains_that_date_drives_the_complete_night(tmp_path, ui_browser):
+    service = UiService(tmp_path / "ideas-explanation-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        expect(page.locator("#ideas-explanation")).to_contain_text("data scelta")
+        expect(page.locator("#ideas-explanation")).to_contain_text("crepuscolo astronomico serale")
+        expect(page.locator("#ideas-explanation")).to_contain_text("mattutino")
+        assert not errors
+        page.close()
+
+
+def test_priority_suggestion_acknowledges_selection_without_network_action(tmp_path, ui_browser):
+    service = UiService(tmp_path / "suggestion-ack-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        requests = []
+        page.on("request", lambda request: requests.append(request.url))
+        wait_until_ready(page)
+        submit_object(page, "Suggestion")
+        suggestion = page.locator("#suggestion-item")
+        expect(page.locator("#suggestion-label")).to_contain_text("data futura")
+        expect(suggestion).to_have_attribute("aria-pressed", "false")
+        calls_before = len(requests)
+
+        suggestion.press("Enter")
+
+        expect(suggestion).to_have_attribute("aria-pressed", "true")
+        expect(suggestion).to_have_class(re.compile(r"\bselected\b"))
+        expect(page.locator("#result-live")).to_have_text("Proposta acquisita")
+        assert len(requests) == calls_before
+        assert not errors
+        page.close()
+
+
+def test_night_plan_shows_gaps_and_short_fill_without_hiding_them(tmp_path, ui_browser):
+    class PartialIdeasUiService(UiService):
+        def ideas(self, payload):
+            return {
+                "status": "partial", "note": "Piano parziale.", "darkness_mode": "astronomical",
+                "timezone": "Europe/Rome", "night_start": "2026-09-05T21:00:00+02:00",
+                "night_end": "2026-09-06T01:00:00+02:00", "night_duration_seconds": 14400,
+                "covered_duration_seconds": 10800, "coverage_percent": 75, "preferred_block_seconds": 7200,
+                "blocks": [{
+                    "target": {"name": "Edge", "type": "HII", "aliases": [], "ra_deg": 1, "dec_deg": 2},
+                    "start": "2026-09-05T21:00:00+02:00", "end": "2026-09-05T22:00:00+02:00",
+                    "offset_start": 32400, "offset_end": 36000, "duration_seconds": 3600,
+                    "reason": "Riempimento utile.", "short_fill": True,
+                }],
+                "gaps": [{
+                    "start": "2026-09-05T22:00:00+02:00", "end": "2026-09-05T23:00:00+02:00",
+                    "offset_start": 36000, "offset_end": 39600, "duration_seconds": 3600,
+                }],
+            }
+
+    service = PartialIdeasUiService(tmp_path / "partial-ideas-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url, viewport={"width": 390, "height": 844})
+        wait_until_ready(page)
+        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
+        expect(page.locator("#night-plan")).to_contain_text("Blocco breve")
+        expect(page.locator("#night-gaps")).to_contain_text("Intervallo scoperto")
+        assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
+        assert not errors
+        page.close()
+
+
+def test_night_plan_shows_an_explicit_no_astronomical_night_state(tmp_path, ui_browser):
+    class NoNightUiService(UiService):
+        def ideas(self, payload):
+            return {
+                "status": "none", "note": "In questa data non esiste una notte astronomica completa.",
+                "darkness_mode": "astronomical", "timezone": "Europe/Rome",
+                "night_start": None, "night_end": None, "night_duration_seconds": 0,
+                "covered_duration_seconds": 0, "coverage_percent": 0,
+                "preferred_block_seconds": 7200, "blocks": [], "gaps": [],
+            }
+
+    service = NoNightUiService(tmp_path / "no-night-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
+        expect(page.locator("#night-period")).to_contain_text("Nessuna notte astronomica completa")
+        expect(page.locator("#night-blocks")).to_contain_text("non esiste una notte astronomica completa")
+        expect(page.locator("#night-plan")).to_be_visible()
         assert not errors
         page.close()
 
@@ -633,5 +756,33 @@ def test_datetime_change_closes_native_picker_focus_and_boundary_hint_is_visible
         expect(page.locator("#start")).not_to_be_focused()
         submit_object(page, "Boundary")
         expect(page.locator("#first-window-note")).to_contain_text("può continuare oltre")
+        assert not errors
+        page.close()
+
+
+def test_datetime_input_closes_after_complete_minutes_but_not_while_incomplete(tmp_path, ui_browser):
+    service = UiService(tmp_path / "picker-input-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        start = page.locator("#start")
+        start.focus()
+        page.evaluate(
+            """() => {
+                const input = document.querySelector('#start');
+                input.value = '';
+                input.dispatchEvent(new Event('input', {bubbles: true}));
+            }"""
+        )
+        expect(start).to_be_focused()
+        page.evaluate(
+            """() => {
+                const input = document.querySelector('#start');
+                input.value = '2026-09-05T23:17';
+                input.dispatchEvent(new Event('input', {bubbles: true}));
+            }"""
+        )
+        expect(start).not_to_be_focused()
+        expect(start).to_have_value("2026-09-05T23:17")
         assert not errors
         page.close()

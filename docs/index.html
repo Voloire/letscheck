@@ -125,12 +125,12 @@
     <div class="shell hero">
       <div class="hero-grid">
         <div>
-          <div class="eyebrow">v0.3.0-alpha.4 · open source in evoluzione</div>
+          <div class="eyebrow">v0.4.0-alpha.1 · open source in evoluzione</div>
           <h1>Il cielo visibile dal tuo <em>balcone.</em></h1>
           <p class="lead">AstroChecker aiuta gli astrofotografi a capire se un oggetto resterà nella finestra di cielo accessibile, al buio, per tutta la durata della ripresa.</p>
           <div class="actions">
             <a class="button primary" href="#come-funziona">Scopri come funziona <span aria-hidden="true">↓</span></a>
-            <a class="button" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.4">Release alpha.4 ↗</a>
+            <a class="button" href="https://github.com/Voloire/letscheck/releases/tag/v0.4.0-alpha.1">Release v0.4 ↗</a>
           </div>
         </div>
         <div class="sky-card" aria-label="Illustrazione di una traiettoria nel cielo">
@@ -152,6 +152,7 @@
         <div class="requirement"><span class="check">✓</span><span><strong>Descrivere la postazione</strong><span>Latitudine, longitudine, fuso IANA e limiti dell’orizzonte del balcone.</span></span></div>
         <div class="requirement"><span class="check">✓</span><span><strong>Chiedere una durata</strong><span>Una ripresa continua, espressa in minuti, a partire da un’ora locale.</span></span></div>
         <div class="requirement"><span class="check">✓</span><span><strong>Ricevere una decisione</strong><span>Completa, parziale o non visibile, con una proposta prioritaria quando l'orario non è sufficiente.</span></span></div>
+        <div class="requirement"><span class="check">✓</span><span><strong>Pianificare l'intera notte</strong><span>Una catena di bersagli realmente visibili dal balcone, dal crepuscolo astronomico serale a quello mattutino.</span></span></div>
       </div>
     </div></section>
 
@@ -182,7 +183,7 @@
     <section id="privacy"><div class="shell cards">
       <article class="card"><div class="eyebrow">Privacy</div><h3>La postazione resta tua</h3><p>Le coordinate possono essere inserite manualmente o proposte dal browser. L’app chiede conferma e salva un solo profilo locale.</p></article>
       <article class="card"><div class="eyebrow">Determinismo</div><h3>Nessun LLM nel calcolo</h3><p>Le decisioni sono regole e numeri: catalogo, coordinate, Sole, altezza, azimut e durata.</p></article>
-      <article class="card"><div class="eyebrow">Verifica</div><h3>ATDD in evidenza</h3><p>La release è protetta da test di accettazione, backend e browser. Il gate attuale conta 176 test passati.</p></article>
+      <article class="card"><div class="eyebrow">Verifica</div><h3>ATDD in evidenza</h3><p>La release è protetta da test di accettazione, backend e browser, inclusa la sequenza completa della notte.</p></article>
     </div></section>
 
     <section id="limiti"><div class="shell">
@@ -196,7 +197,7 @@ cd letscheck
 python -m venv .venv
 pip install -r requirements.txt
 python run.py</code></pre></div>
-      <div class="card"><div class="eyebrow">Release corrente</div><h3>AstroChecker v0.3.0-alpha.4</h3><p>Cataloghi locali, alias comuni, suggerimenti ordinati e ricerca futura limitata a 90 giorni.</p><p style="margin-top:18px"><a class="button primary" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.4">Apri la release ↗</a></p><p style="margin-top:22px"><a href="https://github.com/Voloire/letscheck">Codice sorgente su GitHub ↗</a></p></div>
+      <div class="card"><div class="eyebrow">Release corrente</div><h3>AstroChecker v0.4.0-alpha.1</h3><p>Planner completo della notte astronomica, vincoli reali del balcone, catena operativa e gap espliciti.</p><p style="margin-top:18px"><a class="button primary" href="https://github.com/Voloire/letscheck/releases/tag/v0.4.0-alpha.1">Apri la release ↗</a></p><p style="margin-top:22px"><a href="https://github.com/Voloire/letscheck">Codice sorgente su GitHub ↗</a></p></div>
     </div></section>
   </main>
 

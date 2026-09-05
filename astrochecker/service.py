@@ -25,9 +25,11 @@ from .planner import (
     MAX_FUTURE_SEARCH_DAYS,
     choose_suggestion,
     elapsed_end,
+    parse_start,
+    plan_night_sequence,
     position_is_visible,
+    select_astronomical_night,
     solve_visibility,
-    plan_ideas,
 )
 from .server import ApiError, validate_check_request, validate_ideas_request, validate_site_request
 
@@ -36,6 +38,11 @@ HORIZON_SECONDS = 86400
 CHART_STEP_SECONDS = 300
 FUTURE_PROBE_STEP_SECONDS = 300
 IDEA_PROBE_STEP_SECONDS = 300
+
+
+def observing_night_anchor(start, timezone_name):
+    """Use the selected civil date as the evening date for a full-night plan."""
+    return parse_start(f"{start.date().isoformat()}T12:00", timezone_name)
 
 
 def _tidy(number):
@@ -324,18 +331,25 @@ class AstroCheckerService:
         }
 
     def ideas(self, payload):
-        """Build one deterministic multi-object plan from local ephemerides."""
+        """Build a complete astronomical-night target chain from local ephemerides."""
         request = validate_ideas_request(payload)
+        requested_start = request["start"]
+        anchor = observing_night_anchor(requested_start, request["timezone"])
         try:
             records = self.catalog.idea_candidates(include_ineligible=True)
         except CatalogError as exc:
             raise ApiError(str(exc), "catalog", 503) from exc
         eligible = [item for item in records if (item.get("profile") or {}).get("eligible")]
+        eligible.sort(key=lambda item: (
+            -int((item.get("profile") or {}).get("priority", 0)),
+            str(item.get("name", "")).casefold(),
+            str(item.get("canonical_key", item.get("id", ""))),
+        ))
         selected_records = _select_idea_candidates(eligible, limit=None)
         horizon = HORIZON_SECONDS
         try:
             darkness_ephemeris = build_ephemeris(
-                0, 0, request["start"], request["latitude"], request["longitude"],
+                0, 0, anchor, request["latitude"], request["longitude"],
                 horizon_seconds=horizon,
                 knot_step_seconds=IDEA_PROBE_STEP_SECONDS,
                 output_step_seconds=IDEA_PROBE_STEP_SECONDS,
@@ -345,61 +359,122 @@ class AstroCheckerService:
         astronomical = self._idea_darkness_summary(darkness_ephemeris, -18, horizon)
         nautical = self._idea_darkness_summary(darkness_ephemeris, -12, horizon)
         darkness = {
-            "mode": request["darkness_mode"],
+            "mode": "astronomical",
             "astronomical": astronomical,
             "nautical": nautical,
         }
-        selected_darkness = darkness[request["darkness_mode"]]["intervals"]
-        candidates = []
-        try:
-            ephemerides = build_catalog_ephemerides(
-                [(item["ra_deg"], item["dec_deg"]) for item in selected_records],
-                request["start"], request["latitude"], request["longitude"],
-                horizon_seconds=horizon,
-                knot_step_seconds=IDEA_PROBE_STEP_SECONDS,
-                output_step_seconds=IDEA_PROBE_STEP_SECONDS,
-            )
-        except AstronomyDataError as exc:
-            raise ApiError(str(exc), "calculation", 502) from exc
-        for candidate, ephemeris in zip(selected_records, ephemerides):
-            visibility = solve_visibility(
-                ephemeris.position_at,
-                duration_seconds=1,
-                horizon_seconds=horizon,
-                min_alt=request["min_alt"], max_alt=request["max_alt"],
-                az_start=request["az_start"], az_end=request["az_end"],
-                resolution_seconds=IDEA_PROBE_STEP_SECONDS,
-            )
-            candidates.append({**candidate, "intervals": visibility["intervals"]})
-        result = plan_ideas(
-            candidates, selected_darkness, request["duration_seconds"],
-            minimum_block_seconds=IDEA_MIN_BLOCK_SECONDS,
-        )
-        for block in result["blocks"]:
-            block["offset_start"] = block["start"]
-            block["offset_end"] = block["end"]
-            block["start"] = elapsed_end(request["start"], block["offset_start"]).isoformat()
-            block["end"] = elapsed_end(request["start"], block["offset_end"]).isoformat()
-        result.update({
-            "start": request["start"].isoformat(),
-            "end": elapsed_end(request["start"], request["duration_seconds"]).isoformat(),
+        night = select_astronomical_night(astronomical["intervals"], horizon)
+        common = {
+            "start": anchor.isoformat(),
+            "end": elapsed_end(anchor, horizon).isoformat(),
+            "requested_start": requested_start.isoformat(),
             "timezone": request["timezone"],
             "duration_seconds": _tidy(request["duration_seconds"]),
             "darkness": darkness,
-            "darkness_mode": request["darkness_mode"],
+            "darkness_mode": "astronomical",
             "search_days": request["search_days"],
             "search_limit_days": MAX_FUTURE_SEARCH_DAYS,
             "candidate_count": len(eligible),
-            "evaluated_candidate_count": len(selected_records),
+            "evaluated_candidate_count": 0,
+        }
+        if night is None:
+            return {
+                **common,
+                "status": "none",
+                "night_start": None,
+                "night_end": None,
+                "night_start_offset": None,
+                "night_end_offset": None,
+                "night_duration_seconds": 0,
+                "covered_duration_seconds": 0,
+                "coverage_percent": 0,
+                "preferred_block_seconds": IDEA_MIN_BLOCK_SECONDS,
+                "blocks": [],
+                "gaps": [],
+                "object_count": 0,
+                "skipped": {
+                    "catalog_excluded": max(0, len(records) - len(eligible)),
+                    "not_evaluated": len(eligible),
+                },
+                "note": "In questa data e postazione non esiste una notte astronomica completa.",
+                "notes": [
+                    "Il piano richiede il Sole sotto -18 gradi dal crepuscolo astronomico serale a quello mattutino.",
+                    "Il buio nautico e mostrato solo come contesto e non sostituisce il criterio astronomico.",
+                ],
+            }
+        candidates = []
+        evaluated_count = 0
+        result = plan_night_sequence(
+            [], night, slot_seconds=IDEA_PROBE_STEP_SECONDS,
+            preferred_block_seconds=IDEA_MIN_BLOCK_SECONDS,
+        )
+        tier_start = 0
+        while tier_start < len(selected_records):
+            priority = int((selected_records[tier_start].get("profile") or {}).get("priority", 0))
+            tier_end = tier_start + 1
+            while tier_end < len(selected_records) and int(
+                (selected_records[tier_end].get("profile") or {}).get("priority", 0)
+            ) == priority:
+                tier_end += 1
+            tier = selected_records[tier_start:tier_end]
+            try:
+                ephemerides = build_catalog_ephemerides(
+                    [(item["ra_deg"], item["dec_deg"]) for item in tier],
+                    anchor, request["latitude"], request["longitude"],
+                    horizon_seconds=horizon,
+                    knot_step_seconds=IDEA_PROBE_STEP_SECONDS,
+                    output_step_seconds=IDEA_PROBE_STEP_SECONDS,
+                )
+            except AstronomyDataError as exc:
+                raise ApiError(str(exc), "calculation", 502) from exc
+            for candidate, ephemeris in zip(tier, ephemerides):
+                visibility = solve_visibility(
+                    ephemeris.position_at,
+                    duration_seconds=1,
+                    horizon_seconds=horizon,
+                    min_alt=request["min_alt"], max_alt=request["max_alt"],
+                    az_start=request["az_start"], az_end=request["az_end"],
+                    resolution_seconds=IDEA_PROBE_STEP_SECONDS,
+                )
+                candidates.append({**candidate, "intervals": visibility["intervals"]})
+            evaluated_count += len(tier)
+            result = plan_night_sequence(
+                candidates,
+                night,
+                slot_seconds=IDEA_PROBE_STEP_SECONDS,
+                preferred_block_seconds=IDEA_MIN_BLOCK_SECONDS,
+            )
+            if result["status"] == "full" and not any(block["short_fill"] for block in result["blocks"]):
+                break
+            tier_start = tier_end
+        for block in result["blocks"]:
+            block["offset_start"] = block["start"]
+            block["offset_end"] = block["end"]
+            block["start"] = elapsed_end(anchor, block["offset_start"]).isoformat()
+            block["end"] = elapsed_end(anchor, block["offset_end"]).isoformat()
+        for gap in result["gaps"]:
+            gap["offset_start"] = gap["start"]
+            gap["offset_end"] = gap["end"]
+            gap["start"] = elapsed_end(anchor, gap["offset_start"]).isoformat()
+            gap["end"] = elapsed_end(anchor, gap["offset_end"]).isoformat()
+        night_start_offset = result["night_start"]
+        night_end_offset = result["night_end"]
+        result.update({
+            **common,
+            "evaluated_candidate_count": evaluated_count,
+            "night_start": elapsed_end(anchor, night_start_offset).isoformat(),
+            "night_end": elapsed_end(anchor, night_end_offset).isoformat(),
+            "night_start_offset": night_start_offset,
+            "night_end_offset": night_end_offset,
             "skipped": {
-                **result["skipped"],
                 "catalog_excluded": max(0, len(records) - len(eligible)),
-                "not_evaluated": max(0, len(eligible) - len(selected_records)),
+                "not_evaluated": max(0, len(eligible) - evaluated_count),
             },
             "notes": [
-                "Piano calcolato localmente dal catalogo SQLite e da effemeridi offline.",
-                "Il buio astronomico (Sole <= -18 gradi) e il criterio predefinito; il buio nautico usa -12 gradi.",
-                "Ogni oggetto richiede un blocco continuo di almeno due ore; meteo, Luna e attrezzatura non sono valutati.",
+                "Piano della notte calcolato localmente dal catalogo SQLite e da effemeridi offline.",
+                "Il periodo va dal crepuscolo astronomico serale a quello mattutino (Sole <= -18 gradi).",
+                "Due ore sono il blocco preferito per bersaglio; i riempimenti piu brevi sono segnalati.",
+                "Meteo, Luna, attrezzatura e tempi operativi NINA non sono valutati.",
             ],
         })
         return result

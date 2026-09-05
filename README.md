@@ -1,6 +1,6 @@
 # letscheck
 
-**[AstroChecker — pagina pubblica del progetto](https://voloire.github.io/letscheck/)** · [Release v0.3.0-alpha.2](https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2)
+**[AstroChecker — pagina pubblica del progetto](https://voloire.github.io/letscheck/)** · [Release v0.4.0-alpha.1](https://github.com/Voloire/letscheck/releases/tag/v0.4.0-alpha.1)
 
 Archivio privato del contesto e delle decisioni per sperimentare uno sviluppo unattended di piccoli progetti, con costi sostenibili e accettazione basata sulle funzionalità.
 
@@ -26,7 +26,7 @@ La versione v0.1.0 è un archivio di progettazione: non contiene un'applicazione
 
 La trascrizione è storica: dichiarazioni tecniche, disponibilità dei prodotti e prezzi devono essere verificati quando riutilizzati. In caso di evoluzioni della discussione, CONTEXT.md e il workflow descrivono l'orientamento più recente.
 
-AstroChecker include anche **Cerchi Idee?**, un planner locale multi-oggetto con blocchi continui di almeno due ore, priorita per nebulose di emissione/riflessione e oggetti beginner, inviluppi di buio astronomico e nautico e ricerca futura limitata a 90 giorni.
+AstroChecker include anche **Cerchi Idee?**, un planner locale che costruisce una catena di bersagli per l'intera notte astronomica, dal crepuscolo serale a quello mattutino. Rispetta la finestra reale del balcone, mostra blocchi e intervalli scoperti e prepara i dati per una futura esportazione NINA senza effettuarla.
 
 ## Versionamento
 

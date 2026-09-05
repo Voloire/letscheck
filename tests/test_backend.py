@@ -352,7 +352,7 @@ def test_ui_defaults_to_supported_objects_and_full_azimuth(running_server):
         assert page.locator("#az-start").input_value() == "0"
         assert page.locator("#az-end").input_value() == "360"
         assert "Cataloghi locali M, NGC, IC, Sh2, vdB e LDN" in page.locator("#object-help").inner_text()
-        assert "finestre stimate" in page.get_by_text("Metodo e limiti dell’alfa").locator("..").inner_text()
+        assert "finestre stimate" in page.locator(".criteria-card details").text_content()
         browser.close()
 
 
