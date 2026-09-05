@@ -1,4 +1,4 @@
-# AstroChecker - v0.3.0-alpha.3
+# AstroChecker - v0.3.0-alpha.4
 
 Un pianificatore locale per verificare se un bersaglio del cielo profondo resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
 
