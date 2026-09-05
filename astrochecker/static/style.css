@@ -296,7 +296,7 @@ fieldset:disabled { opacity: .42; }
 
 .result-content { display: grid; gap: 14px; margin-top: 18px; }
 .result-content.is-stale { opacity: .64; }
-.result-summary, .first-window, .visual-card, .interval-card, .criteria-card { border: 1px solid var(--border); border-radius: 11px; background: rgba(11, 18, 26, .5); }
+.result-summary, .first-window, .suggestions-card, .visual-card, .interval-card, .criteria-card { border: 1px solid var(--border); border-radius: 11px; background: rgba(11, 18, 26, .5); }
 .result-summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(210px, .8fr); gap: 18px; align-items: center; padding: 18px; border-left: 3px solid var(--teal); }
 .result-summary.partial { border-left-color: var(--amber); }
 .result-summary.none { border-left-color: var(--red); }
@@ -325,6 +325,13 @@ fieldset:disabled { opacity: .42; }
 .nina-button { width: auto; min-height: 36px; padding: 7px 11px; font-size: .72rem; }
 .nina-button:disabled { cursor: not-allowed; opacity: .48; }
 .coming-soon { color: var(--amber); font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.suggestions-card { padding: 16px; background: linear-gradient(100deg, var(--amber-soft), rgba(11,18,26,.45) 55%); }
+.suggestion-limit { color: var(--amber); font-size: .65rem; white-space: nowrap; }
+.suggestion-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 11px; align-items: start; margin-top: 13px; padding: 11px 12px; border: 1px solid rgba(239,185,110,.25); border-radius: 8px; background: rgba(23,34,49,.62); }
+.suggestion-tier { display: grid; place-items: center; min-width: 28px; height: 24px; border-radius: 6px; color: #18212b; background: var(--amber); font-size: .68rem; font-weight: 800; }
+.suggestion-item strong { display: block; color: var(--text-soft); font-size: .78rem; }
+.suggestion-item p { margin: 4px 0 2px; color: var(--text); font-size: .76rem; font-variant-numeric: tabular-nums; line-height: 1.4; }
+.suggestion-item small { color: var(--text-dim); font-size: .68rem; line-height: 1.4; }
 
 .visual-card, .interval-card, .criteria-card { padding: 16px; }
 .article-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }

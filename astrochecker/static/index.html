@@ -181,7 +181,7 @@
                 <span class="button-label">Calcola visibilità</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
-              <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore.</p>
+            <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore; le proposte future cercano fino a 90 giorni.</p>
             </fieldset>
           </form>
         </section>
@@ -235,6 +235,24 @@
               <div class="nina-action">
                 <button class="button button-secondary nina-button" type="button" disabled>Export TARGET to NINA</button>
                 <span class="coming-soon">Prossimamente</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="suggestions-card" id="suggestions-card" hidden aria-labelledby="suggestions-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="suggestions-title">Suggerimento prioritario</h3>
+                <p id="suggestions-note"></p>
+              </div>
+              <span class="suggestion-limit">Ricerca futura: 90 giorni</span>
+            </div>
+            <div class="suggestion-item" id="suggestion-item">
+              <span class="suggestion-tier" id="suggestion-tier"></span>
+              <div>
+                <strong id="suggestion-label"></strong>
+                <p id="suggestion-time"></p>
+                <small id="suggestion-detail"></small>
               </div>
             </div>
           </article>

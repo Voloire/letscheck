@@ -159,6 +159,27 @@ def test_solar_threshold_transition_matches_direct_astropy():
     assert astronomy.summarize_darkness(direct.sun_alt) == expected
 
 
+def test_coarse_ephemeris_exposes_only_requested_probe_grid():
+    astronomy = astronomy_module()
+    from astrochecker.planner import parse_start
+
+    ephemeris = astronomy.build_ephemeris(
+        250.423455,
+        36.461301,
+        parse_start("2026-09-06T03:15", "UTC"),
+        43.9729,
+        7.9944,
+        horizon_seconds=60,
+        knot_step_seconds=30,
+        output_step_seconds=30,
+    )
+
+    assert len(ephemeris.target_alt) == 3
+    assert ephemeris.position_at(30)["alt"] == pytest.approx(ephemeris.target_alt[1])
+    with pytest.raises(ValueError, match="griglia"):
+        ephemeris.position_at(15)
+
+
 def test_iers_coverage_checks_the_search_end_as_well_as_the_start():
     astronomy = astronomy_module()
     from astropy.time import Time

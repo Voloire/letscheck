@@ -19,12 +19,19 @@ from .local_astronomy import (
     build_ephemeris,
     summarize_darkness,
 )
-from .planner import elapsed_end, position_is_visible, solve_visibility
+from .planner import (
+    MAX_FUTURE_SEARCH_DAYS,
+    choose_suggestion,
+    elapsed_end,
+    position_is_visible,
+    solve_visibility,
+)
 from .server import ApiError, validate_check_request, validate_site_request
 
 
 HORIZON_SECONDS = 86400
 CHART_STEP_SECONDS = 300
+FUTURE_PROBE_STEP_SECONDS = 300
 
 
 def _tidy(number):
@@ -68,6 +75,96 @@ class AstroCheckerService:
         except CatalogError as exc:
             raise ApiError(str(exc), "catalog", 503) from exc
 
+    def _future_windows(self, selected, request, current_result):
+        """Search later dates locally, stopping at the first complete window."""
+        records = []
+        try:
+            probe = build_ephemeris(
+                selected["ra_deg"],
+                selected["dec_deg"],
+                request["start"],
+                request["latitude"],
+                request["longitude"],
+                horizon_seconds=(MAX_FUTURE_SEARCH_DAYS + 1) * HORIZON_SECONDS,
+                knot_step_seconds=FUTURE_PROBE_STEP_SECONDS,
+                output_step_seconds=FUTURE_PROBE_STEP_SECONDS,
+            )
+        except AstronomyDataError:
+            return records
+
+        for day in range(1, MAX_FUTURE_SEARCH_DAYS + 1):
+            future_start = elapsed_end(request["start"], day * HORIZON_SECONDS)
+            base_offset = day * HORIZON_SECONDS
+            future_result = solve_visibility(
+                lambda offset, base_offset=base_offset: probe.position_at(base_offset + offset),
+                duration_seconds=request["duration_seconds"],
+                horizon_seconds=HORIZON_SECONDS,
+                min_alt=request["min_alt"],
+                max_alt=request["max_alt"],
+                az_start=request["az_start"],
+                az_end=request["az_end"],
+                resolution_seconds=FUTURE_PROBE_STEP_SECONDS,
+            )
+            records.append({"start": future_start, "intervals": future_result["intervals"]})
+            candidate = choose_suggestion(
+                start=request["start"],
+                duration_seconds=request["duration_seconds"],
+                current_intervals=current_result["intervals"],
+                future_windows=records,
+            )
+            if candidate and candidate["tier"] == "future":
+                break
+        candidate = choose_suggestion(
+            start=request["start"],
+            duration_seconds=request["duration_seconds"],
+            current_intervals=current_result["intervals"],
+            future_windows=records,
+        )
+        if records and (candidate is None or candidate["tier"] != "future"):
+            widest_record = max(
+                records,
+                key=lambda record: max(
+                    (item["end"] - item["start"] for item in record["intervals"]),
+                    default=0,
+                ),
+            )
+            try:
+                exact_ephemeris = build_ephemeris(
+                    selected["ra_deg"],
+                    selected["dec_deg"],
+                    widest_record["start"],
+                    request["latitude"],
+                    request["longitude"],
+                    horizon_seconds=HORIZON_SECONDS,
+                )
+                exact_result = solve_visibility(
+                    exact_ephemeris.position_at,
+                    duration_seconds=request["duration_seconds"],
+                    horizon_seconds=HORIZON_SECONDS,
+                    min_alt=request["min_alt"],
+                    max_alt=request["max_alt"],
+                    az_start=request["az_start"],
+                    az_end=request["az_end"],
+                )
+                widest_record["intervals"] = exact_result["intervals"]
+            except AstronomyDataError:
+                pass
+        return records
+
+    @staticmethod
+    def _suggestion_note(suggestion, *, has_any_window):
+        if suggestion is None:
+            return (
+                "L'oggetto non e visibile in alcuna finestra continua nei 90 giorni analizzati."
+                if not has_any_window
+                else "Non esiste una proposta che rispetti i criteri indicati."
+            )
+        if suggestion["tier"] == "adjust":
+            return "Sposta l'orario mantenendo la durata richiesta, nella prima finestra continua utile del periodo analizzato."
+        if suggestion["tier"] == "future":
+            return "Prima data futura entro 90 giorni con una finestra continua sufficiente per tutta la durata richiesta."
+        return "La durata richiesta non e disponibile: questa e la finestra continua piu ampia trovata nei 90 giorni analizzati."
+
     def check(self, payload):
         request = validate_check_request(payload)
         selected = self._resolve(request["object"])
@@ -92,6 +189,25 @@ class AstroCheckerService:
             az_start=request["az_start"],
             az_end=request["az_end"],
         )
+        future_windows = []
+        suggestion = None
+        if result["status"] != "full":
+            current_candidate = choose_suggestion(
+                start=request["start"],
+                duration_seconds=request["duration_seconds"],
+                current_intervals=result["intervals"],
+                future_windows=[],
+            )
+            if current_candidate and current_candidate["tier"] == "adjust":
+                suggestion = current_candidate
+            else:
+                future_windows = self._future_windows(selected, request, result)
+                suggestion = choose_suggestion(
+                    start=request["start"],
+                    duration_seconds=request["duration_seconds"],
+                    current_intervals=result["intervals"],
+                    future_windows=future_windows,
+                )
         samples = []
         for offset in range(0, HORIZON_SECONDS + 1, CHART_STEP_SECONDS):
             position = ephemeris.position_at(offset)
@@ -112,6 +228,20 @@ class AstroCheckerService:
             )
 
         iers_kind = "predittivi" if ephemeris.uses_prediction else "osservati"
+        if suggestion is not None:
+            suggestion = {
+                **suggestion,
+                "start": suggestion["start"].isoformat(),
+                "end": suggestion["end"].isoformat(),
+            }
+        has_any_window = bool(
+            result["intervals"] or any(record["intervals"] for record in future_windows)
+        )
+        suggestion_note = (
+            ""
+            if result["status"] == "full"
+            else self._suggestion_note(suggestion, has_any_window=has_any_window)
+        )
         return {
             **result,
             "object": {
@@ -130,6 +260,9 @@ class AstroCheckerService:
             "search_end": elapsed_end(request["start"], HORIZON_SECONDS).isoformat(),
             "timezone": request["timezone"],
             "duration_seconds": _tidy(request["duration_seconds"]),
+            "suggestions": [suggestion] if suggestion else [],
+            "suggestion_note": suggestion_note,
+            "suggestion_search_days": MAX_FUTURE_SEARCH_DAYS,
             "samples": samples,
             "darkness": summarize_darkness(ephemeris.sun_alt),
             "notes": [
@@ -138,6 +271,7 @@ class AstroCheckerService:
                 "Astropy e campionato ogni 30 secondi; vettori orizzontali interpolati alimentano la griglia decisionale conservativa di un secondo. La precisione e verificata dai test, non e un limite universale.",
                 f"Orientamento terrestre da tabella IERS-A locale ({iers_kind} per questo intervallo), copertura UTC da {ephemeris.iers_coverage_start} a prima di {ephemeris.iers_coverage_end_exclusive}.",
                 "La visibilita considera geometria e Sole a -18 gradi; non include meteo, Luna o qualita fotografica.",
+                "Se la richiesta non e completa, le alternative future vengono cercate localmente fino a 90 giorni; la prima finestra completa viene poi verificata con la griglia di un secondo.",
             ],
         }
 
