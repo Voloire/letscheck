@@ -282,6 +282,15 @@ def test_catalog_boot_is_automatic_and_failed_status_retries_without_reload(tmp_
         assert not errors
         page.close()
 
+
+def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
+    service = UiService(tmp_path / "version-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        expect(page.locator(".eyebrow").first).to_contain_text("0.3.0-alpha.4")
+        assert not errors
+        page.close()
+
     unavailable = {
         "ready": False,
         "version": "",
