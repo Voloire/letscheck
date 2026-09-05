@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Pianificazione locale della visibilità astronomica con SkyChart.">
+  <title>AstroChecker</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand-lockup">
+        <svg class="brand-mark" viewBox="0 0 72 54" aria-hidden="true">
+          <path d="M7 38A31 31 0 0 1 64 22" class="sky-arc"/>
+          <circle cx="48" cy="13" r="2.2"/>
+          <circle cx="60" cy="23" r="1.3"/>
+          <circle cx="31" cy="17" r="1.1"/>
+          <path d="M9 39h55M17 39v10M56 39v10M13 49h47" class="balcony"/>
+        </svg>
+        <div>
+          <div class="brand-row">
+            <span class="eyebrow">ALFA LOCALE</span>
+            <span class="connection-pill" id="header-connection">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>Da verificare</span>
+            </span>
+          </div>
+          <h1>AstroChecker</h1>
+          <p>Pianifica una finestra osservativa dal tuo balcone.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="setup-column">
+        <section class="card connection-card" aria-labelledby="connection-title">
+          <div class="step-heading">
+            <span class="step-number" aria-hidden="true">1</span>
+            <div>
+              <p class="section-kicker">PREREQUISITO</p>
+              <h2 id="connection-title">Collega SkyChart</h2>
+            </div>
+          </div>
+
+          <details class="connection-details" id="connection-details" open>
+            <summary>Impostazioni SkyChart</summary>
+            <ol class="instruction-list">
+              <li><span>Avvia SkyChart.</span></li>
+              <li><span>Apri <strong>Generale → Server</strong>.</span></li>
+              <li><span>Attiva <strong>Use TCP/IP Server</strong> e imposta <code>127.0.0.1:3292</code>.</span></li>
+              <li><span>Se hai cambiato questa impostazione, riavvia SkyChart.</span></li>
+            </ol>
+          </details>
+
+          <div class="connection-actions">
+            <button class="button button-secondary" id="verify-connection" type="button">
+              <span class="button-label">Verifica connessione</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
+            <p class="status-message" id="connection-status" role="status" aria-live="polite">
+              SkyChart non verificato.
+            </p>
+          </div>
+        </section>
+
+        <section class="card planner-card" aria-labelledby="planner-title">
+          <div class="step-heading compact-heading">
+            <span class="step-number" aria-hidden="true">2</span>
+            <div>
+              <p class="section-kicker">OSSERVAZIONE</p>
+              <h2 id="planner-title">Imposta la ricerca</h2>
+            </div>
+          </div>
+
+          <p class="unlock-note" id="unlock-note">Verifica la connessione per sbloccare il pianificatore.</p>
+
+          <form id="planner-form" novalidate>
+            <fieldset id="planner-fields" disabled>
+              <legend class="visually-hidden">Parametri della ricerca</legend>
+
+              <div class="field field-wide">
+                <label for="object">Oggetto celeste</label>
+                <input id="object" name="object" type="text" value="M13" maxlength="200" required autocomplete="off" aria-describedby="object-help">
+                <p class="field-help" id="object-help">Stelle e oggetti del cielo profondo disponibili in SkyChart, per esempio M13 o NGC 6205.</p>
+              </div>
+
+              <div class="field-group field-wide" role="group" aria-labelledby="position-group-label">
+                <p class="group-label" id="position-group-label">Posizione di osservazione</p>
+                <div class="field-grid two-columns">
+                  <div class="field">
+                    <label for="latitude">Latitudine</label>
+                    <div class="input-unit"><input id="latitude" name="latitude" type="number" value="43.9729" min="-90" max="90" step="any" required><span>°</span></div>
+                  </div>
+                  <div class="field">
+                    <label for="longitude">Longitudine</label>
+                    <div class="input-unit"><input id="longitude" name="longitude" type="number" value="7.9944" min="-180" max="180" step="any" required><span>°</span></div>
+                  </div>
+                </div>
+                <p class="field-help">Valori positivi: nord/est. Valori negativi: sud/ovest.</p>
+              </div>
+
+              <div class="field-grid two-columns field-wide">
+                <div class="field date-field">
+                  <label for="start">Data e ora locale</label>
+                  <input id="start" name="start" type="datetime-local" required>
+                </div>
+                <div class="field">
+                  <label for="duration">Durata continua</label>
+                  <div class="input-unit"><input id="duration" name="duration" type="number" value="60" min="0" max="1440" step="any" required><span>min</span></div>
+                </div>
+              </div>
+              <p class="field-help field-wide time-note">Fuso orario Europe/Rome. Le 24 ore analizzate partono dall’istante scelto.</p>
+
+              <div class="field-group field-wide balcony-group" role="group" aria-labelledby="balcony-group-label">
+                <div class="group-title-row">
+                  <p class="group-label" id="balcony-group-label">Finestra visibile dal balcone</p>
+                  <span class="tiny-key">Altezze geometriche</span>
+                </div>
+                <div class="field-grid four-columns">
+                  <div class="field">
+                    <label for="min-alt">Altezza minima</label>
+                    <div class="input-unit"><input id="min-alt" name="min_alt" type="number" value="10" min="0" max="90" step="any" required><span>°</span></div>
+                  </div>
+                  <div class="field">
+                    <label for="max-alt">Altezza massima</label>
+                    <div class="input-unit"><input id="max-alt" name="max_alt" type="number" value="30" min="0" max="90" step="any" required><span>°</span></div>
+                  </div>
+                  <div class="field">
+                    <label for="az-start">Azimut iniziale</label>
+                    <div class="input-unit"><input id="az-start" name="az_start" type="number" value="0" min="0" max="360" step="any" required><span>°</span></div>
+                  </div>
+                  <div class="field">
+                    <label for="az-end">Azimut finale</label>
+                    <div class="input-unit"><input id="az-end" name="az_end" type="number" value="360" min="0" max="360" step="any" required><span>°</span></div>
+                  </div>
+                </div>
+                <p class="field-help">Azimut: nord 0°, est 90°, sud 180°, ovest 270°. Può attraversare il nord; 0° → 360° include tutto l’orizzonte. Estremi uguali non sono validi.</p>
+              </div>
+
+              <div class="constraint-strip field-wide">
+                <span class="constraint-symbol" aria-hidden="true">☾</span>
+                <span><strong>Buio astronomico</strong><small>Sole ≤ −18° per tutta la finestra</small></span>
+                <span class="constraint-divider" aria-hidden="true"></span>
+                <span><strong>Ricerca</strong><small>Prime 24 ore, durata continua</small></span>
+              </div>
+
+              <div class="form-error" id="form-error" role="alert" aria-live="assertive" hidden></div>
+
+              <button class="button button-primary field-wide" id="calculate" type="submit">
+                <span class="button-label">Calcola visibilità</span>
+                <span class="spinner" aria-hidden="true"></span>
+              </button>
+              <p class="calculation-note field-wide">SkyChart prepara le prossime 24 ore; il calcolo può richiedere 1–2 minuti.</p>
+            </fieldset>
+          </form>
+        </section>
+      </div>
+
+      <section class="results-column" id="results" aria-labelledby="results-title">
+        <div class="results-heading">
+          <div>
+            <p class="section-kicker">RISULTATO</p>
+            <h2 id="results-title">Finestra osservativa</h2>
+          </div>
+          <span class="stale-badge" id="stale-badge" hidden>Parametri modificati · ricalcola</span>
+        </div>
+
+        <div id="result-live" class="visually-hidden" role="status" aria-live="polite"></div>
+        <div class="result-error" id="result-error" role="alert" hidden></div>
+
+        <div class="empty-result" id="empty-result">
+          <svg viewBox="0 0 180 104" aria-hidden="true">
+            <path d="M24 75c18-42 49-59 84-50 21 5 37 19 48 42"/>
+            <path d="M18 77h144M37 77v17M143 77v17M29 94h122" class="empty-balcony"/>
+            <circle cx="119" cy="21" r="3"/><circle cx="145" cy="37" r="1.7"/><circle cx="78" cy="27" r="1.4"/>
+          </svg>
+          <h3>Pronto per la notte</h3>
+          <p>I risultati appariranno qui dopo il calcolo.</p>
+        </div>
+
+        <div id="result-content" class="result-content" hidden>
+          <article class="result-summary" id="result-summary">
+            <div class="summary-main">
+              <span class="result-state-icon" aria-hidden="true"></span>
+              <div>
+                <p class="result-object" id="result-object"></p>
+                <h3 id="result-status"></h3>
+                <p id="result-period"></p>
+              </div>
+            </div>
+            <div class="summary-metrics">
+              <div><span id="visible-duration">—</span><small>nel periodo richiesto</small></div>
+              <div><span id="longest-duration">—</span><small>tratto continuo massimo in 24 h</small></div>
+            </div>
+          </article>
+
+          <article class="first-window" id="first-window-card">
+            <div class="window-marker" aria-hidden="true"></div>
+            <div>
+              <p class="section-kicker">PROSSIMA OCCASIONE</p>
+              <h3 id="first-window-title"></h3>
+              <p id="first-window-time"></p>
+              <p class="first-window-note" id="first-window-note"></p>
+            </div>
+          </article>
+
+          <article class="visual-card" aria-labelledby="timeline-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="timeline-title">Timeline delle 24 ore</h3>
+                <p>Verde: intervalli continui disponibili. Ambra: periodo richiesto.</p>
+              </div>
+              <span class="timeline-date" id="timeline-date"></span>
+            </div>
+            <div class="timeline-wrap">
+              <div class="timeline" id="timeline" role="img" aria-label="Timeline della visibilità nelle 24 ore">
+                <div class="timeline-request" id="timeline-request"></div>
+                <div class="timeline-intervals" id="timeline-intervals"></div>
+              </div>
+              <div class="timeline-axis" id="timeline-axis" aria-hidden="true"></div>
+            </div>
+          </article>
+
+          <article class="visual-card trajectory-card" aria-labelledby="trajectory-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="trajectory-title">Altezza dell’oggetto</h3>
+                <p>La fascia evidenziata è l’altezza visibile dal balcone.</p>
+              </div>
+            </div>
+            <div class="trajectory-wrap" id="trajectory"></div>
+          </article>
+
+          <article class="interval-card" aria-labelledby="intervals-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="intervals-title">Intervalli continui disponibili</h3>
+                <p>Gli intervalli separati non vengono sommati.</p>
+              </div>
+              <span class="interval-count" id="interval-count"></span>
+            </div>
+            <ol class="interval-list" id="interval-list"></ol>
+          </article>
+
+          <article class="criteria-card" aria-labelledby="criteria-title">
+            <h3 id="criteria-title">Lettura del risultato</h3>
+            <div class="reason-list" id="reason-list"></div>
+            <details>
+              <summary>Metodo e limiti dell’alfa</summary>
+              <ul id="method-notes"></ul>
+              <p>SkyChart fornisce le coordinate. AstroChecker calcola localmente finestre stimate, altezza e azimut geometrici, senza rifrazione. Le effemeridi orarie sono interpolate; nei dettagli è riportato un confronto locale dell’interpolazione. La griglia decisionale di 1 secondo è una risoluzione di calcolo, non una garanzia di accuratezza astronomica al secondo. Meteo, Luna, qualità del cielo e attrezzatura non sono valutati.</p>
+            </details>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Funziona solo su questo computer.</span>
+      <span>Europe/Rome · geometria + Sole ≤ −18°</span>
+    </footer>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
