@@ -1,62 +1,73 @@
-# AstroChecker — v0.2.0-alpha.1
+# AstroChecker - v0.3.0-alpha.2
 
-Un piccolo pianificatore locale per verificare se un oggetto celeste resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
+Un pianificatore locale per verificare se un bersaglio del cielo profondo resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
 
-## Avvio su questo computer
+## Avvio
 
-1. Avvia SkyChart / Cartes du Ciel.
-2. Nelle impostazioni General → Server abilita **Use TCP/IP Server**, indirizzo **127.0.0.1**, porta **3292**. Riavvia SkyChart se hai modificato le impostazioni.
-3. Esegui `avvia.cmd` dalla cartella dell'applicazione. Si apre il browser su una porta libera di localhost.
-4. Premi **Verifica connessione**, compila i dati e avvia il calcolo.
+Esegui `avvia.cmd` dalla cartella dell'applicazione: il browser apre una porta libera di localhost. Il catalogo SQLite è già incluso e viene controllato automaticamente. SkyChart non è più un prerequisito.
 
-Il programma non usa Internet durante l'esecuzione. La ricerca oggetti usa i cataloghi disponibili nella propria installazione SkyChart. Nessun account o modello linguistico. Il server accetta connessioni soltanto da questo computer.
-
-Per l'avvio da terminale:
+Da terminale:
 
 ```powershell
 .\.venv\Scripts\python.exe run.py
 ```
 
-Per chiudere il server usa Ctrl+C nella finestra di avvio. Chiudere la scheda del browser non arresta Python.
+Per chiudere il server usa Ctrl+C nella finestra di avvio. Chiudere la scheda del browser non arresta Python. Il server accetta connessioni soltanto da questo computer.
 
-## Come leggere i risultati
+## Pianificare una sessione
+
+1. Digita una sigla M, NGC, IC, Sh2, vdB o LDN oppure un nome comune presente nel catalogo. Puoi selezionare una proposta oppure inserire direttamente una sigla esatta. M13 e NGC 6205 identificano lo stesso bersaglio. Sigle o nomi ambigui richiedono una scelta esplicita.
+2. Imposta coordinate e fuso IANA della postazione, data/ora locale e durata continua. I valori iniziali di Chiusanico sono un esempio modificabile.
+3. Imposta altezza minima/massima e settore di azimut, poi calcola.
+
+Nord/Est sono positivi. L'azimut vale Nord 0°, Est 90°, Sud 180°, Ovest 270°. Un settore 350°-20° attraversa il Nord; 0°-360° comprende tutte le direzioni. Gli estremi uguali non sono validi.
+
+Puoi salvare una sola postazione, compresi fuso e limiti del balcone: viene ritrovata anche se cambia la porta al successivo avvio. Su Windows il file è `%LOCALAPPDATA%/AstroChecker/site.json`. Non vengono salvati oggetto, data e durata della ricerca.
+
+Il rilevamento facoltativo usa la geolocalizzazione del browser: mostra coordinate e raggio di accuratezza dichiarato, da accettare prima di sostituire i dati manuali. Non ricava automaticamente il fuso e non salva automaticamente la proposta. Dipende dal browser e dai servizi di posizione disponibili; l'inserimento manuale funziona senza rete.
+
+Il fuso è quello della postazione, non necessariamente quello del computer. Gli orari ambigui o inesistenti al cambio dell'ora vengono rifiutati. La durata e l'orizzonte di ricerca sono tempo fisicamente trascorso.
+
+## Leggere i risultati
 
 - **Completa:** tutto l'intervallo richiesto è disponibile.
-- **Parziale:** soltanto una parte è disponibile; gli intervalli separati non vengono sommati per soddisfare la durata continua.
+- **Parziale:** soltanto una parte è disponibile; intervalli separati non soddisfano una durata continua.
 - **Non visibile:** nessun tratto utile nell'intervallo richiesto.
-- **Prima finestra completa:** primo intervallo sufficiente trovato nel periodo di ricerca. La sua fine deve rientrare nelle 24 ore successive all'inizio indicato.
+- **Prima finestra completa:** prima occasione sufficiente la cui fine rientra nelle 24 ore successive all'inizio scelto.
 - **Nessuna soluzione:** nessuna finestra continua sufficiente in queste 24 ore, non una previsione per tutti i giorni futuri.
 
-La durata è tempo continuo trascorso, non somma delle esposizioni. L'alfa richiede Sole a un'altezza non superiore a -18°. Non considera nuvole, Luna, inquinamento luminoso, qualità fotografica, ingombri dell'attrezzatura o movimenti della montatura. Non esporta sequenze NINA.
+Se un intervallo tocca l'inizio o la fine delle 24 ore, il risultato lo segnala come possibile prosecuzione oltre il periodo analizzato. Gli intervalli separati non vengono uniti automaticamente: per confermare ciò che accade oltre il bordo occorre avviare un'analisi con un inizio diverso.
 
-Latitudine e longitudine usano i segni geografici usuali: Nord/Est positivi. I valori precompilati sono indicativi di Chiusanico e possono essere cambiati. Per il balcone si specificano altezza minima/massima e settore di azimut: Nord 0°, Est 90°, Sud 180°, Ovest 270°. Un settore 350°–20° attraversa il Nord; 0°–360° include tutte le direzioni.
+Il buio astronomico richiede Sole <= -18° per tutta la finestra. Inizio e fine del buio sono mostrati separatamente: dipendono da data e postazione, non dal balcone o dal bersaglio. Dove non ci sono attraversamenti della soglia nelle 24 ore non vengono inventati orari.
 
-Il fuso dell'alfa è Europe/Rome. Gli orari ambigui o inesistenti durante il cambio dell'ora vengono rifiutati, anziché indovinare l'istante desiderato.
+La durata è tempo continuo, non somma delle esposizioni. Il pulsante **Export TARGET to NINA** è un segnaposto disabilitato: l'esportazione è futura.
 
-## Metodo e precisione
+## Dati e limiti
 
-Questa alfa accetta **stelle di catalogo e oggetti del cielo profondo**. Pianeti, Luna, comete e altri oggetti mobili vengono rifiutati esplicitamente: occorre prima verificare un metodo adatto al loro movimento. Un'analisi completa su questa installazione richiede circa uno o due minuti.
+Il database locale contiene i sei cataloghi richiesti e i nomi comuni verificati dallo snapshot OpenNGC; fonti, snapshot, licenze, censimenti ed eccezioni sono descritti in [FONTI-DATI.md](FONTI-DATI.md). Il nome controverso associato a IC 434 è escluso. M102 resta ambiguo: scegliere il bersaglio esplicito fra i candidati indicati.
 
-SkyChart fornisce le coordinate equatoriali dell'oggetto e del Sole. Il checker converte localmente queste coordinate in altezza e azimut per la postazione indicata. Le interrogazioni usano una carta temporanea; la posizione del mouse non entra nel calcolo.
+Questa versione non include un catalogo stellare generale: Arturo non è ricercabile. Non considera pianeti, comete, meteo, effetto della Luna, qualità del cielo o attrezzatura. Verifica la posizione di catalogo del bersaglio, non l'intero campo fotografico né l'estensione di una nebulosa.
 
-Le altezze sono **geometriche**, senza rifrazione atmosferica: vicino all'orizzonte possono differire dall'altezza apparente mostrata da SkyChart. Le posizioni intermedie vengono interpolate tra effemeridi orarie. La griglia di verifica è di un secondo; questo indica la risoluzione temporale del motore, non una garanzia di accuratezza astronomica al secondo. Per ostruzioni reali lascia un margine nei limiti inseriti.
+Astropy calcola localmente bersaglio e Sole, usando dati ausiliari inclusi. Nessun download durante il calcolo e nessun modello linguistico. Le altezze sono geometriche, senza rifrazione atmosferica. Le posizioni sono interpolate fra nodi a 30 secondi e valutate su una griglia di un secondo: questa è una risoluzione del calcolo, non una garanzia di accuratezza astronomica al secondo. Per ostruzioni reali lascia un margine nei limiti inseriti.
 
-L'alfa richiede coordinate SkyChart all'equinozio della data. Se il server è configurato per forzare J2000, il checker deve segnalare l'incompatibilità anziché usare il sistema di riferimento errato.
+I dati di orientamento terrestre hanno un intervallo temporale finito. Il motore segnala date non coperte e dichiara l'uso di valori predittivi nelle note; aggiornare i pacchetti è un'operazione esplicita, separata dall'uso offline.
 
-Riferimento del protocollo: [comandi server SkyChart](https://www.ap-i.net/skychart/en/documentation/server_commands). L'applicazione non consulta questa pagina durante l'uso.
+La tabella inclusa copre dal 2 gennaio 1973 UTC fino a prima del 28 agosto 2027 UTC. Anche la fine delle 24 ore analizzate deve essere coperta. Questa copertura non rende uniformemente precise le coordinate dei cataloghi storici.
 
 ## Preparazione di un nuovo ambiente
 
-Python 3.13 e SkyChart con server TCP sono necessari. L'installazione iniziale delle dipendenze richiede accesso ai pacchetti:
+Python 3.13. L'installazione iniziale delle dipendenze richiede accesso ai pacchetti:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-## Verifiche
+Non occorre ricostruire il database a ogni avvio. Il comando separato e le condizioni di riutilizzo dei dati sono in `FONTI-DATI.md`.
 
-I criteri funzionali sono in `ALPHA.md`; gli esempi protetti in `tests/test_acceptance.py` verificano decisioni e intervalli con traiettorie sintetiche dichiarate. Le prove con SkyChart reale sono distinte da quelle del motore, così un doppio di test non può essere scambiato per un'integrazione funzionante.
+## Verifiche e riferimenti
+
+I criteri della versione locale sono in `PIANO-LOCALE.md`; gli esempi protetti sono in `tests/test_acceptance.py` e `tests/test_local_acceptance.py`.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
@@ -64,4 +75,4 @@ I criteri funzionali sono in `ALPHA.md`; gli esempi protetti in `tests/test_acce
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-La suite include quattro regressioni dell'interfaccia con Playwright e Chromium. Le evidenze locali sono nella cartella `artifacts/`, esclusa da Git.
+Il percorso storico SkyChart è conservato in `RIFERIMENTO-SKYCHART.md` e nei moduli di riferimento. Le evidenze della precedente release sono distinte da quelle della versione locale. Le evoluzioni da esplorare sono in `EVOLUZIONI.md`.

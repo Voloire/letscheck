@@ -2,6 +2,18 @@
 
 Consolidamento iniziale: 5 settembre 2026, v0.1.0.
 
+## Ripresa dopo compattazione
+
+Leggere prima `RIPRESA.md`: contiene stato completato, tre nuovi interventi ancora da pianificare, autorizzazioni e indicazioni per una ripresa economica. L'ultima richiesta riguarda solo il salvataggio del contesto; non avviare ancora i nuovi fix.
+
+## AstroChecker: aggiornamento della progettazione
+
+La prima alfa SkyChart è stata realizzata e integrata come `v0.2.0-alpha.1`. È stato poi autorizzato il refactoring locale descritto in `PIANO-LOCALE.md`: SQLite prealimentato con M, NGC, IC, Sh2, vdB e LDN, calcoli astronomici offline, postazione salvabile e fuso esplicito, conservando la UI e i criteri di visibilità. Le verifiche correnti sono in `VERIFICA-LOCALE.md`; istruzioni d'uso in `ASTROCHECKER.md`, fonti e licenze in `FONTI-DATI.md`.
+
+Le conoscenze SkyChart restano in `RIFERIMENTO-SKYCHART.md` e nei moduli storici. `EVOLUZIONI.md` raccoglie la lista dei desideri, incluso caricamento FITS/immagini con plate solving blind. L'esportazione NINA è soltanto un pulsante disabilitato; nessuna funzione della lista dei desideri è inclusa nel refactoring. Commit, merge e push della nuova versione richiedono una richiesta successiva.
+
+Le sezioni seguenti conservano il contesto iniziale del workflow e non annullano queste decisioni successive.
+
 ## Obiettivo
 
 Sperimentare sviluppo unattended di piccoli progetti, con controllo del costo per funzionalità accettata. L'utente vuole feature effettive e utilizzabili, non quantità di codice, test o coverage.

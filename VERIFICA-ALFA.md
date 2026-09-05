@@ -1,4 +1,4 @@
-# Verifica dell'alfa
+# Verifica storica — alfa con SkyChart
 
 ## Criteri ATDD
 
