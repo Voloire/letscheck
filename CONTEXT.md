@@ -2,6 +2,10 @@
 
 Consolidamento iniziale: 5 settembre 2026, v0.1.0.
 
+## Ripresa corrente — AstroChecker
+
+Prima di riprendere leggere `RIPRESA.md` in questa cartella. Il codice corrente è nel worktree `C:\Users\franc\astrochecker-local`, branch `astrochecker-local`: alfa locale completata, nuovi fix ancora da pianificare. Questo checkout principale e il suo EVOLUZIONI.md non rappresentano la nuova implementazione. L'ultima richiesta autorizza il salvataggio del contesto, non l'esecuzione dei fix.
+
 ## Obiettivo
 
 Sperimentare sviluppo unattended di piccoli progetti, con controllo del costo per funzionalità accettata. L'utente vuole feature effettive e utilizzabili, non quantità di codice, test o coverage.
