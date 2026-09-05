@@ -113,6 +113,27 @@ class AstroCheckerService:
                 future_windows=records,
             )
             if candidate and candidate["tier"] == "future":
+                try:
+                    exact_ephemeris = build_ephemeris(
+                        selected["ra_deg"],
+                        selected["dec_deg"],
+                        future_start,
+                        request["latitude"],
+                        request["longitude"],
+                        horizon_seconds=HORIZON_SECONDS,
+                    )
+                    exact_result = solve_visibility(
+                        exact_ephemeris.position_at,
+                        duration_seconds=request["duration_seconds"],
+                        horizon_seconds=HORIZON_SECONDS,
+                        min_alt=request["min_alt"],
+                        max_alt=request["max_alt"],
+                        az_start=request["az_start"],
+                        az_end=request["az_end"],
+                    )
+                    records[-1]["intervals"] = exact_result["intervals"]
+                except AstronomyDataError:
+                    continue
                 break
         candidate = choose_suggestion(
             start=request["start"],
