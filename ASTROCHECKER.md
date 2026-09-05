@@ -1,4 +1,4 @@
-# AstroChecker - v0.3.0-alpha.4
+# AstroChecker - v0.3.0-alpha.5
 
 Un pianificatore locale per verificare se un bersaglio del cielo profondo resta nella porzione di cielo accessibile dal balcone, al buio, per una durata continua.
 
@@ -43,6 +43,10 @@ Se un intervallo tocca l'inizio o la fine delle 24 ore, il risultato lo segnala 
 Il buio astronomico richiede Sole <= -18° per tutta la finestra. Inizio e fine del buio sono mostrati separatamente: dipendono da data e postazione, non dal balcone o dal bersaglio. Dove non ci sono attraversamenti della soglia nelle 24 ore non vengono inventati orari.
 
 La durata è tempo continuo, non somma delle esposizioni. Il pulsante **Export TARGET to NINA** è un segnaposto disabilitato: l'esportazione è futura.
+
+### Cerchi Idee?
+
+Il pulsante **Cerchi Idee?** costruisce una sequenza locale di piu oggetti usando il catalogo SQLite e le effemeridi offline. Ogni oggetto richiede un unico blocco continuo di almeno due ore; il piano riporta stato completo, parziale o nessuna soluzione, durata e oggetti saltati. Il buio astronomico (-18 gradi) e predefinito e il buio nautico (-12 gradi) e disponibile come alternativa. La ricerca e deterministica e limitata a 90 giorni; meteo, Luna, qualita del cielo e attrezzatura non vengono valutati.
 
 ## Dati e limiti
 

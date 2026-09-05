@@ -4,6 +4,8 @@ Questo documento descrive l'alfa con SkyChart. Il refactoring con cataloghi loca
 
 Applicazione Python per Windows, disponibile esclusivamente su localhost in un browser. Nessun servizio esterno, account, LLM, telemetria o esportazione NINA durante l'uso. SkyChart installato e avviato è un prerequisito.
 
+La funzione locale **Cerchi Idee?** propone piu bersagli DSO in una sessione con un blocco continuo minimo di due ore per oggetto. Usa solo catalogo SQLite ed effemeridi locali, privilegia nebulose di emissione/riflessione e oggetti beginner, limita la ricerca futura a 90 giorni e mostra buio astronomico e nautico. Meteo, Luna, qualita del cielo e attrezzatura non vengono stimati.
+
 ## Flusso
 
 1. Spiegare come abilitare il server SkyChart su 127.0.0.1:3292. Verificare una risposta reale prima di rendere disponibile la pianificazione. Connessione perduta e oggetto sconosciuto sono errori, non esiti astronomici negativi.

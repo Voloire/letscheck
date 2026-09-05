@@ -26,6 +26,8 @@ La versione v0.1.0 è un archivio di progettazione: non contiene un'applicazione
 
 La trascrizione è storica: dichiarazioni tecniche, disponibilità dei prodotti e prezzi devono essere verificati quando riutilizzati. In caso di evoluzioni della discussione, CONTEXT.md e il workflow descrivono l'orientamento più recente.
 
+AstroChecker include anche **Cerchi Idee?**, un planner locale multi-oggetto con blocchi continui di almeno due ore, priorita per nebulose di emissione/riflessione e oggetti beginner, inviluppi di buio astronomico e nautico e ricerca futura limitata a 90 giorni.
+
 ## Versionamento
 
 Repository previsto: `Voloire/letscheck`, privato. Prima versione: `v0.1.0`. Usare commit descrittivi e tag per i consolidamenti successivi, mantenendo esclusivamente l'identità Git già configurata dall'utente.

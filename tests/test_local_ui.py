@@ -287,7 +287,7 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
     service = UiService(tmp_path / "version-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
-        expect(page.locator(".eyebrow").first).to_contain_text("0.3.0-alpha.4")
+        expect(page.locator(".eyebrow").first).to_contain_text("0.3.0-alpha.5")
         assert not errors
         page.close()
 
@@ -453,6 +453,33 @@ def test_prioritized_suggestion_is_visible_and_states_90_day_limit(tmp_path, ui_
         expect(page.locator("#suggestion-label")).to_contain_text("data futura")
         expect(page.locator("#suggestion-time")).to_contain_text("07 set")
         expect(page.locator("#suggestions-card")).to_contain_text("90 giorni")
+        assert not errors
+        page.close()
+
+
+def test_ideas_button_does_not_require_a_single_target(tmp_path, ui_browser):
+    class IdeasUiService(UiService):
+        def ideas(self, payload):
+            return {
+                "status": "full",
+                "note": "Piano completo con blocchi continui di almeno due ore.",
+                "darkness_mode": "astronomical",
+                "blocks": [{
+                    "object": "Sh 2-31", "type": "HII",
+                    "start": "2026-09-05T23:00:00+02:00",
+                    "end": "2026-09-06T01:00:00+02:00",
+                    "duration_seconds": 7200,
+                }],
+            }
+
+    service = IdeasUiService(tmp_path / "ideas-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        page.locator("#object").fill("")
+        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
+        expect(page.locator("#ideas-card")).to_be_visible()
+        expect(page.locator("#ideas-list")).to_contain_text("Sh 2-31")
         assert not errors
         page.close()
 

@@ -21,7 +21,7 @@
         </svg>
         <div>
           <div class="brand-row">
-            <span class="eyebrow">ALFA LOCALE · 0.3.0-alpha.4</span>
+            <span class="eyebrow">ALFA LOCALE · 0.3.0-alpha.5</span>
             <span class="connection-pill" id="header-connection">
               <span class="status-dot" aria-hidden="true"></span>
               <span>Controllo cataloghi…</span>
@@ -181,6 +181,10 @@
                 <span class="button-label">Calcola visibilità</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
+              <button class="button button-secondary field-wide ideas-button" id="ideas" type="button">
+                <span class="button-label">Cerchi Idee?</span>
+                <span class="spinner" aria-hidden="true"></span>
+              </button>
             <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore; le proposte future cercano fino a 90 giorni.</p>
             </fieldset>
           </form>
@@ -255,6 +259,17 @@
                 <small id="suggestion-detail"></small>
               </div>
             </div>
+          </article>
+
+          <article class="suggestions-card ideas-card" id="ideas-card" hidden aria-labelledby="ideas-title">
+            <div class="article-heading">
+              <div>
+                <h3 id="ideas-title">Idee per la sessione</h3>
+                <p id="ideas-note"></p>
+              </div>
+              <span class="suggestion-limit" id="ideas-darkness">Buio astronomico</span>
+            </div>
+            <ol class="idea-list" id="ideas-list"></ol>
           </article>
 
           <article class="visual-card" aria-labelledby="timeline-title">

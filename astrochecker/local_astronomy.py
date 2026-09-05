@@ -227,12 +227,108 @@ def build_ephemeris(
     )
 
 
-def summarize_darkness(sun_altitudes):
-    """Describe astronomical darkness without inventing clipped-edge events."""
+def build_catalog_ephemerides(
+    coordinates,
+    start,
+    latitude,
+    longitude,
+    *,
+    horizon_seconds=DEFAULT_HORIZON_SECONDS,
+    knot_step_seconds=DEFAULT_KNOT_STEP_SECONDS,
+    output_step_seconds=300,
+):
+    """Build coarse local ephemerides for many targets in one Astropy pass."""
+    if not coordinates:
+        return []
+    if not isinstance(start, datetime) or start.tzinfo is None:
+        raise ValueError("L'inizio astronomico deve includere il fuso orario")
+    try:
+        ras = np.asarray([float(item[0]) for item in coordinates], dtype=float)
+        decs = np.asarray([float(item[1]) for item in coordinates], dtype=float)
+    except (TypeError, ValueError, IndexError) as exc:
+        raise ValueError("Le coordinate del catalogo non sono valide") from exc
+    if not np.all(np.isfinite(ras)) or not np.all(np.isfinite(decs)):
+        raise ValueError("Le coordinate del catalogo non sono finite")
+    if isinstance(horizon_seconds, bool) or not isinstance(horizon_seconds, int) or horizon_seconds <= 0:
+        raise ValueError("Il periodo astronomico deve essere espresso in secondi interi")
+    if isinstance(knot_step_seconds, bool) or not isinstance(knot_step_seconds, int) or knot_step_seconds <= 0:
+        raise ValueError("Il passo astronomico deve essere espresso in secondi interi")
+    if isinstance(output_step_seconds, bool) or not isinstance(output_step_seconds, int) or output_step_seconds <= 0:
+        raise ValueError("Il passo di uscita astronomico deve essere espresso in secondi interi")
+
+    table = _bundled_iers_table()
+    start_utc, uses_prediction, coverage_start, coverage_end = _time_metadata(
+        table, start, horizon_seconds
+    )
+    knot_offsets = np.arange(0, horizon_seconds + 1, knot_step_seconds, dtype=float)
+    if knot_offsets[-1] != horizon_seconds:
+        knot_offsets = np.append(knot_offsets, float(horizon_seconds))
+    offsets = np.arange(0, horizon_seconds + 1, output_step_seconds, dtype=float)
+    if offsets[-1] != horizon_seconds:
+        offsets = np.append(offsets, float(horizon_seconds))
+    try:
+        times = Time(start_utc, scale="utc") + TimeDelta(knot_offsets, format="sec")
+        location = EarthLocation.from_geodetic(
+            lon=float(longitude) * u.deg, lat=float(latitude) * u.deg, height=0 * u.m
+        )
+        targets = SkyCoord(ra=ras[:, None] * u.deg, dec=decs[:, None] * u.deg, frame="icrs")
+        frame = AltAz(obstime=times, location=location, pressure=0 * u.hPa)
+        with _ASTROPY_LOCK, warnings.catch_warnings(), iers.earth_orientation_table.set(table):
+            warnings.simplefilter("error", iers.IERSWarning)
+            horizontal = targets.transform_to(frame)
+            sun = get_sun(times).transform_to(frame)
+    except iers.IERSWarning as exc:
+        raise AstronomyDataError("Astropy ha segnalato un limite nei dati IERS locali") from exc
+    except (IndexError, TypeError, ValueError) as exc:
+        raise AstronomyDataError("Il calcolo astronomico locale non e riuscito") from exc
+
+    target_alt_knots = horizontal.alt.to_value(u.rad)
+    target_az_knots = horizontal.az.to_value(u.rad)
+    target_vectors = np.stack(
+        (
+            np.cos(target_alt_knots) * np.cos(target_az_knots),
+            np.cos(target_alt_knots) * np.sin(target_az_knots),
+            np.sin(target_alt_knots),
+        ),
+        axis=-1,
+    )
+    sun_vectors = _horizontal_vectors(sun)
+
+    def interpolate_rows(values):
+        return np.vstack([np.interp(offsets, knot_offsets, row) for row in values])
+
+    target_vectors = np.stack(
+        [interpolate_rows(target_vectors[:, :, component]) for component in range(3)], axis=-1
+    )
+    lengths = np.linalg.norm(target_vectors, axis=2)
+    if not np.all(np.isfinite(target_vectors)) or np.any(lengths <= 0):
+        raise AstronomyDataError("Le coordinate astronomiche calcolate non sono valide")
+    target_vectors /= lengths[:, :, None]
+    target_alt = np.degrees(np.arcsin(np.clip(target_vectors[:, :, 2], -1.0, 1.0)))
+    target_az = np.degrees(np.arctan2(target_vectors[:, :, 1], target_vectors[:, :, 0])) % 360.0
+    sun_vectors = _interpolate_vectors(knot_offsets, sun_vectors, offsets)
+    sun_alt, _ = _altitude_azimuth(sun_vectors)
+    grid = offsets.astype(int)
+    return [
+        LocalEphemeris(
+            target_alt=target_alt[index],
+            target_az=target_az[index],
+            sun_alt=sun_alt,
+            uses_prediction=uses_prediction,
+            iers_coverage_start=coverage_start,
+            iers_coverage_end_exclusive=coverage_end,
+            sample_offsets=grid,
+        )
+        for index in range(len(ras))
+    ]
+
+
+def summarize_darkness(sun_altitudes, limit=SUN_LIMIT_DEGREES):
+    """Describe a darkness envelope without inventing clipped-edge events."""
     values = np.asarray(sun_altitudes, dtype=float)
     if values.ndim != 1 or values.size == 0 or not np.all(np.isfinite(values)):
         raise ValueError("Le altezze del Sole devono essere una sequenza finita")
-    dark = values <= SUN_LIMIT_DEGREES
+    dark = values <= float(limit)
     horizon = len(dark) - 1
     intervals = []
     events = []

@@ -72,6 +72,12 @@ def test_messier_alias_normalization_resolves_to_ngc_6205(query):
     assert result["dec_deg"] == pytest.approx(36.46131, abs=0.00003)
 
 
+def test_catalog_exposes_angular_size_for_galaxy_profile_filtering():
+    target = Catalog().resolve("M 31")
+
+    assert target["major_axis_arcmin"] > 30
+
+
 def test_common_name_alias_resolves_and_is_searchable():
     catalog = Catalog()
 

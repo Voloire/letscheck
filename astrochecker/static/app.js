@@ -8,6 +8,7 @@ const form = document.querySelector("#planner-form");
 const fields = document.querySelector("#planner-fields");
 const verifyButton = document.querySelector("#verify-connection");
 const calculateButton = document.querySelector("#calculate");
+const ideasButton = document.querySelector("#ideas");
 const saveSiteButton = document.querySelector("#save-site");
 const detectLocationButton = document.querySelector("#detect-location");
 const connectionStatus = document.querySelector("#connection-status");
@@ -25,6 +26,10 @@ const objectSearchStatus = document.querySelector("#object-search-status");
 const siteStatus = document.querySelector("#site-status");
 const timezoneInput = document.querySelector("#timezone");
 const startInput = document.querySelector("#start");
+const ideasCard = document.querySelector("#ideas-card");
+const ideasList = document.querySelector("#ideas-list");
+const ideasNote = document.querySelector("#ideas-note");
+const ideasDarkness = document.querySelector("#ideas-darkness");
 
 let catalogReady = false;
 let siteLoaded = false;
@@ -277,9 +282,8 @@ function siteRules() {
   ];
 }
 
-function validateForm() {
-  return validateRules([
-    ["#object", (value) => value.trim().length > 0, "Inserisci la sigla dell’oggetto."],
+function validateForm({requireObject = true} = {}) {
+  const rules = [
     ["#latitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -90 && Number(value) <= 90, "La latitudine deve essere compresa tra −90° e 90°."],
     ["#longitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -180 && Number(value) <= 180, "La longitudine deve essere compresa tra −180° e 180°."],
     ["#start", (value) => value !== "", "Scegli una data e un’ora della postazione."],
@@ -289,7 +293,9 @@ function validateForm() {
     ["#max-alt", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 90, "L’altezza massima deve essere compresa tra 0° e 90°."],
     ["#az-start", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 360, "L’azimut iniziale deve essere compreso tra 0° e 360°."],
     ["#az-end", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 360, "L’azimut finale deve essere compreso tra 0° e 360°."],
-  ]);
+  ];
+  if (requireObject) rules.unshift(["#object", (value) => value.trim().length > 0, "Inserisci la sigla dell'oggetto."]);
+  return validateRules(rules);
 }
 
 function currentSitePayload() {
@@ -835,7 +841,42 @@ function renderSuggestions(data) {
   note.textContent = data.suggestion_note || "Proposta calcolata localmente.";
 }
 
+function renderIdeas(data) {
+  ideasCard.hidden = false;
+  ideasList.replaceChildren();
+  ideasNote.textContent = data.note || "Piano calcolato localmente.";
+  ideasDarkness.textContent = data.darkness_mode === "nautical" ? "Buio nautico" : "Buio astronomico";
+  const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+  if (!blocks.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty-intervals";
+    empty.textContent = data.note || "Nessun blocco continuo di almeno due ore disponibile.";
+    ideasList.append(empty);
+    return;
+  }
+  blocks.forEach((block, index) => {
+    const item = document.createElement("li");
+    const number = document.createElement("span");
+    number.className = "idea-index";
+    number.textContent = String(index + 1);
+    const detail = document.createElement("div");
+    const object = document.createElement("strong");
+    object.className = "idea-object";
+    object.textContent = `${block.object} - ${block.type}`;
+    const times = document.createElement("div");
+    times.className = "idea-detail";
+    times.textContent = `${formatInstant(block.start, 0, data.timezone)} - ${formatInstant(block.end, 0, data.timezone)}`;
+    detail.append(object, times);
+    const duration = document.createElement("span");
+    duration.className = "idea-duration";
+    duration.textContent = formatDuration(block.duration_seconds);
+    item.append(number, detail, duration);
+    ideasList.append(item);
+  });
+}
+
 function renderResult(data, payload) {
+  ideasCard.hidden = true;
   emptyResult.hidden = true;
   resultError.hidden = true;
   resultContent.hidden = false;
@@ -890,6 +931,42 @@ function renderResult(data, payload) {
   renderSuggestions(data);
   resultLive.textContent = `${data.object?.name || payload.object}: ${label}. Orari nel fuso ${data.timezone}.`;
 }
+
+async function requestIdeas() {
+  if (!catalogReady) {
+    setCatalogState({ready: false, message: "Catalogo locale non disponibile. Riprova il controllo.", version: "", catalogs: []});
+    verifyButton.focus();
+    return;
+  }
+  if (!validateForm({requireObject: false})) return;
+  calculationRunning = true;
+  updatePlannerAvailability();
+  setButtonLoading(ideasButton, true, "Cerco idee...");
+  emptyResult.hidden = true;
+  resultContent.hidden = false;
+  resultError.hidden = true;
+  resultLive.textContent = "Ricerca locale di una sequenza osservativa in corso.";
+  try {
+    const response = await fetch("/api/ideas", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify(currentPayload()),
+    });
+    const data = await readJson(response);
+    if (!response.ok) throw new Error(data.error || "Pianificazione delle idee non riuscita.");
+    renderIdeas(data);
+    resultLive.textContent = data.note || "Piano idee disponibile.";
+  } catch (error) {
+    showResultError(error instanceof Error ? error.message : "Pianificazione delle idee non riuscita.");
+    ideasCard.hidden = true;
+  } finally {
+    calculationRunning = false;
+    updatePlannerAvailability();
+    setButtonLoading(ideasButton, false, "");
+  }
+}
+
+ideasButton.addEventListener("click", requestIdeas);
 
 startInput.addEventListener("change", () => {
   window.setTimeout(() => {
