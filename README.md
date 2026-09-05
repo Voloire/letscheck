@@ -1,5 +1,7 @@
 # letscheck
 
+**[AstroChecker — pagina pubblica del progetto](https://voloire.github.io/letscheck/)** · [Release v0.3.0-alpha.2](https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2)
+
 Archivio privato del contesto e delle decisioni per sperimentare uno sviluppo unattended di piccoli progetti, con costi sostenibili e accettazione basata sulle funzionalità.
 
 ## ATDD in evidenza

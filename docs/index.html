@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AstroChecker: pianifica una sessione fotografica dal tuo balcone, con dati locali e criteri trasparenti.">
+  <title>AstroChecker · Pianifica il cielo dal tuo balcone</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #edf4ff;
+      --muted: #aab8ce;
+      --faint: #72819a;
+      --bg: #08111f;
+      --panel: rgba(17, 31, 52, .78);
+      --line: rgba(152, 181, 221, .18);
+      --cyan: #63e4d2;
+      --amber: #ffc979;
+      --violet: #a99cff;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(76, 119, 202, .27), transparent 34rem),
+        radial-gradient(circle at 92% 12%, rgba(117, 74, 185, .18), transparent 30rem),
+        var(--bg);
+      font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--cyan); }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--amber); outline-offset: 4px; }
+    .shell { width: min(calc(100% - 40px), var(--max)); margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; }
+    .brand { color: var(--ink); text-decoration: none; font-weight: 750; letter-spacing: .04em; }
+    .brand span { color: var(--cyan); }
+    .toplinks { display: flex; gap: 22px; font-size: .92rem; }
+    .hero { padding: 76px 0 96px; position: relative; }
+    .eyebrow { color: var(--cyan); font-size: .8rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+    h1, h2, h3 { line-height: 1.1; margin: 0; letter-spacing: -.025em; }
+    h1 { max-width: 820px; font-size: clamp(2.8rem, 8vw, 6.2rem); margin-top: 18px; }
+    h1 em { color: var(--amber); font-style: normal; }
+    .lead { color: var(--muted); font-size: clamp(1.1rem, 2vw, 1.35rem); max-width: 680px; margin: 26px 0 34px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .button { border: 1px solid var(--line); border-radius: 999px; color: var(--ink); display: inline-flex; align-items: center; gap: 9px; padding: 12px 19px; text-decoration: none; font-weight: 700; }
+    .button.primary { color: #06131e; background: var(--cyan); border-color: var(--cyan); }
+    .button:hover { transform: translateY(-1px); }
+    .hero-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 36px; align-items: end; }
+    .sky-card { min-height: 250px; border: 1px solid var(--line); border-radius: 26px; background: linear-gradient(145deg, rgba(25, 53, 87, .9), rgba(14, 24, 43, .78)); padding: 24px; position: relative; overflow: hidden; }
+    .sky-card:before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.75) 0 1px, transparent 1.5px); background-size: 42px 39px; opacity: .4; }
+    .orbit { position: absolute; width: 230px; height: 230px; border: 1px solid rgba(99, 228, 210, .42); border-radius: 50%; right: 28px; top: 13px; }
+    .orbit:after { content: ""; position: absolute; width: 13px; height: 13px; border-radius: 50%; background: var(--amber); top: 15px; left: 36px; box-shadow: 0 0 25px var(--amber); }
+    .sky-copy { position: relative; z-index: 1; margin-top: 150px; }
+    .sky-copy strong { display: block; font-size: 1.4rem; }
+    .sky-copy span { color: var(--muted); font-size: .9rem; }
+    section { padding: 74px 0; border-top: 1px solid var(--line); }
+    .section-heading { display: flex; justify-content: space-between; gap: 30px; align-items: end; margin-bottom: 30px; }
+    h2 { font-size: clamp(2rem, 4vw, 3.2rem); }
+    .section-intro { max-width: 470px; color: var(--muted); margin: 0; }
+    .problem { display: grid; grid-template-columns: .9fr 1.1fr; gap: 52px; }
+    .problem p { color: var(--muted); font-size: 1.15rem; margin: 0; }
+    .quote { border-left: 3px solid var(--amber); padding-left: 22px; color: var(--ink); font-size: 1.35rem; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 22px; }
+    .card .number { color: var(--cyan); font-weight: 800; font-size: .83rem; letter-spacing: .14em; }
+    .card h3 { margin-top: 11px; font-size: 1.25rem; }
+    .card p { color: var(--muted); margin: 10px 0 0; }
+    .requirements { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .requirement { display: flex; gap: 15px; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: rgba(12, 24, 42, .62); }
+    .check { color: var(--cyan); font-size: 1.2rem; font-weight: 900; }
+    .requirement strong { display: block; }
+    .requirement span:last-child { color: var(--muted); }
+    .flow { counter-reset: step; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .flow .card { position: relative; padding-top: 54px; }
+    .flow .card:before { counter-increment: step; content: counter(step, decimal-leading-zero); position: absolute; top: 20px; left: 22px; color: var(--amber); font-weight: 850; }
+    .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .result { padding: 22px; border-radius: 18px; border: 1px solid var(--line); }
+    .result h3 { margin-bottom: 8px; }
+    .result p { color: var(--muted); margin: 0; }
+    .result.full { border-color: rgba(99, 228, 210, .48); }
+    .result.partial { border-color: rgba(255, 201, 121, .48); }
+    .result.none { border-color: rgba(169, 156, 255, .48); }
+    .data-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    .catalogs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; color: var(--muted); background: rgba(16, 31, 53, .75); }
+    .note { border-radius: 18px; padding: 22px; background: linear-gradient(140deg, rgba(84, 70, 160, .26), rgba(20, 42, 65, .52)); border: 1px solid rgba(169, 156, 255, .27); }
+    .note p { color: var(--muted); margin: 10px 0 0; }
+    .limits { columns: 2; column-gap: 50px; color: var(--muted); }
+    .limits li { break-inside: avoid; margin-bottom: 12px; }
+    .launch { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+    pre { overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 16px 0 0; padding: 17px; border-radius: 12px; color: #d6e9ff; background: #050b14; border: 1px solid var(--line); }
+    .hero-grid > *, .problem > *, .data-grid > *, .launch > * { min-width: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    footer { border-top: 1px solid var(--line); padding: 30px 0 42px; color: var(--faint); font-size: .9rem; }
+    footer .shell { display: flex; justify-content: space-between; gap: 20px; }
+    @media (max-width: 800px) {
+      .shell { width: min(calc(100% - 28px), var(--max)); }
+      .topbar { align-items: flex-start; }
+      .toplinks { gap: 12px; flex-direction: column; align-items: flex-end; }
+      .hero { padding: 50px 0 68px; }
+      .hero-grid, .problem, .data-grid, .launch { grid-template-columns: 1fr; }
+      .sky-card { min-height: 205px; }
+      .cards, .results, .flow { grid-template-columns: 1fr; }
+      .requirements { grid-template-columns: 1fr; }
+      .section-heading { display: block; }
+      .section-intro { margin-top: 14px; }
+      .limits { columns: 1; }
+      footer .shell { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <a class="brand" href="#top">ASTRO<span>CHECKER</span></a>
+    <nav class="toplinks" aria-label="Navigazione principale">
+      <a href="#requisiti">Requisiti</a>
+      <a href="#limiti">Limiti</a>
+      <a href="https://github.com/Voloire/letscheck">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">v0.3.0-alpha.2 · open source in evoluzione</div>
+          <h1>Il cielo visibile dal tuo <em>balcone.</em></h1>
+          <p class="lead">AstroChecker aiuta gli astrofotografi a capire se un oggetto resterà nella finestra di cielo accessibile, al buio, per tutta la durata della ripresa.</p>
+          <div class="actions">
+            <a class="button primary" href="#come-funziona">Scopri come funziona <span aria-hidden="true">↓</span></a>
+            <a class="button" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2">Release alpha.2 ↗</a>
+          </div>
+        </div>
+        <div class="sky-card" aria-label="Illustrazione di una traiettoria nel cielo">
+          <div class="orbit" aria-hidden="true"></div>
+          <div class="sky-copy"><strong>Una domanda concreta</strong><span>“Posso riprendere questo oggetto da qui, per quanto tempo?”</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="problema"><div class="shell problem">
+      <div><div class="eyebrow">Il problema</div><h2>Non tutto il cielo è a disposizione.</h2></div>
+      <div><p class="quote">Un balcone, un tetto o una parete possono trasformare una notte limpida in una finestra molto precisa.</p><p style="margin-top:20px">AstroChecker rende espliciti quei vincoli: altezza, direzione, buio e tempo continuo. Così la pianificazione parte dal cielo che puoi davvero vedere.</p></div>
+    </div></section>
+
+    <section id="requisiti"><div class="shell">
+      <div class="section-heading"><div><div class="eyebrow">Requisiti funzionali</div><h2>Piccolo strumento, risposte nette.</h2></div><p class="section-intro">La release segue un contratto semplice e deterministico. Inserisci i dati, lascia che il motore calcoli, leggi una risposta verificabile.</p></div>
+      <div class="requirements">
+        <div class="requirement"><span class="check">✓</span><span><strong>Cercare un oggetto</strong><span>Sigle M, NGC, IC, Sh2, vdB e LDN, più nomi comuni verificati.</span></span></div>
+        <div class="requirement"><span class="check">✓</span><span><strong>Descrivere la postazione</strong><span>Latitudine, longitudine, fuso IANA e limiti dell’orizzonte del balcone.</span></span></div>
+        <div class="requirement"><span class="check">✓</span><span><strong>Chiedere una durata</strong><span>Una ripresa continua, espressa in minuti, a partire da un’ora locale.</span></span></div>
+        <div class="requirement"><span class="check">✓</span><span><strong>Ricevere una decisione</strong><span>Completa, parziale o non visibile, con la prima finestra utile quando esiste.</span></span></div>
+      </div>
+    </div></section>
+
+    <section id="come-funziona"><div class="shell">
+      <div class="section-heading"><div><div class="eyebrow">Come funziona</div><h2>Quattro passi, senza magia nera.</h2></div><p class="section-intro">Tutto resta locale: il catalogo e le effemeridi sono inclusi nella macchina che esegue AstroChecker.</p></div>
+      <div class="flow">
+        <article class="card"><h3>Scegli il bersaglio</h3><p>Digita una sigla o un alias e seleziona il record del catalogo.</p></article>
+        <article class="card"><h3>Imposta il balcone</h3><p>Indica coordinate, altezza minima e massima e settore di azimut.</p></article>
+        <article class="card"><h3>Definisci la ripresa</h3><p>Scegli data, ora, fuso della postazione e durata continua.</p></article>
+        <article class="card"><h3>Leggi la finestra</h3><p>Il motore scandisce le prossime 24 ore e mostra il risultato.</p></article>
+      </div>
+    </div></section>
+
+    <section id="risultati"><div class="shell">
+      <div class="section-heading"><div><div class="eyebrow">Il risultato</div><h2>Non somma pezzi di notte.</h2></div><p class="section-intro">Una durata continua deve stare dentro un unico intervallo che rispetta insieme balcone e buio astronomico.</p></div>
+      <div class="results">
+        <article class="result full"><h3>Visibile per tutta la durata</h3><p>La ripresa può iniziare all’ora scelta e resta dentro i vincoli.</p></article>
+        <article class="result partial"><h3>Visibile solo in parte</h3><p>Esiste tempo utile, ma nessun intervallo continuo copre l’intera durata.</p></article>
+        <article class="result none"><h3>Non visibile nel periodo</h3><p>Non c’è una finestra sufficiente nelle 24 ore analizzate.</p></article>
+      </div>
+    </div></section>
+
+    <section id="dati"><div class="shell data-grid">
+      <div><div class="eyebrow">Dati locali</div><h2>Fonti leggibili, calcolo offline.</h2><p class="section-intro" style="margin-top:18px">Il database SQLite è incluso e ricostruibile dagli snapshot. Astropy calcola localmente posizione apparente del bersaglio e altezza del Sole, senza richieste durante l’uso.</p><div class="catalogs"><span class="pill">M · 110</span><span class="pill">NGC · 8.440</span><span class="pill">IC · 5.594</span><span class="pill">Sh2 · 313</span><span class="pill">vdB · 158</span><span class="pill">LDN · 1.787</span></div></div>
+      <aside class="note"><strong>Trasparenza prima di tutto</strong><p>Le fonti, i sistemi di riferimento, le eccezioni e le licenze sono documentati nel repository. OpenNGC è CC-BY-SA-4.0; per i cataloghi CDS la licenza specifica va chiarita prima di una redistribuzione esterna.</p><p><a href="https://github.com/Voloire/letscheck/blob/main/FONTI-DATI.md">Leggi le fonti e le licenze ↗</a></p></aside>
+    </div></section>
+
+    <section id="privacy"><div class="shell cards">
+      <article class="card"><div class="eyebrow">Privacy</div><h3>La postazione resta tua</h3><p>Le coordinate possono essere inserite manualmente o proposte dal browser. L’app chiede conferma e salva un solo profilo locale.</p></article>
+      <article class="card"><div class="eyebrow">Determinismo</div><h3>Nessun LLM nel calcolo</h3><p>Le decisioni sono regole e numeri: catalogo, coordinate, Sole, altezza, azimut e durata.</p></article>
+      <article class="card"><div class="eyebrow">Verifica</div><h3>ATDD in evidenza</h3><p>La release è protetta da test di accettazione, backend e browser. Il gate attuale conta 168 test passati.</p></article>
+    </div></section>
+
+    <section id="limiti"><div class="shell">
+      <div class="section-heading"><div><div class="eyebrow">Confini dichiarati</div><h2>Quello che ancora non promette.</h2></div><p class="section-intro">Una buona risposta contiene anche il suo perimetro. Questi punti restano fuori dalla release.</p></div>
+      <ul class="limits"><li>La ricerca copre i sei cataloghi DSO inclusi, non un catalogo stellare generale: Arturo non è disponibile.</li><li>Il calcolo usa altezze geometriche, senza rifrazione atmosferica.</li><li>Le 24 ore sono un orizzonte di ricerca, non una previsione per tutti i giorni futuri.</li><li>Un intervallo che tocca il bordo viene segnalato come possibile prosecuzione, senza fondere intervalli separati.</li><li>Non valuta meteo, Luna, qualità del cielo, campo fotografico o attrezzatura.</li><li>Export verso NINA, EQMOD, animazioni e plate solving sono nella lista dei desideri.</li></ul>
+    </div></section>
+
+    <section id="avvio"><div class="shell launch">
+      <div><div class="eyebrow">Provalo sul tuo computer</div><h2>Parte su localhost.</h2><p class="section-intro" style="margin-top:18px">Python e le dipendenze sono l’unico requisito operativo. Il server sceglie una porta libera e apre l’interfaccia nel browser.</p><pre><code>git clone https://github.com/Voloire/letscheck.git
+cd letscheck
+python -m venv .venv
+pip install -r requirements.txt
+python run.py</code></pre></div>
+      <div class="card"><div class="eyebrow">Release corrente</div><h3>AstroChecker v0.3.0-alpha.2</h3><p>Cataloghi locali, alias comuni, indicazione dei bordi temporali e selettore data/ora più fluido.</p><p style="margin-top:18px"><a class="button primary" href="https://github.com/Voloire/letscheck/releases/tag/v0.3.0-alpha.2">Apri la release ↗</a></p><p style="margin-top:22px"><a href="https://github.com/Voloire/letscheck">Codice sorgente su GitHub ↗</a></p></div>
+    </div></section>
+  </main>
+
+  <footer><div class="shell"><span>AstroChecker · progetto sperimentale per astrofotografi</span><span><a href="https://github.com/Voloire/letscheck">Repository</a> · <a href="https://github.com/Voloire/letscheck/releases">Release</a></span></div></footer>
+</body>
+</html>
