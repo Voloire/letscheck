@@ -145,7 +145,7 @@ class UiService(AstroCheckerService):
         if self.site_gate is not None:
             self.site_gate.wait(timeout=5)
         if self.fail_site_load:
-            raise ApiError("Postazione saved non leggibile", "site", 500)
+            raise ApiError("Saved site could not be read", "site", 500)
         return super().get_site()
 
     def save_site(self, payload):
@@ -505,7 +505,7 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         assert page.locator("#night-plan").evaluate("element => element.parentElement.classList.contains('results-column')")
         expect(page.locator("#result-content")).to_be_hidden()
         expect(page.locator("#results-title")).to_have_text("Night plan")
-        expect(page.get_by_role("heading", name="Sequenza completa", exact=True)).to_be_visible()
+        expect(page.get_by_role("heading", name="Complete sequence", exact=True)).to_be_visible()
         expect(page.locator("#night-period")).to_contain_text("21:00")
         expect(page.locator("#night-period")).to_contain_text("05:00")
         expect(page.locator("#night-coverage")).to_have_text("100%")
@@ -556,7 +556,7 @@ def test_night_plan_shows_gaps_and_short_fill_without_hiding_them(tmp_path, ui_b
     class PartialIdeasUiService(UiService):
         def ideas(self, payload):
             return {
-                "status": "partial", "note": "Piano parziale.", "darkness_mode": "astronomical",
+                "status": "partial", "note": "Partial plan.", "darkness_mode": "astronomical",
                 "timezone": "Europe/Rome", "night_start": "2026-09-05T21:00:00+02:00",
                 "night_end": "2026-09-06T01:00:00+02:00", "night_duration_seconds": 14400,
                 "covered_duration_seconds": 10800, "coverage_percent": 75, "preferred_block_seconds": 7200,
@@ -564,7 +564,7 @@ def test_night_plan_shows_gaps_and_short_fill_without_hiding_them(tmp_path, ui_b
                     "target": {"name": "Edge", "type": "HII", "aliases": [], "ra_deg": 1, "dec_deg": 2},
                     "start": "2026-09-05T21:00:00+02:00", "end": "2026-09-05T22:00:00+02:00",
                     "offset_start": 32400, "offset_end": 36000, "duration_seconds": 3600,
-                    "reason": "Riempimento utile.", "short_fill": True,
+                    "reason": "Useful fill.", "short_fill": True,
                 }],
                 "gaps": [{
                     "start": "2026-09-05T22:00:00+02:00", "end": "2026-09-05T23:00:00+02:00",
