@@ -703,7 +703,7 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
 
         submit_object(page, "Polar Day")
         expect(page.locator("#darkness-summary")).to_have_text("No astronomical darkness in the 24-hour window")
-        nina = page.get_by_role("button", name="Export to NINA", exact=True)
+        nina = page.get_by_role("button", name="Export TARGET to NINA", exact=True)
         expect(nina).to_be_visible()
         expect(nina).to_be_disabled()
         expect(page.get_by_text("Coming soon", exact=True)).to_be_visible()
