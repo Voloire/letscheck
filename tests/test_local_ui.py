@@ -310,7 +310,7 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
         page, errors = open_page(ui_browser, url)
         expect(page.locator("#header-connection")).to_contain_text("Catalogs unavailable")
         expect(page.get_by_label("Sky object", exact=True)).to_be_disabled()
-        expect(page.locator("#site-status")).to_contain_text("non leggibile")
+        expect(page.locator("#site-status")).to_contain_text("could not be read")
         navigation_count = page.evaluate("performance.getEntriesByType('navigation').length")
         page.get_by_role("button", name="Check again", exact=True).click()
         wait_until_ready(page)
@@ -349,7 +349,7 @@ def test_object_search_requires_selection_and_exact_submit_canonicalizes(tmp_pat
         expect(page.locator("#object-search-status")).to_contain_text("M 13")
         assert service.check_payloads[-1]["object"] == "M 13"
 
-        field.fill("does not exist")
+        field.fill("inesistente")
         expect(page.locator("#object-search-status")).to_contain_text("No objects found")
         field.press("Escape")
         page.get_by_role("button", name="Check visibility", exact=True).click()
