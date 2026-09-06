@@ -95,6 +95,7 @@ class UiService(AstroCheckerService):
         )
         self.status_calls = 0
         self.check_payloads = []
+        self.export_payloads = []
         self.object_gates = {}
         self.object_started = {}
         self.site_gate = None
@@ -217,6 +218,15 @@ class UiService(AstroCheckerService):
             return result
         timezone = str(payload.get("timezone", "Europe/Rome"))
         return result_fixture(timezone=timezone)
+
+    def export_nina_sequence(self, payload):
+        self.export_payloads.append(copy.deepcopy(payload))
+        return {
+            "path": "/home/test/Downloads/AstroChecker_Suggestion.xml",
+            "filename": "AstroChecker_Suggestion.xml",
+            "exposure_seconds": 300,
+            "exposure_count": 12,
+        }
 
 
 @contextmanager
@@ -529,7 +539,7 @@ def test_ideas_button_explains_that_date_drives_the_complete_night(tmp_path, ui_
         page.close()
 
 
-def test_priority_suggestion_acknowledges_selection_without_network_action(tmp_path, ui_browser):
+def test_priority_suggestion_exports_a_nina_legacy_sequence(tmp_path, ui_browser):
     service = UiService(tmp_path / "suggestion-ack-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
@@ -540,14 +550,14 @@ def test_priority_suggestion_acknowledges_selection_without_network_action(tmp_p
         suggestion = page.locator("#suggestion-item")
         expect(page.locator("#suggestion-label")).to_contain_text("future date")
         expect(suggestion).to_have_attribute("aria-pressed", "false")
-        calls_before = len(requests)
-
         suggestion.press("Enter")
 
         expect(suggestion).to_have_attribute("aria-pressed", "true")
         expect(suggestion).to_have_class(re.compile(r"\bselected\b"))
-        expect(page.locator("#result-live")).to_have_text("Suggestion selected")
-        assert len(requests) == calls_before
+        expect(page.locator("#result-live")).to_contain_text("NINA sequence saved")
+        assert any(url.endswith("/api/nina/legacy-sequence") for url in requests)
+        assert service.export_payloads[0]["object"]["name"] == "Suggestion"
+        assert service.export_payloads[0]["duration_seconds"] == 3600
         assert not errors
         page.close()
 

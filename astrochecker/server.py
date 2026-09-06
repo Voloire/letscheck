@@ -343,7 +343,7 @@ def make_handler(service):
             if self._reject_nonlocal():
                 return
             parsed = urlparse(self.path)
-            if parsed.path not in ("/api/check", "/api/ideas", "/api/site"):
+            if parsed.path not in ("/api/check", "/api/ideas", "/api/site", "/api/nina/legacy-sequence"):
                 self._early_json(
                     404,
                     {"error": "Resource not found", "code": "validation"},
@@ -361,6 +361,11 @@ def make_handler(service):
                 self._service_json(
                     lambda: service.ideas(payload),
                     generic_message="Idea planning failed",
+                )
+            elif parsed.path == "/api/nina/legacy-sequence":
+                self._service_json(
+                    lambda: service.export_nina_sequence(payload),
+                    generic_message="NINA sequence export failed",
                 )
             else:
                 self._service_json(

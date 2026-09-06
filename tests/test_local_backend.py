@@ -433,6 +433,9 @@ class FakeLocalService:
     def check(self, payload):
         return {"status": "full", "object": {"name": payload["object"]}}
 
+    def export_nina_sequence(self, payload):
+        return {"path": "C:/Users/test/Downloads/AstroChecker_M-13.xml", "exposure_seconds": 300, "exposure_count": 24}
+
 
 @pytest.fixture
 def local_api_server():
@@ -476,6 +479,19 @@ def test_local_catalog_and_site_routes_return_json(local_api_server):
     status, saved = api_request(local_api_server, "POST", "/api/site", SITE)
     assert status == 200
     assert saved == {"site": SITE}
+
+
+def test_nina_legacy_sequence_route_returns_saved_file_metadata(local_api_server):
+    status, payload = api_request(
+        local_api_server,
+        "POST",
+        "/api/nina/legacy-sequence",
+        {"object": {"name": "M 13", "ra": 250.4, "dec": 36.4}, "duration_seconds": 7200},
+    )
+
+    assert status == 200
+    assert payload["path"].endswith("AstroChecker_M-13.xml")
+    assert payload["exposure_count"] == 24
 
 
 def test_objects_route_maps_catalog_failure_to_503(local_api_server):

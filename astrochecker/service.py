@@ -21,6 +21,7 @@ from .local_astronomy import (
     build_catalog_ephemerides,
     summarize_darkness,
 )
+from .nina import NinaSequenceError, export_legacy_sequence
 from .planner import (
     MAX_FUTURE_SEARCH_DAYS,
     choose_suggestion,
@@ -98,6 +99,17 @@ class AstroCheckerService:
             return {"objects": self.catalog.search(query, limit=10)}
         except CatalogError as exc:
             raise ApiError(str(exc), "catalog", 503) from exc
+
+    def export_nina_sequence(self, payload):
+        """Persist a native NINA Legacy/Simple Sequencer file locally."""
+        if not isinstance(payload, dict):
+            raise ValueError("JSON body must be an object")
+        target = payload.get("object")
+        duration_seconds = payload.get("duration_seconds")
+        try:
+            return export_legacy_sequence(target, duration_seconds=duration_seconds)
+        except NinaSequenceError as exc:
+            raise ApiError(str(exc), "validation", 400) from exc
 
     def _resolve(self, query):
         try:

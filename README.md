@@ -30,6 +30,13 @@ python3 -m venv .venv
 
 The terminal prints `http://127.0.0.1:<port>` if the browser does not open automatically. Stop the server with `Ctrl+C`.
 
+When a result offers an alternative observing window, select the suggestion to
+save a native NINA `CaptureSequenceList` XML file for the Legacy/Simple
+Sequencer in the current user's `Downloads` folder. It uses 300-second LIGHT
+exposures and calculates the number of complete exposures that fit the proposed
+window; other settings remain at NINA defaults. The observing window is not
+encoded in the sequence and must be applied manually in NINA.
+
 For a fully local workflow, enter your site coordinates and time zone manually. Optional browser geolocation may use your operating system or browser location services.
 
 ## Tests and contributions
