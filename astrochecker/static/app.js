@@ -521,9 +521,9 @@ function showLocationProposal(position) {
     longitude: Number(position.coords.longitude),
     accuracy: Number(position.coords.accuracy),
   };
-  field("#proposal-latitude").textContent = `Latitudine ${proposedLocation.latitude.toFixed(4)}°`;
-  field("#proposal-longitude").textContent = `Longitudine ${proposedLocation.longitude.toFixed(4)}°`;
-  field("#proposal-accuracy").textContent = `Accuratezza ± ${Math.round(proposedLocation.accuracy)} m`;
+  field("#proposal-latitude").textContent = `Latitude ${proposedLocation.latitude.toFixed(4)}°`;
+  field("#proposal-longitude").textContent = `Longitude ${proposedLocation.longitude.toFixed(4)}°`;
+  field("#proposal-accuracy").textContent = `Accuracy ± ${Math.round(proposedLocation.accuracy)} m`;
   field("#location-proposal").hidden = false;
   setSiteStatus("Location found. Confirm to use it.");
 }
