@@ -154,7 +154,7 @@ def test_selected_object_parser_does_not_turn_failed_lookup_into_coordinates():
 
 class FakeService:
     def status(self):
-        return {"connected": True, "message": "SkyChart collegato", "port": 3292}
+        return {"connected": True, "message": "SkyChart connected", "port": 3292}
 
     def check(self, payload):
         return {"status": "full", "object": {"name": payload["object"]}}
@@ -280,7 +280,7 @@ def request(server, method, path, body=None, headers=None):
 def test_status_endpoint_queries_service_without_cors_wildcard(running_server):
     status, payload, cors = request(running_server, "GET", "/api/status")
     assert status == 200
-    assert payload == {"connected": True, "message": "SkyChart collegato", "port": 3292}
+    assert payload == {"connected": True, "message": "SkyChart connected", "port": 3292}
     assert cors is None
 
 

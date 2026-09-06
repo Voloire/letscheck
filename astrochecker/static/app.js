@@ -903,7 +903,7 @@ function renderNightPlan(data) {
     if (block.short_fill) {
       const badge = document.createElement("span");
       badge.className = "short-fill-badge";
-      badge.textContent = "Blocco breve";
+      badge.textContent = "Short block";
       detail.append(badge);
     }
     item.append(number, detail);
