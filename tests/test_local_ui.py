@@ -216,6 +216,20 @@ class UiService(AstroCheckerService):
             result["suggestion_note"] = "Prima future date entro 90 days."
             result["suggestion_search_days"] = 90
             return result
+        if normalized == "ADJUST":
+            result = result_fixture(object_name="Adjust")
+            result["status"] = "partial"
+            result["first_window"] = None
+            result["suggestions"] = [{
+                "tier": "adjust",
+                "start": "2026-09-05T23:40:00+02:00",
+                "end": "2026-09-06T00:10:00+02:00",
+                "duration_seconds": 1800,
+                "requested_duration_seconds": 1800,
+                "available_duration_seconds": 7200,
+            }]
+            result["suggestion_note"] = "Move the time to the first useful window."
+            return result
         timezone = str(payload.get("timezone", "Europe/Rome"))
         return result_fixture(timezone=timezone)
 
@@ -558,6 +572,19 @@ def test_priority_suggestion_exports_a_nina_legacy_sequence(tmp_path, ui_browser
         assert any(url.endswith("/api/nina/legacy-sequence") for url in requests)
         assert service.export_payloads[0]["object"]["name"] == "Suggestion"
         assert service.export_payloads[0]["duration_seconds"] == 3600
+        assert not errors
+        page.close()
+
+
+def test_adjust_suggestion_is_overlaid_on_the_green_timeline(tmp_path, ui_browser):
+    service = UiService(tmp_path / "suggestion-overlay-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        submit_object(page, "Adjust")
+        expect(page.locator("#timeline-suggestion")).to_be_visible()
+        expect(page.locator("#suggestion-detail")).to_contain_text("up to 2 h")
+        assert page.locator("#timeline-suggestion").evaluate("element => parseFloat(element.style.left) > 0")
         assert not errors
         page.close()
 

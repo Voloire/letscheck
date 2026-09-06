@@ -685,6 +685,22 @@ function renderTimeline(data) {
   const requested = field("#timeline-request");
   requested.style.width = `${Math.min(100, Number(data.duration_seconds) / horizon * 100)}%`;
   requested.title = "Requested period";
+  const suggestionMarker = field("#timeline-suggestion");
+  suggestionMarker.hidden = true;
+  const suggestion = Array.isArray(data.suggestions) ? data.suggestions[0] : null;
+  if (suggestion && suggestion.tier !== "future") {
+    const startOffset = (Date.parse(suggestion.start) - Date.parse(data.start)) / 1000;
+    const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
+    const endOffset = startOffset + availableDuration;
+    const left = Math.max(0, Math.min(horizon, startOffset));
+    const right = Math.max(left, Math.min(horizon, endOffset));
+    if (right > left) {
+      suggestionMarker.style.left = `${left / horizon * 100}%`;
+      suggestionMarker.style.width = `${(right - left) / horizon * 100}%`;
+      suggestionMarker.title = `Suggested window (up to ${formatDuration(availableDuration)}): ${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.start, availableDuration, data.timezone)}`;
+      suggestionMarker.hidden = false;
+    }
+  }
   const axis = field("#timeline-axis");
   axis.replaceChildren();
   [0, .25, .5, .75, 1].forEach((part) => {
@@ -695,7 +711,7 @@ function renderTimeline(data) {
   field("#timeline-date").textContent = `${formatInstant(data.start, 0, data.timezone, false)} → ${formatInstant(data.start, horizon, data.timezone, false)} · ${data.timezone}`;
   field("#timeline").setAttribute(
     "aria-label",
-    `${(data.intervals || []).length} visible intervals in 24 hours. Requested period: ${formatDuration(data.duration_seconds)}. Time zone ${data.timezone}.`
+    `${(data.intervals || []).length} visible intervals in 24 hours. Requested period: ${formatDuration(data.duration_seconds)}. ${suggestion?.tier === "future" ? "Suggested window is on a future date and is listed above." : suggestion ? "Suggested window is highlighted." : ""} Time zone ${data.timezone}.`
   );
 }
 
@@ -857,6 +873,10 @@ function renderSuggestions(data) {
   detail.textContent = suggestion.tier === "widest"
     ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
     : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`;
+  const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
+  if (availableDuration > Number(suggestion.duration_seconds)) {
+    detail.textContent += ` This window supports up to ${formatDuration(availableDuration)}.`;
+  }
   detail.textContent += " Click to save a NINA Legacy sequence.";
   note.textContent = data.suggestion_note || "Suggestion calculated locally.";
 }
