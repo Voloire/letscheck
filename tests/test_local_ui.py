@@ -512,7 +512,7 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         expect(page.locator("#night-chain")).to_have_text("X → Y → Z")
         expect(page.locator("#night-blocks li")).to_have_count(3)
         expect(page.locator("#night-timeline .night-segment")).to_have_count(3)
-        expect(page.get_by_role("button", name="Export TARGET to NINA", exact=True)).to_be_disabled()
+        expect(page.get_by_role("button", name="Export to NINA", exact=True)).to_be_disabled()
         assert not errors
         page.close()
 
@@ -703,7 +703,7 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
 
         submit_object(page, "Polar Day")
         expect(page.locator("#darkness-summary")).to_have_text("No astronomical darkness in the 24-hour window")
-        nina = page.get_by_role("button", name="Export TARGET to NINA", exact=True)
+        nina = page.get_by_role("button", name="Export to NINA", exact=True)
         expect(nina).to_be_visible()
         expect(nina).to_be_disabled()
         expect(page.get_by_text("Coming soon", exact=True)).to_be_visible()
