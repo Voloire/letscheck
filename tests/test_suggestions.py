@@ -161,3 +161,16 @@ def test_choose_suggestions_intersects_candidates_with_astronomical_darkness():
     assert suggestions
     assert all(item["start"] >= datetime(2026, 9, 5, 14, 0) for item in suggestions)
     assert all(item["duration_seconds"] == 3600 for item in suggestions)
+
+
+def test_choose_suggestions_does_not_present_the_same_window_twice():
+    suggestions = choose_suggestions(
+        start=datetime(2026, 9, 5, 22, 0),
+        duration_seconds=3600,
+        current_intervals=[{"start": 1800, "end": 9000}],
+        future_windows=[],
+    )
+
+    assert len(suggestions) == 1
+    assert suggestions[0]["tier"] == "adjust"
+    assert suggestions[0]["available_duration_seconds"] == 7200

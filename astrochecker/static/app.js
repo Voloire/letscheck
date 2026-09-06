@@ -893,15 +893,17 @@ function renderSuggestions(data) {
     const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
     const duration = document.createElement("span");
     duration.className = "suggestion-duration";
-    duration.textContent = `Continuous window: ${formatDuration(availableDuration)}`;
+    duration.textContent = `Available continuous window: ${formatDuration(availableDuration)}`;
     const time = document.createElement("span");
     time.className = "suggestion-time";
-    time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
+    time.textContent = `Suggested block: ${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)} (${formatDuration(suggestion.duration_seconds)})`;
     const detail = document.createElement("small");
     detail.textContent = `${suggestion.reason || "Valid observing window."} ` + (suggestion.tier === "widest"
-      ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
-      : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`);
-    if (availableDuration > Number(suggestion.duration_seconds)) detail.textContent += ` This window supports up to ${formatDuration(availableDuration)}.`;
+      ? `The full available window is ${formatDuration(availableDuration)}.`
+      : `The requested block is ${formatDuration(suggestion.duration_seconds)}.`);
+    if (availableDuration > Number(suggestion.duration_seconds)) {
+      detail.textContent += ` The window remains available until ${formatInstant(suggestion.start, availableDuration, data.timezone)}.`;
+    }
     if (suggestion.tier === "future") detail.textContent += " Future date — not shown on today's timeline.";
     copy.append(title, duration, time, detail);
     select.append(badge, stars, copy);

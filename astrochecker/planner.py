@@ -565,7 +565,7 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
                     restricted.append({"start": left, "end": right})
         return restricted
 
-    def proposal(tier, window_start, available):
+    def proposal(tier, window_start, available, *, source_start=None, source_end=None):
         duration = required if tier != "widest" else available
         ratio = min(1.0, duration / required)
         days_away = max(0.0, (window_start - start).total_seconds() / 86400)
@@ -586,6 +586,7 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
             "duration_seconds": duration,
             "requested_duration_seconds": required,
             "available_duration_seconds": available,
+            "_source_window": (source_start or window_start, source_end or window_start + timedelta(seconds=available)),
         }
 
     current = restrict_to_darkness(current_intervals, darkness_intervals)
@@ -594,7 +595,13 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
 
     adjustments = [item for item in current if int(item["start"]) > 0 and length(item) >= required]
     proposals = [
-        proposal("adjust", start + timedelta(seconds=int(item["start"])), length(item))
+        proposal(
+            "adjust",
+            start + timedelta(seconds=int(item["start"])),
+            length(item),
+            source_start=start + timedelta(seconds=int(item["start"])),
+            source_end=start + timedelta(seconds=int(item["end"])),
+        )
         for item in sorted(adjustments, key=lambda candidate: (int(candidate["start"]), int(candidate["end"])))
     ]
 
@@ -615,17 +622,40 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
                 future_complete.append((window_start, item))
     if future_complete:
         window_start, item = min(future_complete, key=lambda candidate: candidate[0])
-        proposals.append(proposal("future", window_start, length(item)))
+        proposals.append(
+            proposal(
+                "future",
+                window_start,
+                length(item),
+                source_start=window_start,
+                source_end=window_start + timedelta(seconds=length(item)),
+            )
+        )
 
     available = [(window_start, length(item)) for window_start, item in all_windows if length(item) > 0]
     if available:
         window_start, longest = min(available, key=lambda candidate: (-candidate[1], candidate[0]))
-        proposals.append(proposal("widest", window_start, longest))
+        proposals.append(
+            proposal(
+                "widest",
+                window_start,
+                longest,
+                source_start=window_start,
+                source_end=window_start + timedelta(seconds=longest),
+            )
+        )
 
     unique = {}
+    tier_priority = {"adjust": 2, "future": 1, "widest": 0}
     for item in proposals:
-        key = (item["tier"], item["start"], item["end"])
-        unique[key] = item
+        key = item.pop("_source_window")
+        previous = unique.get(key)
+        if previous is None or (
+            tier_priority.get(item["tier"], 0), item["score"]
+        ) > (
+            tier_priority.get(previous["tier"], 0), previous["score"]
+        ):
+            unique[key] = item
     ranked = sorted(unique.values(), key=lambda item: (-item["score"], item["start"], item["tier"]))
     return ranked[:max(0, int(limit))]
 

@@ -596,7 +596,7 @@ def test_adjust_suggestion_is_overlaid_on_the_green_timeline(tmp_path, ui_browse
         wait_until_ready(page)
         submit_object(page, "Adjust")
         expect(page.locator("#timeline-suggestion")).to_be_visible()
-        expect(page.locator(".suggestion-item").first).to_contain_text("up to 2 h")
+        expect(page.locator(".suggestion-item").first).to_contain_text("Available continuous window: 2 h")
         assert page.locator("#timeline-suggestion").evaluate("element => parseFloat(element.style.left) > 0")
         assert not errors
         page.close()
