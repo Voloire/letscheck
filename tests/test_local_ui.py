@@ -312,6 +312,10 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
     service = UiService(tmp_path / "version-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
+        expect(page.locator(".brand-nickname")).to_have_text("· Balcony Stargazer")
+        assert page.get_by_label("Site name", exact=True).input_value() == "Rome observing site"
+        assert page.get_by_label("Latitude", exact=True).input_value() == "41.9028"
+        assert page.get_by_label("Longitude", exact=True).input_value() == "12.4964"
         expect(page.locator(".eyebrow").first).to_contain_text("0.4.0-alpha.1")
         assert not errors
         page.close()
@@ -536,7 +540,13 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         expect(page.locator("#night-chain")).to_have_text("X → Y → Z")
         expect(page.locator("#night-blocks li")).to_have_count(3)
         expect(page.locator("#night-timeline .night-segment")).to_have_count(3)
-        expect(page.get_by_role("button", name="Export to NINA", exact=True)).to_be_disabled()
+        export_button = page.get_by_role("button", name="Export complete sequence to NINA", exact=True)
+        expect(export_button).to_be_enabled()
+        page.locator("#night-sequence-name").fill("Rome night set")
+        export_button.click()
+        expect(page.locator("#night-nina-export-status")).to_contain_text("Saved locally to Downloads")
+        assert service.export_payloads[0]["sequence_name"] == "Rome night set"
+        assert [item["target"]["name"] for item in service.export_payloads[0]["targets"]] == ["X", "Y", "Z"]
         assert not errors
         page.close()
 

@@ -139,6 +139,32 @@ def build_legacy_sequence_xml(
     return ET.tostring(root, encoding="unicode", xml_declaration=True)
 
 
+def build_legacy_sequence_set_xml(items, *, exposure_seconds=DEFAULT_EXPOSURE_SECONDS):
+    """Build NINA's native Legacy target-set XML for an ordered target list."""
+    if not isinstance(items, (list, tuple)) or not items:
+        raise NinaSequenceError("The NINA sequence must contain at least one target")
+    root = ET.Element(
+        "ArrayOfCaptureSequenceList",
+        {
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+        },
+    )
+    for item in items:
+        if not isinstance(item, dict):
+            raise NinaSequenceError("Each NINA sequence target must be an object")
+        target = item.get("target", item.get("object"))
+        duration_seconds = item.get("duration_seconds")
+        child = ET.fromstring(build_legacy_sequence_xml(
+            target,
+            duration_seconds=duration_seconds,
+            exposure_seconds=exposure_seconds,
+        ))
+        root.append(child)
+    ET.indent(root, space="  ")
+    return ET.tostring(root, encoding="unicode", xml_declaration=True)
+
+
 def default_downloads_dir():
     """Return the active user's Downloads directory without a hardcoded profile."""
     profile = os.environ.get("USERPROFILE") if os.name == "nt" else None
@@ -207,4 +233,66 @@ def export_legacy_sequence(
         "filename": path.name,
         "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
         "exposure_count": exposure_count,
+    }
+
+
+def export_legacy_sequence_set(
+    items,
+    *,
+    sequence_name,
+    downloads_dir=None,
+    filename_timestamp=None,
+):
+    """Write an ordered native NINA Legacy target-set XML file atomically."""
+    if not isinstance(sequence_name, str) or not sequence_name.strip():
+        raise NinaSequenceError("The NINA sequence name is required")
+    xml = build_legacy_sequence_set_xml(items)
+    sequence_name = _safe_filename(sequence_name.strip())
+    directory = Path(downloads_dir) if downloads_dir is not None else default_downloads_dir()
+    directory.mkdir(parents=True, exist_ok=True)
+    stamp = filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
+    base = f"{sequence_name}_{stamp}"
+    path = directory / f"{base}.xml"
+    suffix = 1
+    while path.exists():
+        path = directory / f"{base}-{suffix}.xml"
+        suffix += 1
+
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=directory,
+            prefix=f".{path.name}-",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+            temporary.write(xml)
+            temporary.write("\n")
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_path, path)
+        temporary_path = None
+    except OSError as exc:
+        raise NinaSequenceError("The NINA sequence could not be saved") from exc
+    finally:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+    counts = [
+        _duration_count(item.get("duration_seconds"), DEFAULT_EXPOSURE_SECONDS)
+        for item in items
+    ]
+    return {
+        "path": str(path),
+        "filename": path.name,
+        "sequence_name": sequence_name,
+        "target_count": len(items),
+        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
+        "exposure_count": sum(counts),
+        "exposure_counts": counts,
     }

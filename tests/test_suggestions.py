@@ -147,3 +147,17 @@ def test_choose_suggestions_does_not_pad_when_only_one_valid_window_exists():
 
     assert len(suggestions) == 1
     assert suggestions[0]["tier"] == "widest"
+
+
+def test_choose_suggestions_intersects_candidates_with_astronomical_darkness():
+    suggestions = choose_suggestions(
+        start=datetime(2026, 9, 5, 12, 0),
+        duration_seconds=3600,
+        current_intervals=[{"start": 3600, "end": 10800}],
+        darkness_intervals=[{"start": 7200, "end": 10800}],
+        future_windows=[],
+    )
+
+    assert suggestions
+    assert all(item["start"] >= datetime(2026, 9, 5, 14, 0) for item in suggestions)
+    assert all(item["duration_seconds"] == 3600 for item in suggestions)

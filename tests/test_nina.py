@@ -2,7 +2,13 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from astrochecker.nina import NinaSequenceError, build_legacy_sequence_xml, export_legacy_sequence
+from astrochecker.nina import (
+    NinaSequenceError,
+    build_legacy_sequence_set_xml,
+    build_legacy_sequence_xml,
+    export_legacy_sequence,
+    export_legacy_sequence_set,
+)
 
 
 TARGET = {
@@ -10,6 +16,39 @@ TARGET = {
     "ra": 83.82208,
     "dec": -5.39111,
 }
+
+TARGET_2 = {
+    "name": "M 31",
+    "ra": 10.6847,
+    "dec": 41.269,
+}
+
+
+def test_build_legacy_sequence_set_xml_uses_ninas_native_target_set_shape():
+    xml = build_legacy_sequence_set_xml([
+        {"target": TARGET, "duration_seconds": 901},
+        {"target": TARGET_2, "duration_seconds": 1200},
+    ])
+
+    root = ET.fromstring(xml)
+    assert root.tag == "ArrayOfCaptureSequenceList"
+    targets = root.findall("CaptureSequenceList")
+    assert [item.attrib["TargetName"] for item in targets] == ["M 42", "M 31"]
+    assert [item.findtext("CaptureSequence/TotalExposureCount") for item in targets] == ["3", "4"]
+
+
+def test_export_legacy_sequence_set_uses_the_sequence_name_for_the_file(tmp_path):
+    result = export_legacy_sequence_set(
+        [{"target": TARGET, "duration_seconds": 901}],
+        sequence_name="Rome night plan",
+        downloads_dir=tmp_path,
+        filename_timestamp="20260906-130215",
+    )
+
+    assert result["filename"] == "Rome-night-plan_20260906-130215.xml"
+    root = ET.parse(result["path"]).getroot()
+    assert root.tag == "ArrayOfCaptureSequenceList"
+    assert root.find("CaptureSequenceList").attrib["TargetName"] == "M 42"
 
 
 def test_build_legacy_sequence_xml_matches_nina_capture_sequence_shape():

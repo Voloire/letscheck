@@ -45,6 +45,50 @@ def test_idea_candidate_selection_keeps_each_catalogued_type_before_filling_prio
     assert len(selected) == 5
 
 
+def test_ideas_service_caps_expensive_candidate_evaluation(monkeypatch):
+    from astrochecker.service import AstroCheckerService
+
+    class StubCatalog:
+        def idea_candidates(self, include_ineligible=False):
+            return [
+                {
+                    "id": index, "name": f"Target {index:03d}", "type": "GCl",
+                    "ra_deg": float(index), "dec_deg": 20,
+                    "aliases": [], "profile": {"eligible": True, "priority": 50, "reason": "Test"},
+                }
+                for index in range(500)
+            ]
+
+    class DarknessEphemeris:
+        uses_prediction = False
+        iers_coverage_start = "test"
+        iers_coverage_end_exclusive = "test"
+        sample_offsets = list(range(0, 86401, 300))
+        sun_alt = [10] * 72 + [-20] * 97 + [10] * 120
+
+        @staticmethod
+        def position_at(offset):
+            return {"alt": 0, "az": 180, "sun_alt": -20}
+
+    monkeypatch.setattr("astrochecker.service.build_ephemeris", lambda *args, **kwargs: DarknessEphemeris())
+    evaluated = []
+
+    def build_targets(coordinates, *args, **kwargs):
+        evaluated.extend(coordinates)
+        return [DarknessEphemeris() for _ in coordinates]
+
+    monkeypatch.setattr("astrochecker.service.build_catalog_ephemerides", build_targets)
+
+    result = AstroCheckerService(catalog=StubCatalog()).ideas(
+        REQUEST | {"min_alt": 89, "max_alt": 90, "duration_minutes": 240}
+    )
+
+    assert result["candidate_count"] == 500
+    assert result["evaluated_candidate_count"] == 120
+    assert len(evaluated) == 120
+    assert result["skipped"]["not_evaluated"] == 380
+
+
 def test_ideas_service_returns_complete_twilight_bounded_target_chain(monkeypatch):
     from astrochecker.service import AstroCheckerService
 

@@ -21,7 +21,7 @@ from .local_astronomy import (
     build_catalog_ephemerides,
     summarize_darkness,
 )
-from .nina import NinaSequenceError, export_legacy_sequence
+from .nina import NinaSequenceError, export_legacy_sequence, export_legacy_sequence_set
 from .planner import (
     MAX_FUTURE_SEARCH_DAYS,
     choose_suggestion,
@@ -40,6 +40,7 @@ HORIZON_SECONDS = 86400
 CHART_STEP_SECONDS = 300
 FUTURE_PROBE_STEP_SECONDS = 300
 IDEA_PROBE_STEP_SECONDS = 300
+IDEA_CANDIDATE_LIMIT = 120
 
 
 def observing_night_anchor(start, timezone_name):
@@ -106,9 +107,15 @@ class AstroCheckerService:
         if not isinstance(payload, dict):
             raise ValueError("JSON body must be an object")
         target = payload.get("object")
+        targets = payload.get("targets")
         duration_seconds = payload.get("duration_seconds")
         sequence_name = payload.get("sequence_name")
         try:
+            if targets is not None:
+                return export_legacy_sequence_set(
+                    targets,
+                    sequence_name=sequence_name,
+                )
             return export_legacy_sequence(
                 target,
                 duration_seconds=duration_seconds,
@@ -262,6 +269,7 @@ class AstroCheckerService:
             az_start=request["az_start"],
             az_end=request["az_end"],
         )
+        darkness_summary = summarize_darkness(ephemeris.sun_alt)
         future_windows = []
         suggestions = []
         if result["status"] != "full":
@@ -271,6 +279,7 @@ class AstroCheckerService:
                 duration_seconds=request["duration_seconds"],
                 current_intervals=result["intervals"],
                 future_windows=future_windows,
+                darkness_intervals=darkness_summary["intervals"],
             )
         samples = []
         for offset in range(0, HORIZON_SECONDS + 1, CHART_STEP_SECONDS):
@@ -336,7 +345,7 @@ class AstroCheckerService:
             "suggestion_note": suggestion_note,
             "suggestion_search_days": MAX_FUTURE_SEARCH_DAYS,
             "samples": samples,
-            "darkness": summarize_darkness(ephemeris.sun_alt),
+            "darkness": darkness_summary,
             "notes": [
                 "Altezza geometrica senza rifrazione atmosferica; azimut da nord verso est.",
                 "Coordinate ICRS e Sole builtin trasformati localmente con Astropy, senza accesso alla rete.",
@@ -362,7 +371,11 @@ class AstroCheckerService:
             str(item.get("name", "")).casefold(),
             str(item.get("canonical_key", item.get("id", ""))),
         ))
-        selected_records = _select_idea_candidates(eligible, limit=None)
+        # The catalog contains thousands of eligible objects.  Keep the
+        # deterministic, profile-diverse shortlist bounded so an impossible
+        # set of visibility filters cannot leave the browser waiting while
+        # every catalog entry is transformed and sampled.
+        selected_records = _select_idea_candidates(eligible, limit=IDEA_CANDIDATE_LIMIT)
         horizon = HORIZON_SECONDS
         try:
             darkness_ephemeris = build_ephemeris(
@@ -392,6 +405,7 @@ class AstroCheckerService:
             "search_days": request["search_days"],
             "search_limit_days": MAX_FUTURE_SEARCH_DAYS,
             "candidate_count": len(eligible),
+            "candidate_limit": IDEA_CANDIDATE_LIMIT,
             "evaluated_candidate_count": 0,
         }
         if night is None:
@@ -487,9 +501,10 @@ class AstroCheckerService:
                 "catalog_excluded": max(0, len(records) - len(eligible)),
                 "not_evaluated": max(0, len(eligible) - evaluated_count),
             },
-            "notes": [
-                "Night plan calculated locally from the SQLite catalog and offline ephemerides.",
-                "The period runs from evening through morning astronomical twilight (Sun <= -18 degrees).",
+                "notes": [
+                    "Night plan calculated locally from the SQLite catalog and offline ephemerides.",
+                    f"The planner evaluates a deterministic shortlist of up to {IDEA_CANDIDATE_LIMIT} candidates for responsiveness.",
+                    "The period runs from evening through morning astronomical twilight (Sun <= -18 degrees).",
                 "Two hours is the preferred block per target; shorter fills are marked.",
                 "Weather, Moon, equipment, and NINA operating times are not evaluated.",
             ],
