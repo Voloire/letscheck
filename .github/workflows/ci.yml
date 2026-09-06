@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
+      - run: python -m compileall -q astrochecker tests
+      - run: node --check astrochecker/static/app.js
+      - run: python -m pytest -q
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install -r requirements.txt -r requirements-build.txt
+      - run: pyinstaller --clean --noconfirm packaging/AstroChecker.spec
+      - run: |
+          $process = Start-Process -FilePath dist/AstroChecker.exe -ArgumentList '--no-browser','--port','0' -PassThru
+          Start-Sleep -Seconds 5
+          if ($process.HasExited) { throw "AstroChecker.exe si è chiuso con codice $($process.ExitCode)" }
+          Stop-Process -Id $process.Id
+        shell: pwsh

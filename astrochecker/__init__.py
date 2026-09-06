@@ -1,0 +1,1 @@
+"""AstroChecker: pianificazione osservativa locale."""
