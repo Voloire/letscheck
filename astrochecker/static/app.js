@@ -44,6 +44,8 @@ let searchTimer = null;
 let searchGeneration = 0;
 let proposedLocation = null;
 let selectedSuggestion = null;
+let selectedResult = null;
+let ninaExportRunning = false;
 
 function localDateAtTenPm(timeZone = DEFAULT_TIME_ZONE) {
   let formatter;
@@ -855,6 +857,7 @@ function renderSuggestions(data) {
   detail.textContent = suggestion.tier === "widest"
     ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
     : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`;
+  detail.textContent += " Click to save a NINA Legacy sequence.";
   note.textContent = data.suggestion_note || "Suggestion calculated locally.";
 }
 
@@ -941,8 +944,39 @@ function renderNightPlan(data) {
 
 function clearSuggestionAcknowledgement() {
   selectedSuggestion = null;
+  selectedResult = null;
   suggestionItem.classList.remove("selected");
   suggestionItem.setAttribute("aria-pressed", "false");
+  suggestionItem.removeAttribute("aria-busy");
+  suggestionItem.disabled = false;
+}
+
+async function exportSelectedSuggestion() {
+  if (!selectedSuggestion || !selectedResult || ninaExportRunning) return;
+  ninaExportRunning = true;
+  suggestionItem.disabled = true;
+  suggestionItem.setAttribute("aria-busy", "true");
+  try {
+    const response = await fetch("/api/nina/legacy-sequence", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify({
+        object: selectedResult.object,
+        duration_seconds: selectedSuggestion.duration_seconds,
+        suggestion_start: selectedSuggestion.start,
+        suggestion_end: selectedSuggestion.end,
+      }),
+    });
+    const data = await readJson(response);
+    if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
+    resultLive.textContent = `NINA sequence saved: ${data.filename || data.path}`;
+  } catch (error) {
+    resultLive.textContent = error instanceof Error ? error.message : "NINA sequence export failed.";
+  } finally {
+    ninaExportRunning = false;
+    suggestionItem.disabled = false;
+    suggestionItem.removeAttribute("aria-busy");
+  }
 }
 
 suggestionItem.addEventListener("click", () => {
@@ -950,6 +984,7 @@ suggestionItem.addEventListener("click", () => {
   suggestionItem.classList.add("selected");
   suggestionItem.setAttribute("aria-pressed", "true");
   resultLive.textContent = "Suggestion selected";
+  exportSelectedSuggestion();
 });
 
 function renderResult(data, payload) {
@@ -962,6 +997,7 @@ function renderResult(data, payload) {
   nightPlan.classList.remove("is-stale");
   staleBadge.hidden = true;
   hasResult = true;
+  selectedResult = data;
 
   if (data.object?.name) {
     objectInput.value = data.object.name;
