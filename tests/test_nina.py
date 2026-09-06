@@ -58,6 +58,19 @@ def test_export_legacy_sequence_writes_to_requested_download_directory(tmp_path)
     assert (tmp_path / "AstroChecker_M-42_20260906-130215.xml").is_file()
 
 
+def test_export_legacy_sequence_uses_a_user_supplied_safe_sequence_name(tmp_path):
+    result = export_legacy_sequence(
+        TARGET,
+        duration_seconds=901,
+        sequence_name="M 42 / balcony: night?",
+        downloads_dir=tmp_path,
+        filename_timestamp="20260906-130215",
+    )
+
+    assert result["filename"] == "M-42-balcony-night_20260906-130215.xml"
+    assert (tmp_path / result["filename"]).is_file()
+
+
 def test_legacy_sequence_rejects_a_window_shorter_than_one_default_exposure():
     with pytest.raises(NinaSequenceError, match="at least 300 seconds"):
         build_legacy_sequence_xml(TARGET, duration_seconds=299)

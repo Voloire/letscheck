@@ -27,7 +27,13 @@ const objectSearchStatus = document.querySelector("#object-search-status");
 const siteStatus = document.querySelector("#site-status");
 const timezoneInput = document.querySelector("#timezone");
 const startInput = document.querySelector("#start");
-const suggestionItem = document.querySelector("#suggestion-item");
+const suggestionList = document.querySelector("#suggestion-list");
+const suggestionsEmpty = document.querySelector("#suggestions-empty");
+const acceptedPlan = document.querySelector("#accepted-plan");
+const acceptedPlanSummary = document.querySelector("#accepted-plan-summary");
+const ninaSequenceName = document.querySelector("#nina-sequence-name");
+const exportAcceptedNina = document.querySelector("#export-accepted-nina");
+const ninaExportStatus = document.querySelector("#nina-export-status");
 const nightPlan = document.querySelector("#night-plan");
 const nightBlocks = document.querySelector("#night-blocks");
 const nightGaps = document.querySelector("#night-gaps");
@@ -44,6 +50,7 @@ let searchTimer = null;
 let searchGeneration = 0;
 let proposedLocation = null;
 let selectedSuggestion = null;
+let acceptedSuggestion = null;
 let selectedResult = null;
 let ninaExportRunning = false;
 
@@ -358,6 +365,9 @@ function markStale() {
   staleBadge.hidden = false;
   resultContent.classList.add("is-stale");
   nightPlan.classList.add("is-stale");
+  acceptedSuggestion = null;
+  acceptedPlan.hidden = true;
+  ninaExportStatus.textContent = "Recalculate before exporting this plan.";
 }
 
 function updateTimeZoneNote() {
@@ -687,7 +697,7 @@ function renderTimeline(data) {
   requested.title = "Requested period";
   const suggestionMarker = field("#timeline-suggestion");
   suggestionMarker.hidden = true;
-  const suggestion = Array.isArray(data.suggestions) ? data.suggestions[0] : null;
+  const suggestion = acceptedSuggestion || selectedSuggestion || (Array.isArray(data.suggestions) ? data.suggestions[0] : null);
   if (suggestion && suggestion.tier !== "future") {
     const startOffset = (Date.parse(suggestion.start) - Date.parse(data.start)) / 1000;
     const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
@@ -697,7 +707,7 @@ function renderTimeline(data) {
     if (right > left) {
       suggestionMarker.style.left = `${left / horizon * 100}%`;
       suggestionMarker.style.width = `${(right - left) / horizon * 100}%`;
-      suggestionMarker.title = `Suggested window (up to ${formatDuration(availableDuration)}): ${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.start, availableDuration, data.timezone)}`;
+      suggestionMarker.title = `${acceptedSuggestion ? "Accepted" : "Suggested"} window (up to ${formatDuration(availableDuration)}): ${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.start, availableDuration, data.timezone)}`;
       suggestionMarker.hidden = false;
     }
   }
@@ -711,7 +721,7 @@ function renderTimeline(data) {
   field("#timeline-date").textContent = `${formatInstant(data.start, 0, data.timezone, false)} → ${formatInstant(data.start, horizon, data.timezone, false)} · ${data.timezone}`;
   field("#timeline").setAttribute(
     "aria-label",
-    `${(data.intervals || []).length} visible intervals in 24 hours. Requested period: ${formatDuration(data.duration_seconds)}. ${suggestion?.tier === "future" ? "Suggested window is on a future date and is listed above." : suggestion ? "Suggested window is highlighted." : ""} Time zone ${data.timezone}.`
+    `${(data.intervals || []).length} visible intervals in 24 hours. Requested period: ${formatDuration(data.duration_seconds)}. ${suggestion?.tier === "future" ? "Suggested window is on a future date and is listed above." : suggestion ? `${acceptedSuggestion ? "Accepted" : "Suggested"} window is highlighted.` : ""} Time zone ${data.timezone}.`
   );
 }
 
@@ -844,41 +854,82 @@ function renderSuggestions(data) {
   }
   card.hidden = false;
   const note = field("#suggestions-note");
-  const tier = field("#suggestion-tier");
-  const label = field("#suggestion-label");
-  const time = field("#suggestion-time");
-  const detail = field("#suggestion-detail");
-  const suggestion = items[0];
+  suggestionList.replaceChildren();
   selectedSuggestion = null;
-  suggestionItem.classList.remove("selected");
-  suggestionItem.setAttribute("aria-pressed", "false");
-  if (!suggestion) {
-    tier.textContent = "—";
-    label.textContent = "No valid criteria met";
-    time.textContent = "";
-    detail.textContent = data.suggestion_note || "There is no useful window.";
+  acceptedSuggestion = null;
+  acceptedPlan.hidden = true;
+  ninaExportStatus.textContent = "";
+  suggestionsEmpty.hidden = Boolean(items.length);
+  if (!items.length) {
     note.textContent = "This object has no valid suggestion for these settings.";
     return;
   }
+  const labels = {adjust: "Adjust the current time", future: "Choose a future date", widest: "Use the widest continuous window"};
+  items.forEach((suggestion, index) => {
+    const item = document.createElement("article");
+    item.className = "suggestion-item";
+    const select = document.createElement("button");
+    select.className = "suggestion-select";
+    select.type = "button";
+    select.setAttribute("aria-pressed", "false");
+    const badge = document.createElement("span");
+    badge.className = "suggestion-tier";
+    badge.textContent = index === 0 ? "The Best" : `Alternative ${index}`;
+    const stars = document.createElement("span");
+    stars.className = "suggestion-stars";
+    const starCount = Math.max(1, Math.min(5, Number(suggestion.stars) || (5 - index)));
+    stars.textContent = `${"★".repeat(starCount)}${"☆".repeat(5 - starCount)}`;
+    stars.setAttribute("aria-label", `${starCount} out of 5 stars`);
+    const copy = document.createElement("span");
+    copy.className = "suggestion-copy";
+    const title = document.createElement("strong");
+    title.textContent = labels[suggestion.tier] || "Suggestion";
+    const time = document.createElement("span");
+    time.className = "suggestion-time";
+    time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
+    const detail = document.createElement("small");
+    detail.textContent = `${suggestion.reason || "Valid observing window."} ` + (suggestion.tier === "widest"
+      ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
+      : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`);
+    const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
+    if (availableDuration > Number(suggestion.duration_seconds)) detail.textContent += ` This window supports up to ${formatDuration(availableDuration)}.`;
+    if (suggestion.tier === "future") detail.textContent += " Future date — not shown on today's timeline.";
+    copy.append(title, time, detail);
+    select.append(badge, stars, copy);
+    const accept = document.createElement("button");
+    accept.className = "button button-secondary button-compact suggestion-accept";
+    accept.type = "button";
+    accept.textContent = "Accept this window";
+    accept.addEventListener("click", () => acceptSuggestion(suggestion, item));
+    select.addEventListener("click", () => selectSuggestion(suggestion, item));
+    item.append(select, accept);
+    suggestionList.append(item);
+  });
+  note.textContent = data.suggestion_note || "Suggestions calculated locally.";
+}
+
+function selectSuggestion(suggestion, item) {
   selectedSuggestion = suggestion;
-  const labels = {
-    adjust: ["1", "Adjust the current time"],
-    future: ["2", "Choose a future date"],
-    widest: ["3", "Use the widest continuous window"],
-  };
-  const [number, title] = labels[suggestion.tier] || ["", "Suggestion"];
-  tier.textContent = number;
-  label.textContent = title;
-  time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
-  detail.textContent = suggestion.tier === "widest"
-    ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
-    : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`;
-  const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
-  if (availableDuration > Number(suggestion.duration_seconds)) {
-    detail.textContent += ` This window supports up to ${formatDuration(availableDuration)}.`;
-  }
-  detail.textContent += " Click to save a NINA Legacy sequence.";
-  note.textContent = data.suggestion_note || "Suggestion calculated locally.";
+  suggestionList.querySelectorAll(".suggestion-item").forEach((candidate) => {
+    const active = candidate === item;
+    candidate.classList.toggle("selected", active);
+    candidate.querySelector(".suggestion-select")?.setAttribute("aria-pressed", String(active));
+  });
+  if (selectedResult) renderTimeline(selectedResult);
+  resultLive.textContent = "Suggestion selected. Accept it to prepare the NINA export.";
+}
+
+function acceptSuggestion(suggestion, item) {
+  selectSuggestion(suggestion, item);
+  acceptedSuggestion = suggestion;
+  acceptedPlan.hidden = false;
+  acceptedPlanSummary.textContent = `${formatTargetLabel(selectedResult?.object, "Target")} · ${formatInstant(suggestion.start, 0, selectedResult.timezone)} – ${formatInstant(suggestion.end, 0, selectedResult.timezone)} · ${formatDuration(suggestion.duration_seconds)}`;
+  ninaSequenceName.value = `AstroChecker_${(selectedResult?.object?.name || "target").replace(/[^A-Za-z0-9._-]+/g, "-")}`;
+  ninaSequenceName.removeAttribute("aria-invalid");
+  ninaExportStatus.className = "status-message";
+  ninaExportStatus.textContent = "Accepted locally. Choose a sequence name, then export it to NINA.";
+  renderTimeline(selectedResult);
+  resultLive.textContent = "Suggestion accepted. The NINA export is ready.";
 }
 
 function renderNightPlan(data) {
@@ -964,48 +1015,59 @@ function renderNightPlan(data) {
 
 function clearSuggestionAcknowledgement() {
   selectedSuggestion = null;
+  acceptedSuggestion = null;
   selectedResult = null;
-  suggestionItem.classList.remove("selected");
-  suggestionItem.setAttribute("aria-pressed", "false");
-  suggestionItem.removeAttribute("aria-busy");
-  suggestionItem.disabled = false;
+  acceptedPlan.hidden = true;
+  ninaExportStatus.textContent = "";
 }
 
-async function exportSelectedSuggestion() {
-  if (!selectedSuggestion || !selectedResult || ninaExportRunning) return;
+async function exportAcceptedSuggestion() {
+  if (!acceptedSuggestion || !selectedResult || ninaExportRunning) return;
+  const sequenceName = ninaSequenceName.value.trim();
+  if (!sequenceName) {
+    ninaSequenceName.setAttribute("aria-invalid", "true");
+    ninaSequenceName.focus();
+    ninaExportStatus.className = "status-message error";
+    ninaExportStatus.textContent = "Enter a name for the NINA sequence.";
+    return;
+  }
+  ninaSequenceName.removeAttribute("aria-invalid");
   ninaExportRunning = true;
-  suggestionItem.disabled = true;
-  suggestionItem.setAttribute("aria-busy", "true");
+  exportAcceptedNina.disabled = true;
+  exportAcceptedNina.classList.add("loading");
+  exportAcceptedNina.setAttribute("aria-busy", "true");
+  ninaExportStatus.className = "status-message";
+  ninaExportStatus.textContent = "Creating the NINA Legacy XML locally…";
   try {
     const response = await fetch("/api/nina/legacy-sequence", {
       method: "POST",
       headers: {"Content-Type": "application/json", Accept: "application/json"},
       body: JSON.stringify({
         object: selectedResult.object,
-        duration_seconds: selectedSuggestion.duration_seconds,
-        suggestion_start: selectedSuggestion.start,
-        suggestion_end: selectedSuggestion.end,
+        duration_seconds: acceptedSuggestion.duration_seconds,
+        suggestion_start: acceptedSuggestion.start,
+        suggestion_end: acceptedSuggestion.end,
+        sequence_name: sequenceName,
       }),
     });
     const data = await readJson(response);
     if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
-    resultLive.textContent = `NINA sequence saved: ${data.filename || data.path}`;
+    ninaExportStatus.className = "status-message success";
+    ninaExportStatus.textContent = `Saved locally to Downloads: ${data.filename || data.path}`;
+    resultLive.textContent = `NINA Legacy sequence saved: ${data.filename || data.path}`;
   } catch (error) {
-    resultLive.textContent = error instanceof Error ? error.message : "NINA sequence export failed.";
+    ninaExportStatus.className = "status-message error";
+    ninaExportStatus.textContent = error instanceof Error ? error.message : "NINA sequence export failed.";
+    resultLive.textContent = ninaExportStatus.textContent;
   } finally {
     ninaExportRunning = false;
-    suggestionItem.disabled = false;
-    suggestionItem.removeAttribute("aria-busy");
+    exportAcceptedNina.disabled = false;
+    exportAcceptedNina.classList.remove("loading");
+    exportAcceptedNina.removeAttribute("aria-busy");
   }
 }
 
-suggestionItem.addEventListener("click", () => {
-  if (!selectedSuggestion) return;
-  suggestionItem.classList.add("selected");
-  suggestionItem.setAttribute("aria-pressed", "true");
-  resultLive.textContent = "Suggestion selected";
-  exportSelectedSuggestion();
-});
+exportAcceptedNina.addEventListener("click", exportAcceptedSuggestion);
 
 function renderResult(data, payload) {
   resultsTitle.textContent = "Observing window";

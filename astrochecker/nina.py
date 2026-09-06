@@ -154,17 +154,23 @@ def export_legacy_sequence(
     target,
     *,
     duration_seconds,
+    sequence_name=None,
     downloads_dir=None,
     filename_timestamp=None,
 ):
     """Write a native NINA Legacy/Simple Sequencer XML file atomically."""
     xml = build_legacy_sequence_xml(target, duration_seconds=duration_seconds)
     name, _ra_deg, _dec_deg = _target_values(target)
+    if sequence_name is None:
+        sequence_name = f"AstroChecker_{name}"
+    elif not isinstance(sequence_name, str) or not sequence_name.strip():
+        raise NinaSequenceError("The NINA sequence name is required")
+    sequence_name = _safe_filename(sequence_name.strip())
     exposure_count = _duration_count(duration_seconds, DEFAULT_EXPOSURE_SECONDS)
     directory = Path(downloads_dir) if downloads_dir is not None else default_downloads_dir()
     directory.mkdir(parents=True, exist_ok=True)
     stamp = filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
-    base = f"AstroChecker_{_safe_filename(name)}_{stamp}"
+    base = f"{sequence_name}_{stamp}"
     path = directory / f"{base}.xml"
     suffix = 1
     while path.exists():
