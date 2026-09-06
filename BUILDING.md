@@ -1,15 +1,11 @@
-# Build Windows
+# Building AstroChecker
 
-La release Windows viene costruita su `windows-latest` dal workflow
-`Windows release`. Per una prova locale su Windows installa Python 3.13, poi
-esegui:
+The supported development path runs the Python source locally. Install runtime dependencies from `requirements.txt`, then start the server with `python run.py`.
 
-```powershell
-python -m pip install -r requirements.txt -r requirements-build.txt
-pyinstaller --clean --noconfirm packaging/AstroChecker.spec
-dist\AstroChecker.exe --no-browser --port 0
+To rebuild the bundled catalog offline:
+
+```bash
+python tools/build_catalog.py
 ```
 
-La build è un singolo eseguibile `dist\AstroChecker.exe`. Il catalogo e i dati
-astronomici sono incorporati; le impostazioni dell’utente restano in
-`%LOCALAPPDATA%\AstroChecker`.
+The Windows packaging workflow is kept for release experiments. It creates a single executable with the project toolchain; source execution remains the clearest way to develop and troubleshoot the app.

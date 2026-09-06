@@ -1,0 +1,6652 @@
+{
+  "schema_version": 1,
+  "source": "Wikidata structured data (CC0) plus project supplement",
+  "retrieved": "2026-09-06",
+  "groups": [
+    {
+      "group_key": "wikidata:Q1035658",
+      "wikidata_qid": "Q1035658",
+      "identifiers": [
+        "NGC171",
+        "NGC175"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1035799",
+      "wikidata_qid": "Q1035799",
+      "identifiers": [
+        "IC44",
+        "NGC223"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1035980",
+      "wikidata_qid": "Q1035980",
+      "identifiers": [
+        "IC1591",
+        "NGC276"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036361",
+      "wikidata_qid": "Q1036361",
+      "identifiers": [
+        "VDB104"
+      ],
+      "names": [
+        "20 Scorpii",
+        "Alniyat",
+        "Sigma Scorpii"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1036634",
+      "wikidata_qid": "Q1036634",
+      "identifiers": [
+        "IC1658",
+        "NGC444"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036641",
+      "wikidata_qid": "Q1036641",
+      "identifiers": [
+        "IC89",
+        "NGC446"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036649",
+      "wikidata_qid": "Q1036649",
+      "identifiers": [
+        "IC1656",
+        "NGC447"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036656",
+      "wikidata_qid": "Q1036656",
+      "identifiers": [
+        "IC1661",
+        "NGC449"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036792",
+      "wikidata_qid": "Q1036792",
+      "identifiers": [
+        "IC92",
+        "NGC468"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1036990",
+      "wikidata_qid": "Q1036990",
+      "identifiers": [
+        "IC1686",
+        "NGC499"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037135",
+      "wikidata_qid": "Q1037135",
+      "identifiers": [
+        "NGC523",
+        "NGC537"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037188",
+      "wikidata_qid": "Q1037188",
+      "identifiers": [
+        "IC106",
+        "NGC530"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037217",
+      "wikidata_qid": "Q1037217",
+      "identifiers": [
+        "NGC539",
+        "NGC563"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037367",
+      "wikidata_qid": "Q1037367",
+      "identifiers": [
+        "IC1703",
+        "NGC557"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037419",
+      "wikidata_qid": "Q1037419",
+      "identifiers": [
+        "IC1709",
+        "NGC568"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037481",
+      "wikidata_qid": "Q1037481",
+      "identifiers": [
+        "IC1710",
+        "NGC575"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037522",
+      "wikidata_qid": "Q1037522",
+      "identifiers": [
+        "IC1713",
+        "NGC587"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1037939",
+      "wikidata_qid": "Q1037939",
+      "identifiers": [
+        "IC146",
+        "NGC648"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038176",
+      "wikidata_qid": "Q1038176",
+      "identifiers": [
+        "NGC674",
+        "NGC697"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038276",
+      "wikidata_qid": "Q1038276",
+      "identifiers": [
+        "IC165",
+        "NGC684"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038511",
+      "wikidata_qid": "Q1038511",
+      "identifiers": [
+        "IC1743",
+        "NGC716"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038541",
+      "wikidata_qid": "Q1038541",
+      "identifiers": [
+        "IC1744",
+        "NGC719"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038575",
+      "wikidata_qid": "Q1038575",
+      "identifiers": [
+        "NGC723",
+        "NGC724"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038603",
+      "wikidata_qid": "Q1038603",
+      "identifiers": [
+        "NGC727",
+        "NGC729"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1038611",
+      "wikidata_qid": "Q1038611",
+      "identifiers": [
+        "NGC730"
+      ],
+      "names": [
+        "Single Star"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1038620",
+      "wikidata_qid": "Q1038620",
+      "identifiers": [
+        "NGC731",
+        "NGC757"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039082",
+      "wikidata_qid": "Q1039082",
+      "identifiers": [
+        "IC1765",
+        "NGC783"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039101",
+      "wikidata_qid": "Q1039101",
+      "identifiers": [
+        "IC1766",
+        "NGC785"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039185",
+      "wikidata_qid": "Q1039185",
+      "identifiers": [
+        "IC191",
+        "NGC794"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039304",
+      "wikidata_qid": "Q1039304",
+      "identifiers": [
+        "IC1773",
+        "NGC804"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039480",
+      "wikidata_qid": "Q1039480",
+      "identifiers": [
+        "IC1782",
+        "NGC823"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039744",
+      "wikidata_qid": "Q1039744",
+      "identifiers": [
+        "NGC856",
+        "NGC859"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1039806",
+      "wikidata_qid": "Q1039806",
+      "identifiers": [
+        "NGC863",
+        "NGC866",
+        "NGC885"
+      ],
+      "names": [
+        "Markarian 590"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1039838",
+      "wikidata_qid": "Q1039838",
+      "identifiers": [
+        "NGC867",
+        "NGC875"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1040402",
+      "wikidata_qid": "Q1040402",
+      "identifiers": [
+        "IC228",
+        "NGC944"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1040523",
+      "wikidata_qid": "Q1040523",
+      "identifiers": [
+        "IC249",
+        "NGC1051",
+        "NGC961"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1040547",
+      "wikidata_qid": "Q1040547",
+      "identifiers": [
+        "IC1814",
+        "NGC964"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1040699",
+      "wikidata_qid": "Q1040699",
+      "identifiers": [
+        "NGC1002",
+        "NGC983"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1040824",
+      "wikidata_qid": "Q1040824",
+      "identifiers": [
+        "IC240",
+        "NGC999"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041055",
+      "wikidata_qid": "Q1041055",
+      "identifiers": [
+        "IC1828",
+        "NGC1036"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041263",
+      "wikidata_qid": "Q1041263",
+      "identifiers": [
+        "IC254",
+        "NGC1065"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041314",
+      "wikidata_qid": "Q1041314",
+      "identifiers": [
+        "IC1837",
+        "NGC1072"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041610",
+      "wikidata_qid": "Q1041610",
+      "identifiers": [
+        "IC1846",
+        "NGC1109"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041626",
+      "wikidata_qid": "Q1041626",
+      "identifiers": [
+        "IC1852",
+        "NGC1112"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041679",
+      "wikidata_qid": "Q1041679",
+      "identifiers": [
+        "IC261",
+        "NGC1120"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1041986",
+      "wikidata_qid": "Q1041986",
+      "identifiers": [
+        "IC281",
+        "NGC1177"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1042177",
+      "wikidata_qid": "Q1042177",
+      "identifiers": [
+        "IC1881",
+        "NGC1213"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1042549",
+      "wikidata_qid": "Q1042549",
+      "identifiers": [
+        "IC1907",
+        "NGC1278"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1042611",
+      "wikidata_qid": "Q1042611",
+      "identifiers": [
+        "IC314",
+        "NGC1289"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1042858",
+      "wikidata_qid": "Q1042858",
+      "identifiers": [
+        "IC324",
+        "NGC1331"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1043223",
+      "wikidata_qid": "Q1043223",
+      "identifiers": [
+        "IC1943",
+        "NGC1411"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1043230",
+      "wikidata_qid": "Q1043230",
+      "identifiers": [
+        "IC1981",
+        "NGC1412"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1043595",
+      "wikidata_qid": "Q1043595",
+      "identifiers": [
+        "IC2002",
+        "NGC1474"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1043693",
+      "wikidata_qid": "Q1043693",
+      "identifiers": [
+        "NGC1491",
+        "SH2206"
+      ],
+      "names": [
+        "Fossil Footprint Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1043747",
+      "wikidata_qid": "Q1043747",
+      "identifiers": [
+        "NGC1501"
+      ],
+      "names": [
+        "Camel's Eye Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1044096",
+      "wikidata_qid": "Q1044096",
+      "identifiers": [
+        "NGC1579",
+        "SH2222"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044182",
+      "wikidata_qid": "Q1044182",
+      "identifiers": [
+        "IC2077",
+        "NGC1608"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044188",
+      "wikidata_qid": "Q1044188",
+      "identifiers": [
+        "IC2075",
+        "NGC1594"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044422",
+      "wikidata_qid": "Q1044422",
+      "identifiers": [
+        "IC386",
+        "NGC1632"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044647",
+      "wikidata_qid": "Q1044647",
+      "identifiers": [
+        "IC395",
+        "NGC1671"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044848",
+      "wikidata_qid": "Q1044848",
+      "identifiers": [
+        "IC2108",
+        "NGC1710"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044907",
+      "wikidata_qid": "Q1044907",
+      "identifiers": [
+        "IC2111",
+        "NGC1722"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1044955",
+      "wikidata_qid": "Q1044955",
+      "identifiers": [
+        "IC2113",
+        "NGC1730"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1045975",
+      "wikidata_qid": "Q1045975",
+      "identifiers": [
+        "NGC1910"
+      ],
+      "names": [
+        "LH-41"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1046092",
+      "wikidata_qid": "Q1046092",
+      "identifiers": [
+        "IC2127",
+        "NGC1936"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1046310",
+      "wikidata_qid": "Q1046310",
+      "identifiers": [
+        "IC2137",
+        "NGC1979"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1046506",
+      "wikidata_qid": "Q1046506",
+      "identifiers": [
+        "NGC2023",
+        "VDB52"
+      ],
+      "names": [
+        "[NYS99] C-23",
+        "[RK68] 38",
+        "[XT95] 6"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1046829",
+      "wikidata_qid": "Q1046829",
+      "identifiers": [
+        "IC2145",
+        "NGC2086"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1047119",
+      "wikidata_qid": "Q1047119",
+      "identifiers": [
+        "IC2154",
+        "NGC2139"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1047310",
+      "wikidata_qid": "Q1047310",
+      "identifiers": [
+        "NGC2175",
+        "SH2252"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1047920",
+      "wikidata_qid": "Q1047920",
+      "identifiers": [
+        "IC2172",
+        "NGC2282",
+        "VDB85"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1048014",
+      "wikidata_qid": "Q1048014",
+      "identifiers": [
+        "IC452",
+        "NGC2296"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1048252",
+      "wikidata_qid": "Q1048252",
+      "identifiers": [
+        "IC457",
+        "NGC2330"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1048281",
+      "wikidata_qid": "Q1048281",
+      "identifiers": [
+        "IC465",
+        "NGC2334"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1049110",
+      "wikidata_qid": "Q1049110",
+      "identifiers": [
+        "SH2273"
+      ],
+      "names": [
+        "Fox Fur Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1049221",
+      "wikidata_qid": "Q1049221",
+      "identifiers": [
+        "NGC2467",
+        "SH2311"
+      ],
+      "names": [
+        "Skull nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1049373",
+      "wikidata_qid": "Q1049373",
+      "identifiers": [
+        "IC487",
+        "NGC2494"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1049627",
+      "wikidata_qid": "Q1049627",
+      "identifiers": [
+        "NGC2542"
+      ],
+      "names": [
+        "19 Pup",
+        "19 Puppis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1049810",
+      "wikidata_qid": "Q1049810",
+      "identifiers": [
+        "NGC2573"
+      ],
+      "names": [
+        "Polarissima Australis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1049822",
+      "wikidata_qid": "Q1049822",
+      "identifiers": [
+        "NGC2574",
+        "NGC2589"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1049859",
+      "wikidata_qid": "Q1049859",
+      "identifiers": [
+        "IC2351",
+        "NGC2581"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1049865",
+      "wikidata_qid": "Q1049865",
+      "identifiers": [
+        "IC2359",
+        "NGC2582"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1050412",
+      "wikidata_qid": "Q1050412",
+      "identifiers": [
+        "IC2424",
+        "NGC2704"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1051172",
+      "wikidata_qid": "Q1051172",
+      "identifiers": [
+        "IC2460",
+        "NGC2827"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1051463",
+      "wikidata_qid": "Q1051463",
+      "identifiers": [
+        "IC538",
+        "NGC2885"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1079743",
+      "wikidata_qid": "Q1079743",
+      "identifiers": [
+        "IC2118",
+        "NGC1909"
+      ],
+      "names": [
+        "Witch Head Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q108041",
+      "wikidata_qid": "Q108041",
+      "identifiers": [
+        "SH2275"
+      ],
+      "names": [
+        "Caldwell 49",
+        "Rosette Nebula",
+        "The Rosette nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q108512579",
+      "wikidata_qid": "Q108512579",
+      "identifiers": [
+        "NGC84"
+      ],
+      "names": [
+        "USNOA2 1125-00131336"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1085275",
+      "wikidata_qid": "Q1085275",
+      "identifiers": [
+        "SH2103"
+      ],
+      "names": [
+        "Cygnus Loop"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q10884216",
+      "wikidata_qid": "Q10884216",
+      "identifiers": [
+        "VDB9"
+      ],
+      "names": [
+        "SU Cas",
+        "SU Cassiopeiae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q10934",
+      "wikidata_qid": "Q10934",
+      "identifiers": [
+        "NGC1952",
+        "SH2244"
+      ],
+      "names": [
+        "Crab Nebula",
+        "Krab nebula",
+        "Taurus A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q10940903",
+      "wikidata_qid": "Q10940903",
+      "identifiers": [
+        "VDB128"
+      ],
+      "names": [
+        "BD+31 3925"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1102055",
+      "wikidata_qid": "Q1102055",
+      "identifiers": [
+        "IC547",
+        "NGC2947"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1102263",
+      "wikidata_qid": "Q1102263",
+      "identifiers": [
+        "IC556",
+        "NGC2984"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1102722",
+      "wikidata_qid": "Q1102722",
+      "identifiers": [
+        "IC573",
+        "NGC3058"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1102787",
+      "wikidata_qid": "Q1102787",
+      "identifiers": [
+        "IC580",
+        "NGC3069"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1102861",
+      "wikidata_qid": "Q1102861",
+      "identifiers": [
+        "IC2528",
+        "NGC3084"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1103196",
+      "wikidata_qid": "Q1103196",
+      "identifiers": [
+        "NGC3148"
+      ],
+      "names": [
+        "GM Ursae Majoris"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1103268",
+      "wikidata_qid": "Q1103268",
+      "identifiers": [
+        "IC2555",
+        "NGC3157"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1103490",
+      "wikidata_qid": "Q1103490",
+      "identifiers": [
+        "NGC3199"
+      ],
+      "names": [
+        "Banana Nebula",
+        "Carina Smile",
+        "Carina's Smile"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1103596",
+      "wikidata_qid": "Q1103596",
+      "identifiers": [
+        "IC606",
+        "NGC3217"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1103643",
+      "wikidata_qid": "Q1103643",
+      "identifiers": [
+        "IC2571",
+        "NGC3223"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1103819",
+      "wikidata_qid": "Q1103819",
+      "identifiers": [
+        "IC2579",
+        "NGC3251"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1103951",
+      "wikidata_qid": "Q1103951",
+      "identifiers": [
+        "IC2585",
+        "NGC3271"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104005",
+      "wikidata_qid": "Q1104005",
+      "identifiers": [
+        "IC622",
+        "NGC3279"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104115",
+      "wikidata_qid": "Q1104115",
+      "identifiers": [
+        "IC618",
+        "NGC3296"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104162",
+      "wikidata_qid": "Q1104162",
+      "identifiers": [
+        "IC629",
+        "NGC3312"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104427",
+      "wikidata_qid": "Q1104427",
+      "identifiers": [
+        "IC2592",
+        "NGC3366"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104575",
+      "wikidata_qid": "Q1104575",
+      "identifiers": [
+        "IC2609",
+        "NGC3404"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1104723",
+      "wikidata_qid": "Q1104723",
+      "identifiers": [
+        "IC2613",
+        "NGC3430"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1105073",
+      "wikidata_qid": "Q1105073",
+      "identifiers": [
+        "IC2624",
+        "NGC3497"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1105114",
+      "wikidata_qid": "Q1105114",
+      "identifiers": [
+        "IC2622",
+        "NGC3508"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1105209",
+      "wikidata_qid": "Q1105209",
+      "identifiers": [
+        "IC2625",
+        "NGC3529"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1105722",
+      "wikidata_qid": "Q1105722",
+      "identifiers": [
+        "IC684",
+        "NGC3644"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1105777",
+      "wikidata_qid": "Q1105777",
+      "identifiers": [
+        "IC689",
+        "NGC3661"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1106305",
+      "wikidata_qid": "Q1106305",
+      "identifiers": [
+        "IC714",
+        "NGC3763"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1106402",
+      "wikidata_qid": "Q1106402",
+      "identifiers": [
+        "IC717",
+        "NGC3779"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1106849",
+      "wikidata_qid": "Q1106849",
+      "identifiers": [
+        "IC2953",
+        "NGC3855"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1106927",
+      "wikidata_qid": "Q1106927",
+      "identifiers": [
+        "IC2959",
+        "NGC3871"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1107105",
+      "wikidata_qid": "Q1107105",
+      "identifiers": [
+        "IC740",
+        "NGC3913"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1107315",
+      "wikidata_qid": "Q1107315",
+      "identifiers": [
+        "IC2965",
+        "NGC3957"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1108397",
+      "wikidata_qid": "Q1108397",
+      "identifiers": [
+        "IC2976",
+        "NGC3979"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1108475",
+      "wikidata_qid": "Q1108475",
+      "identifiers": [
+        "IC2983",
+        "NGC4006"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1108534",
+      "wikidata_qid": "Q1108534",
+      "identifiers": [
+        "IC755",
+        "NGC4019"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1108907",
+      "wikidata_qid": "Q1108907",
+      "identifiers": [
+        "IC2997",
+        "NGC4090"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109246",
+      "wikidata_qid": "Q1109246",
+      "identifiers": [
+        "IC2989",
+        "NGC4139"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109476",
+      "wikidata_qid": "Q1109476",
+      "identifiers": [
+        "IC3035",
+        "NGC4165"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109561",
+      "wikidata_qid": "Q1109561",
+      "identifiers": [
+        "IC3042",
+        "NGC4178"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109655",
+      "wikidata_qid": "Q1109655",
+      "identifiers": [
+        "IC3050",
+        "NGC4189"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109692",
+      "wikidata_qid": "Q1109692",
+      "identifiers": [
+        "IC3051",
+        "NGC4193"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109710",
+      "wikidata_qid": "Q1109710",
+      "identifiers": [
+        "NGC4194"
+      ],
+      "names": [
+        "New General Galaxy 4194"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1109839",
+      "wikidata_qid": "Q1109839",
+      "identifiers": [
+        "IC3064",
+        "NGC4206"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109972",
+      "wikidata_qid": "Q1109972",
+      "identifiers": [
+        "IC3087",
+        "NGC4222"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1109986",
+      "wikidata_qid": "Q1109986",
+      "identifiers": [
+        "IC3102",
+        "NGC4223"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110079",
+      "wikidata_qid": "Q1110079",
+      "identifiers": [
+        "IC3098",
+        "NGC4235"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110123",
+      "wikidata_qid": "Q1110123",
+      "identifiers": [
+        "IC3115",
+        "NGC4241"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110147",
+      "wikidata_qid": "Q1110147",
+      "identifiers": [
+        "IC3113",
+        "NGC4246"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110429",
+      "wikidata_qid": "Q1110429",
+      "identifiers": [
+        "IC3181",
+        "NGC4286"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110792",
+      "wikidata_qid": "Q1110792",
+      "identifiers": [
+        "IC3254",
+        "NGC4336"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110816",
+      "wikidata_qid": "Q1110816",
+      "identifiers": [
+        "IC3260",
+        "NGC4341"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110825",
+      "wikidata_qid": "Q1110825",
+      "identifiers": [
+        "IC3256",
+        "NGC4342"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110900",
+      "wikidata_qid": "Q1110900",
+      "identifiers": [
+        "IC3265",
+        "IC3266",
+        "NGC4353"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110914",
+      "wikidata_qid": "Q1110914",
+      "identifiers": [
+        "IC3273",
+        "NGC4356"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1110958",
+      "wikidata_qid": "Q1110958",
+      "identifiers": [
+        "NGC4361"
+      ],
+      "names": [
+        "Garden Sprinkler Nebula",
+        "Lawn Sprinkler Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1111133",
+      "wikidata_qid": "Q1111133",
+      "identifiers": [
+        "IC3323",
+        "IC3329",
+        "NGC4393"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1111223",
+      "wikidata_qid": "Q1111223",
+      "identifiers": [
+        "IC788",
+        "NGC4405"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1111277",
+      "wikidata_qid": "Q1111277",
+      "identifiers": [
+        "IC3339",
+        "NGC4411A"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q111181791",
+      "wikidata_qid": "Q111181791",
+      "identifiers": [
+        "IC4506"
+      ],
+      "names": [
+        "InterContinental Kaohsiung",
+        "InterContinental Kaohsiung By IHG"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1111866",
+      "wikidata_qid": "Q1111866",
+      "identifiers": [
+        "IC3427",
+        "NGC4482"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1111974",
+      "wikidata_qid": "Q1111974",
+      "identifiers": [
+        "NGC4490"
+      ],
+      "names": [
+        "Cocoon Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1111996",
+      "wikidata_qid": "Q1111996",
+      "identifiers": [
+        "IC3428",
+        "IC3438",
+        "NGC4492"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1112354",
+      "wikidata_qid": "Q1112354",
+      "identifiers": [
+        "NGC4537",
+        "NGC4542"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1112500",
+      "wikidata_qid": "Q1112500",
+      "identifiers": [
+        "IC3569",
+        "NGC4561"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1112566",
+      "wikidata_qid": "Q1112566",
+      "identifiers": [
+        "IC3588",
+        "NGC4571"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1113239",
+      "wikidata_qid": "Q1113239",
+      "identifiers": [
+        "IC3708",
+        "NGC4654"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1113305",
+      "wikidata_qid": "Q1113305",
+      "identifiers": [
+        "IC811",
+        "NGC4663"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1113490",
+      "wikidata_qid": "Q1113490",
+      "identifiers": [
+        "IC823",
+        "NGC4692"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1113610",
+      "wikidata_qid": "Q1113610",
+      "identifiers": [
+        "IC3804",
+        "NGC4711"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1114909",
+      "wikidata_qid": "Q1114909",
+      "identifiers": [
+        "IC3935",
+        "NGC4849"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1115804",
+      "wikidata_qid": "Q1115804",
+      "identifiers": [
+        "IC4136",
+        "NGC4942"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1115840",
+      "wikidata_qid": "Q1115840",
+      "identifiers": [
+        "IC3974",
+        "NGC4947"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1115854",
+      "wikidata_qid": "Q1115854",
+      "identifiers": [
+        "IC4156",
+        "NGC4948"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1116020",
+      "wikidata_qid": "Q1116020",
+      "identifiers": [
+        "IC4196",
+        "NGC4970"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1116035",
+      "wikidata_qid": "Q1116035",
+      "identifiers": [
+        "IC847",
+        "NGC4973"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1116095",
+      "wikidata_qid": "Q1116095",
+      "identifiers": [
+        "IC4198",
+        "NGC4979"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1116336",
+      "wikidata_qid": "Q1116336",
+      "identifiers": [
+        "IC4381",
+        "NGC5008"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1116997",
+      "wikidata_qid": "Q1116997",
+      "identifiers": [
+        "NGC5102"
+      ],
+      "names": [
+        "Iota's Ghost"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1117131",
+      "wikidata_qid": "Q1117131",
+      "identifiers": [
+        "IC4233",
+        "NGC5124"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1117414",
+      "wikidata_qid": "Q1117414",
+      "identifiers": [
+        "NGC5164"
+      ],
+      "names": [
+        "New General Galaxy 5164"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1118865",
+      "wikidata_qid": "Q1118865",
+      "identifiers": [
+        "IC4338",
+        "NGC5334"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1119711",
+      "wikidata_qid": "Q1119711",
+      "identifiers": [
+        "IC4365",
+        "NGC5437"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1120033",
+      "wikidata_qid": "Q1120033",
+      "identifiers": [
+        "IC973",
+        "NGC5467"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1120271",
+      "wikidata_qid": "Q1120271",
+      "identifiers": [
+        "IC4375",
+        "NGC5488"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11212",
+      "wikidata_qid": "Q11212",
+      "identifiers": [
+        "M4",
+        "NGC6121"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11217",
+      "wikidata_qid": "Q11217",
+      "identifiers": [
+        "M5",
+        "NGC5904"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1121841",
+      "wikidata_qid": "Q1121841",
+      "identifiers": [
+        "IC4455",
+        "NGC5664"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1122174",
+      "wikidata_qid": "Q1122174",
+      "identifiers": [
+        "IC4471",
+        "NGC5697"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11225",
+      "wikidata_qid": "Q11225",
+      "identifiers": [
+        "M6",
+        "NGC6405"
+      ],
+      "names": [
+        "Butterfly Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1122569",
+      "wikidata_qid": "Q1122569",
+      "identifiers": [
+        "NGC5746"
+      ],
+      "names": [
+        "Mini Sombrero Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1122577",
+      "wikidata_qid": "Q1122577",
+      "identifiers": [
+        "IC4493",
+        "NGC5747"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1123004",
+      "wikidata_qid": "Q1123004",
+      "identifiers": [
+        "NGC5795"
+      ],
+      "names": [
+        "Jeon Jungkook"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11234",
+      "wikidata_qid": "Q11234",
+      "identifiers": [
+        "M7",
+        "NGC6475"
+      ],
+      "names": [
+        "Ptolemy Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1123790",
+      "wikidata_qid": "Q1123790",
+      "identifiers": [
+        "IC1100",
+        "NGC5881"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1124168",
+      "wikidata_qid": "Q1124168",
+      "identifiers": [
+        "IC1122",
+        "NGC5931"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11243",
+      "wikidata_qid": "Q11243",
+      "identifiers": [
+        "M8",
+        "NGC6523",
+        "SH225"
+      ],
+      "names": [
+        "Lagoon Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1124481",
+      "wikidata_qid": "Q1124481",
+      "identifiers": [
+        "IC4551",
+        "NGC5964"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1124926",
+      "wikidata_qid": "Q1124926",
+      "identifiers": [
+        "IC4586",
+        "NGC6014"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1124997",
+      "wikidata_qid": "Q1124997",
+      "identifiers": [
+        "IC1148",
+        "NGC6020"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125285",
+      "wikidata_qid": "Q1125285",
+      "identifiers": [
+        "IC4588",
+        "NGC6051"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125299",
+      "wikidata_qid": "Q1125299",
+      "identifiers": [
+        "NGC6053",
+        "NGC6057"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125311",
+      "wikidata_qid": "Q1125311",
+      "identifiers": [
+        "IC1183",
+        "IC1184",
+        "NGC6054"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125319",
+      "wikidata_qid": "Q1125319",
+      "identifiers": [
+        "IC1176",
+        "NGC6056"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125523",
+      "wikidata_qid": "Q1125523",
+      "identifiers": [
+        "IC1202",
+        "NGC6081"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11258",
+      "wikidata_qid": "Q11258",
+      "identifiers": [
+        "M9",
+        "NGC6333"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125837",
+      "wikidata_qid": "Q1125837",
+      "identifiers": [
+        "NGC6118"
+      ],
+      "names": [
+        "Blinking Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1125939",
+      "wikidata_qid": "Q1125939",
+      "identifiers": [
+        "IC4602",
+        "NGC6132"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1125984",
+      "wikidata_qid": "Q1125984",
+      "identifiers": [
+        "NGC6138",
+        "NGC6363"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11267",
+      "wikidata_qid": "Q11267",
+      "identifiers": [
+        "M10",
+        "NGC6254"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11294",
+      "wikidata_qid": "Q11294",
+      "identifiers": [
+        "M11",
+        "NGC6705"
+      ],
+      "names": [
+        "Wild Duck Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11307",
+      "wikidata_qid": "Q11307",
+      "identifiers": [
+        "M12",
+        "NGC6218"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11312",
+      "wikidata_qid": "Q11312",
+      "identifiers": [
+        "M13",
+        "NGC6205"
+      ],
+      "names": [
+        "Great Globular Cluster in Hercules",
+        "Hercules Globular Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11320",
+      "wikidata_qid": "Q11320",
+      "identifiers": [
+        "M14",
+        "NGC6402"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11332",
+      "wikidata_qid": "Q11332",
+      "identifiers": [
+        "M15",
+        "NGC7078"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11349",
+      "wikidata_qid": "Q11349",
+      "identifiers": [
+        "IC4703",
+        "M16",
+        "NGC6611"
+      ],
+      "names": [
+        "Eagle Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11357",
+      "wikidata_qid": "Q11357",
+      "identifiers": [
+        "M17",
+        "NGC6618"
+      ],
+      "names": [
+        "Checkmark Nebula",
+        "Horseshoe Nebula",
+        "Lobster Nebula",
+        "Omega Nebula",
+        "Swan Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11370",
+      "wikidata_qid": "Q11370",
+      "identifiers": [
+        "M18",
+        "NGC6613"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11374",
+      "wikidata_qid": "Q11374",
+      "identifiers": [
+        "M19",
+        "NGC6273"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11377",
+      "wikidata_qid": "Q11377",
+      "identifiers": [
+        "M20",
+        "NGC6514"
+      ],
+      "names": [
+        "Trifid Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11383",
+      "wikidata_qid": "Q11383",
+      "identifiers": [
+        "M21",
+        "NGC6531"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q11392",
+      "wikidata_qid": "Q11392",
+      "identifiers": [
+        "M22",
+        "NGC6656"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1139586",
+      "wikidata_qid": "Q1139586",
+      "identifiers": [
+        "NGC7008"
+      ],
+      "names": [
+        "Fetus Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q11396",
+      "wikidata_qid": "Q11396",
+      "identifiers": [
+        "M23",
+        "NGC6494"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1139933",
+      "wikidata_qid": "Q1139933",
+      "identifiers": [
+        "NGC846",
+        "NGC847"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1145239",
+      "wikidata_qid": "Q1145239",
+      "identifiers": [
+        "IC1253",
+        "NGC6347"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1145815",
+      "wikidata_qid": "Q1145815",
+      "identifiers": [
+        "NGC6441"
+      ],
+      "names": [
+        "Silver Nugget Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1146530",
+      "wikidata_qid": "Q1146530",
+      "identifiers": [
+        "NGC6572"
+      ],
+      "names": [
+        "Emerald Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1146564",
+      "wikidata_qid": "Q1146564",
+      "identifiers": [
+        "IC1280",
+        "NGC6581"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1146612",
+      "wikidata_qid": "Q1146612",
+      "identifiers": [
+        "NGC6590",
+        "SH237",
+        "VDB119"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1147044",
+      "wikidata_qid": "Q1147044",
+      "identifiers": [
+        "IC4763",
+        "NGC6679"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1147369",
+      "wikidata_qid": "Q1147369",
+      "identifiers": [
+        "NGC6741"
+      ],
+      "names": [
+        "Phantom Streak Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1147616",
+      "wikidata_qid": "Q1147616",
+      "identifiers": [
+        "NGC6774"
+      ],
+      "names": [
+        "Ruprecht 147"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1147742",
+      "wikidata_qid": "Q1147742",
+      "identifiers": [
+        "IC1300",
+        "NGC6798"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1147876",
+      "wikidata_qid": "Q1147876",
+      "identifiers": [
+        "NGC6820"
+      ],
+      "names": [
+        "Avedisova 878"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1147987",
+      "wikidata_qid": "Q1147987",
+      "identifiers": [
+        "NGC6842",
+        "SH295"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148026",
+      "wikidata_qid": "Q1148026",
+      "identifiers": [
+        "NGC6847",
+        "SH297"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148116",
+      "wikidata_qid": "Q1148116",
+      "identifiers": [
+        "IC4949",
+        "NGC6861"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148212",
+      "wikidata_qid": "Q1148212",
+      "identifiers": [
+        "NGC6872"
+      ],
+      "names": [
+        "Condor Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1148393",
+      "wikidata_qid": "Q1148393",
+      "identifiers": [
+        "IC1316",
+        "IC5000",
+        "NGC6901"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148401",
+      "wikidata_qid": "Q1148401",
+      "identifiers": [
+        "IC4948",
+        "NGC6902"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148565",
+      "wikidata_qid": "Q1148565",
+      "identifiers": [
+        "IC5004",
+        "NGC6923"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148582",
+      "wikidata_qid": "Q1148582",
+      "identifiers": [
+        "IC5015",
+        "NGC6925"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148606",
+      "wikidata_qid": "Q1148606",
+      "identifiers": [
+        "IC1325",
+        "NGC6928"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148673",
+      "wikidata_qid": "Q1148673",
+      "identifiers": [
+        "SH2274"
+      ],
+      "names": [
+        "Medusa Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1148792",
+      "wikidata_qid": "Q1148792",
+      "identifiers": [
+        "NGC6960"
+      ],
+      "names": [
+        "Caldwell 34",
+        "The Western Veil"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1148816",
+      "wikidata_qid": "Q1148816",
+      "identifiers": [
+        "IC5058",
+        "NGC6965"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1148964",
+      "wikidata_qid": "Q1148964",
+      "identifiers": [
+        "NGC6992"
+      ],
+      "names": [
+        "Caldwell 33",
+        "The Eastern Veil"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1149301",
+      "wikidata_qid": "Q1149301",
+      "identifiers": [
+        "IC1382",
+        "NGC7056"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1149534",
+      "wikidata_qid": "Q1149534",
+      "identifiers": [
+        "IC5114",
+        "NGC7091"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1149565",
+      "wikidata_qid": "Q1149565",
+      "identifiers": [
+        "IC5121",
+        "NGC7096"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1149673",
+      "wikidata_qid": "Q1149673",
+      "identifiers": [
+        "NGC7114"
+      ],
+      "names": [
+        "Q Cygni"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1149767",
+      "wikidata_qid": "Q1149767",
+      "identifiers": [
+        "IC5135",
+        "NGC7130"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1149792",
+      "wikidata_qid": "Q1149792",
+      "identifiers": [
+        "NGC7134"
+      ],
+      "names": [
+        "aka The Glum Cyclops (nickname accredited to astronomer Stephen Saber)"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1150459",
+      "wikidata_qid": "Q1150459",
+      "identifiers": [
+        "IC5198",
+        "NGC7246"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1166090",
+      "wikidata_qid": "Q1166090",
+      "identifiers": [
+        "NGC7822",
+        "SH2171"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1166186",
+      "wikidata_qid": "Q1166186",
+      "identifiers": [
+        "LDN1746"
+      ],
+      "names": [
+        "Dark Horse",
+        "Great Dark Horse"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1166873",
+      "wikidata_qid": "Q1166873",
+      "identifiers": [
+        "IC5225",
+        "NGC7294"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1166901",
+      "wikidata_qid": "Q1166901",
+      "identifiers": [
+        "IC5228",
+        "NGC7302"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1166935",
+      "wikidata_qid": "Q1166935",
+      "identifiers": [
+        "IC1448",
+        "NGC7308"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1167175",
+      "wikidata_qid": "Q1167175",
+      "identifiers": [
+        "IC5237",
+        "NGC7361"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1167553",
+      "wikidata_qid": "Q1167553",
+      "identifiers": [
+        "IC1458",
+        "NGC7441"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1167647",
+      "wikidata_qid": "Q1167647",
+      "identifiers": [
+        "IC5281",
+        "NGC7466"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1167860",
+      "wikidata_qid": "Q1167860",
+      "identifiers": [
+        "IC5290",
+        "NGC7520"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1167951",
+      "wikidata_qid": "Q1167951",
+      "identifiers": [
+        "NGC7538",
+        "SH2158"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168237",
+      "wikidata_qid": "Q1168237",
+      "identifiers": [
+        "IC1478",
+        "NGC7594"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168254",
+      "wikidata_qid": "Q1168254",
+      "identifiers": [
+        "IC5308",
+        "NGC7599"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168444",
+      "wikidata_qid": "Q1168444",
+      "identifiers": [
+        "IC1483",
+        "NGC7638"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168450",
+      "wikidata_qid": "Q1168450",
+      "identifiers": [
+        "IC1485",
+        "NGC7639"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168487",
+      "wikidata_qid": "Q1168487",
+      "identifiers": [
+        "IC5318",
+        "NGC7646"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168499",
+      "wikidata_qid": "Q1168499",
+      "identifiers": [
+        "IC1486",
+        "NGC7648"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168509",
+      "wikidata_qid": "Q1168509",
+      "identifiers": [
+        "IC1487",
+        "NGC7649"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1168756",
+      "wikidata_qid": "Q1168756",
+      "identifiers": [
+        "IC5333",
+        "NGC7697"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169060",
+      "wikidata_qid": "Q1169060",
+      "identifiers": [
+        "IC5348",
+        "NGC7744"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169166",
+      "wikidata_qid": "Q1169166",
+      "identifiers": [
+        "IC5361",
+        "NGC7761"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169221",
+      "wikidata_qid": "Q1169221",
+      "identifiers": [
+        "IC1511",
+        "NGC7767"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169256",
+      "wikidata_qid": "Q1169256",
+      "identifiers": [
+        "IC1514",
+        "NGC7776"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169484",
+      "wikidata_qid": "Q1169484",
+      "identifiers": [
+        "IC5384",
+        "NGC7813"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169563",
+      "wikidata_qid": "Q1169563",
+      "identifiers": [
+        "IC1530",
+        "NGC7831"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1169567",
+      "wikidata_qid": "Q1169567",
+      "identifiers": [
+        "IC5386",
+        "NGC7832"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1194932",
+      "wikidata_qid": "Q1194932",
+      "identifiers": [
+        "SH2191"
+      ],
+      "names": [
+        "Maffei 1"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1195975",
+      "wikidata_qid": "Q1195975",
+      "identifiers": [
+        "LDN66"
+      ],
+      "names": [
+        "Snake Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1196507",
+      "wikidata_qid": "Q1196507",
+      "identifiers": [
+        "IC1848",
+        "SH2199"
+      ],
+      "names": [
+        "Soul Nebula",
+        "The Soul nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q12071179",
+      "wikidata_qid": "Q12071179",
+      "identifiers": [
+        "IC186",
+        "IC186A"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q12071187",
+      "wikidata_qid": "Q12071187",
+      "identifiers": [
+        "IC2121",
+        "IC408"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q12071232",
+      "wikidata_qid": "Q12071232",
+      "identifiers": [
+        "IC5007",
+        "IC5041",
+        "IC5047"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q12071233",
+      "wikidata_qid": "Q12071233",
+      "identifiers": [
+        "IC5039",
+        "IC5046"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q12126",
+      "wikidata_qid": "Q12126",
+      "identifiers": [
+        "VDB36"
+      ],
+      "names": [
+        "19 Ori",
+        "19 Orionis",
+        "2E 1238",
+        "AAVSO 0509-08",
+        "BD-08 1063",
+        "Beta Ori",
+        "Beta Orionis",
+        "Beta Orionis A",
+        "RAFGL 710",
+        "Rigel",
+        "bet Ori A",
+        "β Ori",
+        "β Ori A",
+        "β Orionis",
+        "β Orionis A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q12166",
+      "wikidata_qid": "Q12166",
+      "identifiers": [
+        "VDB107"
+      ],
+      "names": [
+        "21 Scorpii",
+        "Alpha Scorpii",
+        "Antares",
+        "α Scorpii"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q124309",
+      "wikidata_qid": "Q124309",
+      "identifiers": [
+        "NGC6188"
+      ],
+      "names": [
+        "Firebird Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1253120",
+      "wikidata_qid": "Q1253120",
+      "identifiers": [
+        "IC5195",
+        "NGC705"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1256234",
+      "wikidata_qid": "Q1256234",
+      "identifiers": [
+        "NGC993",
+        "NGC994"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1256276",
+      "wikidata_qid": "Q1256276",
+      "identifiers": [
+        "NGC755",
+        "NGC763"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1258376",
+      "wikidata_qid": "Q1258376",
+      "identifiers": [
+        "IC543",
+        "NGC2902"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1278305",
+      "wikidata_qid": "Q1278305",
+      "identifiers": [
+        "NGC2520",
+        "NGC2527"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1332681",
+      "wikidata_qid": "Q1332681",
+      "identifiers": [
+        "SH2106"
+      ],
+      "names": [
+        "Celestial Snow Angel"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13423",
+      "wikidata_qid": "Q13423",
+      "identifiers": [
+        "M45"
+      ],
+      "names": [
+        "Pleiades",
+        "SEVEN SISTERS",
+        "Seven Sisters"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13425",
+      "wikidata_qid": "Q13425",
+      "identifiers": [
+        "VDB23"
+      ],
+      "names": [
+        "25 Tau",
+        "25 Tauri",
+        "Alcyone",
+        "Eta Tauri",
+        "η Tau",
+        "η Tauri"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13429",
+      "wikidata_qid": "Q13429",
+      "identifiers": [
+        "VDB20"
+      ],
+      "names": [
+        "17 Tauri",
+        "Electra"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13434",
+      "wikidata_qid": "Q13434",
+      "identifiers": [
+        "VDB21"
+      ],
+      "names": [
+        "20 Tauri",
+        "Maia"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13436",
+      "wikidata_qid": "Q13436",
+      "identifiers": [
+        "VDB22"
+      ],
+      "names": [
+        "23 Tauri",
+        "Merope"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1347977",
+      "wikidata_qid": "Q1347977",
+      "identifiers": [
+        "VDB156"
+      ],
+      "names": [
+        "1 And",
+        "1 Andromedae",
+        "AAVSO 2257+41",
+        "Alfarasalkamil",
+        "Omicron Andromedae",
+        "omi And",
+        "ο And",
+        "ο Andromedae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13479947",
+      "wikidata_qid": "Q13479947",
+      "identifiers": [
+        "NGC4567"
+      ],
+      "names": [
+        "Siamese Twins"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1348576",
+      "wikidata_qid": "Q1348576",
+      "identifiers": [
+        "NGC6866"
+      ],
+      "names": [
+        "Kite Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13584",
+      "wikidata_qid": "Q13584",
+      "identifiers": [
+        "VDB5"
+      ],
+      "names": [
+        "27 Cassiopeiae",
+        "Gamma Cassiopeiae",
+        "Navi",
+        "y Cassiopeiae",
+        "γ Cassiopeiae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13618",
+      "wikidata_qid": "Q13618",
+      "identifiers": [
+        "IC4715",
+        "M24"
+      ],
+      "names": [
+        "Delle Caustiche",
+        "Sagittarius Star Cloud",
+        "Small Sagittarius Star Cloud"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13623",
+      "wikidata_qid": "Q13623",
+      "identifiers": [
+        "IC4725",
+        "M25"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13626",
+      "wikidata_qid": "Q13626",
+      "identifiers": [
+        "M26",
+        "NGC6694"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13628",
+      "wikidata_qid": "Q13628",
+      "identifiers": [
+        "M27",
+        "NGC6853"
+      ],
+      "names": [
+        "Apple Core Nebula",
+        "Dumb-Bell Nebula",
+        "Dumbbell Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13644",
+      "wikidata_qid": "Q13644",
+      "identifiers": [
+        "M28",
+        "NGC6626"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13647",
+      "wikidata_qid": "Q13647",
+      "identifiers": [
+        "M29",
+        "NGC6913"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13653",
+      "wikidata_qid": "Q13653",
+      "identifiers": [
+        "M30",
+        "NGC7099"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13720",
+      "wikidata_qid": "Q13720",
+      "identifiers": [
+        "M32",
+        "NGC221"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13724",
+      "wikidata_qid": "Q13724",
+      "identifiers": [
+        "M33",
+        "NGC598"
+      ],
+      "names": [
+        "Triangulum Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13729",
+      "wikidata_qid": "Q13729",
+      "identifiers": [
+        "M34",
+        "NGC1039"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13736",
+      "wikidata_qid": "Q13736",
+      "identifiers": [
+        "M35",
+        "NGC2168"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13738",
+      "wikidata_qid": "Q13738",
+      "identifiers": [
+        "M36",
+        "NGC1960"
+      ],
+      "names": [
+        "Open Cluster M36"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13760",
+      "wikidata_qid": "Q13760",
+      "identifiers": [
+        "M44",
+        "NGC2632"
+      ],
+      "names": [
+        "Beehive Cluster",
+        "Praesepe"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13878",
+      "wikidata_qid": "Q13878",
+      "identifiers": [
+        "M37",
+        "NGC2099"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13880",
+      "wikidata_qid": "Q13880",
+      "identifiers": [
+        "M38",
+        "NGC1912"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13883",
+      "wikidata_qid": "Q13883",
+      "identifiers": [
+        "M39",
+        "NGC7092"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13897",
+      "wikidata_qid": "Q13897",
+      "identifiers": [
+        "M41",
+        "NGC2287"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13903",
+      "wikidata_qid": "Q13903",
+      "identifiers": [
+        "M42",
+        "NGC1976",
+        "SH2281"
+      ],
+      "names": [
+        "Great Nebula in Orion",
+        "Great Orion Nebula",
+        "Orion Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13906",
+      "wikidata_qid": "Q13906",
+      "identifiers": [
+        "M43",
+        "NGC1982"
+      ],
+      "names": [
+        "De Mairan's Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13910",
+      "wikidata_qid": "Q13910",
+      "identifiers": [
+        "M46",
+        "NGC2437"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13942",
+      "wikidata_qid": "Q13942",
+      "identifiers": [
+        "M47",
+        "NGC2422"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13951",
+      "wikidata_qid": "Q13951",
+      "identifiers": [
+        "M48",
+        "NGC2548"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13952",
+      "wikidata_qid": "Q13952",
+      "identifiers": [
+        "M49",
+        "NGC4472"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13956",
+      "wikidata_qid": "Q13956",
+      "identifiers": [
+        "M50",
+        "NGC2323"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13957",
+      "wikidata_qid": "Q13957",
+      "identifiers": [
+        "M51"
+      ],
+      "names": [
+        "Whirlpool Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13958",
+      "wikidata_qid": "Q13958",
+      "identifiers": [
+        "M52",
+        "NGC7654"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13960",
+      "wikidata_qid": "Q13960",
+      "identifiers": [
+        "M53",
+        "NGC5024"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13962",
+      "wikidata_qid": "Q13962",
+      "identifiers": [
+        "M54",
+        "NGC6715"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13965",
+      "wikidata_qid": "Q13965",
+      "identifiers": [
+        "M55",
+        "NGC6809"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13967",
+      "wikidata_qid": "Q13967",
+      "identifiers": [
+        "M56",
+        "NGC6779"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13969",
+      "wikidata_qid": "Q13969",
+      "identifiers": [
+        "M57",
+        "NGC6720"
+      ],
+      "names": [
+        "Ring Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13970",
+      "wikidata_qid": "Q13970",
+      "identifiers": [
+        "M58",
+        "NGC4579"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13971",
+      "wikidata_qid": "Q13971",
+      "identifiers": [
+        "M59",
+        "NGC4621"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13976",
+      "wikidata_qid": "Q13976",
+      "identifiers": [
+        "M60",
+        "NGC4649"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13978",
+      "wikidata_qid": "Q13978",
+      "identifiers": [
+        "M61",
+        "NGC4303"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13980",
+      "wikidata_qid": "Q13980",
+      "identifiers": [
+        "M62",
+        "NGC6266"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13981",
+      "wikidata_qid": "Q13981",
+      "identifiers": [
+        "M63",
+        "NGC5055"
+      ],
+      "names": [
+        "Sunflower Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13983",
+      "wikidata_qid": "Q13983",
+      "identifiers": [
+        "M64",
+        "NGC4826"
+      ],
+      "names": [
+        "Black Eye Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q13986",
+      "wikidata_qid": "Q13986",
+      "identifiers": [
+        "M65",
+        "NGC3623"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13992",
+      "wikidata_qid": "Q13992",
+      "identifiers": [
+        "M66",
+        "NGC3627"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q13997",
+      "wikidata_qid": "Q13997",
+      "identifiers": [
+        "M67",
+        "NGC2682"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14000",
+      "wikidata_qid": "Q14000",
+      "identifiers": [
+        "M68",
+        "NGC4590"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14002",
+      "wikidata_qid": "Q14002",
+      "identifiers": [
+        "M69",
+        "NGC6637"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14004",
+      "wikidata_qid": "Q14004",
+      "identifiers": [
+        "M70",
+        "NGC6681"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14006",
+      "wikidata_qid": "Q14006",
+      "identifiers": [
+        "M71",
+        "NGC6838"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14008",
+      "wikidata_qid": "Q14008",
+      "identifiers": [
+        "M72",
+        "NGC6981"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14009",
+      "wikidata_qid": "Q14009",
+      "identifiers": [
+        "M73",
+        "NGC6994"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14013",
+      "wikidata_qid": "Q14013",
+      "identifiers": [
+        "M74",
+        "NGC628"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14014",
+      "wikidata_qid": "Q14014",
+      "identifiers": [
+        "M75",
+        "NGC6864"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14015",
+      "wikidata_qid": "Q14015",
+      "identifiers": [
+        "M76",
+        "NGC650",
+        "NGC651"
+      ],
+      "names": [
+        "Barbell Nebula",
+        "Cork Nebula",
+        "Little Dumbbell Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14017",
+      "wikidata_qid": "Q14017",
+      "identifiers": [
+        "M77",
+        "NGC1068"
+      ],
+      "names": [
+        "Cetus A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14018",
+      "wikidata_qid": "Q14018",
+      "identifiers": [
+        "M78",
+        "NGC2068"
+      ],
+      "names": [
+        "Casper the Friendly Ghost Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14019",
+      "wikidata_qid": "Q14019",
+      "identifiers": [
+        "M79",
+        "NGC1904"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14021",
+      "wikidata_qid": "Q14021",
+      "identifiers": [
+        "M80",
+        "NGC6093"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14026",
+      "wikidata_qid": "Q14026",
+      "identifiers": [
+        "M82",
+        "NGC3034"
+      ],
+      "names": [
+        "Cigar Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14030",
+      "wikidata_qid": "Q14030",
+      "identifiers": [
+        "M83",
+        "NGC5236"
+      ],
+      "names": [
+        "Southern Pinwheel Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14035",
+      "wikidata_qid": "Q14035",
+      "identifiers": [
+        "M85",
+        "NGC4382"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14041",
+      "wikidata_qid": "Q14041",
+      "identifiers": [
+        "M87",
+        "NGC4486"
+      ],
+      "names": [
+        "Virgo A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14048",
+      "wikidata_qid": "Q14048",
+      "identifiers": [
+        "M88",
+        "NGC4501"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14275",
+      "wikidata_qid": "Q14275",
+      "identifiers": [
+        "NGC5139"
+      ],
+      "names": [
+        "Caldwell 80",
+        "Omega Centauri"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14276",
+      "wikidata_qid": "Q14276",
+      "identifiers": [
+        "NGC104"
+      ],
+      "names": [
+        "2E 82",
+        "47 Tuc",
+        "47 Tuc Cluster",
+        "47 Tucanae",
+        "FAUST 10",
+        "ksi Tuc",
+        "ξ Tuc"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14337",
+      "wikidata_qid": "Q14337",
+      "identifiers": [
+        "M89",
+        "NGC4552"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14343",
+      "wikidata_qid": "Q14343",
+      "identifiers": [
+        "M90",
+        "NGC4569"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14344",
+      "wikidata_qid": "Q14344",
+      "identifiers": [
+        "M91",
+        "NGC4548"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14347",
+      "wikidata_qid": "Q14347",
+      "identifiers": [
+        "M93",
+        "NGC2447"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14349",
+      "wikidata_qid": "Q14349",
+      "identifiers": [
+        "M94",
+        "NGC4736"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14351",
+      "wikidata_qid": "Q14351",
+      "identifiers": [
+        "M95",
+        "NGC3351"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14354",
+      "wikidata_qid": "Q14354",
+      "identifiers": [
+        "M96",
+        "NGC3368"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14359",
+      "wikidata_qid": "Q14359",
+      "identifiers": [
+        "M97",
+        "NGC3587"
+      ],
+      "names": [
+        "Owl Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14361",
+      "wikidata_qid": "Q14361",
+      "identifiers": [
+        "M98",
+        "NGC4192"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14371",
+      "wikidata_qid": "Q14371",
+      "identifiers": [
+        "M101",
+        "NGC5457"
+      ],
+      "names": [
+        "Pinwheel Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q14376",
+      "wikidata_qid": "Q14376",
+      "identifiers": [
+        "M103",
+        "NGC581"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q14377",
+      "wikidata_qid": "Q14377",
+      "identifiers": [
+        "M105",
+        "NGC3379"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1455054",
+      "wikidata_qid": "Q1455054",
+      "identifiers": [
+        "LDN1616"
+      ],
+      "names": [
+        "Lynds 1616"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q15086",
+      "wikidata_qid": "Q15086",
+      "identifiers": [
+        "NGC2362"
+      ],
+      "names": [
+        "Caldwell 64"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1577426",
+      "wikidata_qid": "Q1577426",
+      "identifiers": [
+        "IC5148",
+        "IC5150"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q15825",
+      "wikidata_qid": "Q15825",
+      "identifiers": [
+        "VDB129"
+      ],
+      "names": [
+        "65 Aql",
+        "65 Aquilae",
+        "Antinous",
+        "BD-01 3911",
+        "Theta Aquilae",
+        "θ Aql",
+        "θ Aquilae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q15829",
+      "wikidata_qid": "Q15829",
+      "identifiers": [
+        "NGC6543"
+      ],
+      "names": [
+        "'''Cat's Eye Nebula'''",
+        "Caldwell 6",
+        "Cat's Eye Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q15831",
+      "wikidata_qid": "Q15831",
+      "identifiers": [
+        "NGC7009"
+      ],
+      "names": [
+        "Saturn Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q163653",
+      "wikidata_qid": "Q163653",
+      "identifiers": [
+        "IC2114",
+        "NGC1748"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1642529",
+      "wikidata_qid": "Q1642529",
+      "identifiers": [
+        "NGC6845"
+      ],
+      "names": [
+        "Klemola 30"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q164982",
+      "wikidata_qid": "Q164982",
+      "identifiers": [
+        "IC39",
+        "NGC178"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1653298",
+      "wikidata_qid": "Q1653298",
+      "identifiers": [
+        "IC1459",
+        "IC5265"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1653311",
+      "wikidata_qid": "Q1653311",
+      "identifiers": [
+        "IC2574"
+      ],
+      "names": [
+        "Coddington's Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q16605469",
+      "wikidata_qid": "Q16605469",
+      "identifiers": [
+        "SH2129"
+      ],
+      "names": [
+        "Flying Bat Nebula",
+        "squid nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q16605573",
+      "wikidata_qid": "Q16605573",
+      "identifiers": [
+        "SH2188"
+      ],
+      "names": [
+        "Simeis 22"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q169096",
+      "wikidata_qid": "Q169096",
+      "identifiers": [
+        "VDB14"
+      ],
+      "names": [
+        "BD+59 660",
+        "CS Cam",
+        "CS Cam A",
+        "CS Camelopardalis",
+        "CS Camelopardalis A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1749117",
+      "wikidata_qid": "Q1749117",
+      "identifiers": [
+        "VDB49"
+      ],
+      "names": [
+        "47 Ori",
+        "47 Orionis",
+        "Omega Orionis",
+        "ome Ori",
+        "ω Ori",
+        "ω Orionis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q179178",
+      "wikidata_qid": "Q179178",
+      "identifiers": [
+        "NGC6905"
+      ],
+      "names": [
+        "Blue Flash Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q18088385",
+      "wikidata_qid": "Q18088385",
+      "identifiers": [
+        "NGC2237"
+      ],
+      "names": [
+        "Rosette A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q183617",
+      "wikidata_qid": "Q183617",
+      "identifiers": [
+        "NGC151",
+        "NGC153"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q1937961",
+      "wikidata_qid": "Q1937961",
+      "identifiers": [
+        "IC4816"
+      ],
+      "names": [
+        "Nova Sagittarii 1898"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q1995668",
+      "wikidata_qid": "Q1995668",
+      "identifiers": [
+        "NGC6281"
+      ],
+      "names": [
+        "Moth Wing Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2001388",
+      "wikidata_qid": "Q2001388",
+      "identifiers": [
+        "IC2963",
+        "NGC3915"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q202993",
+      "wikidata_qid": "Q202993",
+      "identifiers": [
+        "NGC6888"
+      ],
+      "names": [
+        "Crescent Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2084646",
+      "wikidata_qid": "Q2084646",
+      "identifiers": [
+        "IC5260",
+        "NGC7404"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2085231",
+      "wikidata_qid": "Q2085231",
+      "identifiers": [
+        "IC4643",
+        "NGC6301"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2085473",
+      "wikidata_qid": "Q2085473",
+      "identifiers": [
+        "IC4616",
+        "NGC6197"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2085499",
+      "wikidata_qid": "Q2085499",
+      "identifiers": [
+        "IC1213",
+        "NGC6172"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2087035",
+      "wikidata_qid": "Q2087035",
+      "identifiers": [
+        "IC1239",
+        "NGC6276"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2089341",
+      "wikidata_qid": "Q2089341",
+      "identifiers": [
+        "IC3011",
+        "NGC4119"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q210356",
+      "wikidata_qid": "Q210356",
+      "identifiers": [
+        "VDB31"
+      ],
+      "names": [
+        "AB Aur",
+        "AB Aurigae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q211449",
+      "wikidata_qid": "Q211449",
+      "identifiers": [
+        "NGC4676"
+      ],
+      "names": [
+        "Mice Galaxies"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q215543",
+      "wikidata_qid": "Q215543",
+      "identifiers": [
+        "NGC2392"
+      ],
+      "names": [
+        "Caldwell 39",
+        "Clownface Nebula",
+        "Eskimo Nebula",
+        "Lion Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q217045",
+      "wikidata_qid": "Q217045",
+      "identifiers": [
+        "NGC2239",
+        "NGC2244"
+      ],
+      "names": [
+        "Caldwell 50"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q223671",
+      "wikidata_qid": "Q223671",
+      "identifiers": [
+        "NGC6087"
+      ],
+      "names": [
+        "Caldwell 89",
+        "S Normae Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q224145",
+      "wikidata_qid": "Q224145",
+      "identifiers": [
+        "NGC2070"
+      ],
+      "names": [
+        "30 Doradus",
+        "Tarantula Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q226134",
+      "wikidata_qid": "Q226134",
+      "identifiers": [
+        "NGC2264",
+        "SH2273"
+      ],
+      "names": [
+        "Carlos Manuel Brenes Mena C R",
+        "Cone Nebula and the Christmas Tree Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2268090",
+      "wikidata_qid": "Q2268090",
+      "identifiers": [
+        "VDB30"
+      ],
+      "names": [
+        "9 Cam",
+        "9 Camelopardalis",
+        "Alpha Camelopardalis",
+        "BD+66 358",
+        "alf Cam",
+        "α Cam",
+        "α Camelopardalis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q23306973",
+      "wikidata_qid": "Q23306973",
+      "identifiers": [
+        "NGC2070"
+      ],
+      "names": [
+        "Caldwell 103"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2355688",
+      "wikidata_qid": "Q2355688",
+      "identifiers": [
+        "IC443"
+      ],
+      "names": [
+        "Jellyfish Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q241301",
+      "wikidata_qid": "Q241301",
+      "identifiers": [
+        "NGC3195"
+      ],
+      "names": [
+        "Caldwell 109"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2425229",
+      "wikidata_qid": "Q2425229",
+      "identifiers": [
+        "IC466",
+        "SH2288"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2425244",
+      "wikidata_qid": "Q2425244",
+      "identifiers": [
+        "IC2167",
+        "IC446"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q2425261",
+      "wikidata_qid": "Q2425261",
+      "identifiers": [
+        "IC2631"
+      ],
+      "names": [
+        "Chamaeleon Cloud"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2469",
+      "wikidata_qid": "Q2469",
+      "identifiers": [
+        "M31",
+        "NGC224"
+      ],
+      "names": [
+        "Andromeda",
+        "Andromeda Galaxy",
+        "Andromeda Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2475848",
+      "wikidata_qid": "Q2475848",
+      "identifiers": [
+        "SH2101"
+      ],
+      "names": [
+        "Tulip Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2485827",
+      "wikidata_qid": "Q2485827",
+      "identifiers": [
+        "IC1284",
+        "VDB119"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q249820",
+      "wikidata_qid": "Q249820",
+      "identifiers": [
+        "NGC2775"
+      ],
+      "names": [
+        "Caldwell 48"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q249924",
+      "wikidata_qid": "Q249924",
+      "identifiers": [
+        "NGC2360"
+      ],
+      "names": [
+        "Caldwell 58"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2538697",
+      "wikidata_qid": "Q2538697",
+      "identifiers": [
+        "VDB99"
+      ],
+      "names": [
+        "6 Scorpii",
+        "Fang",
+        "Pi Scorpii"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2548238",
+      "wikidata_qid": "Q2548238",
+      "identifiers": [
+        "SH2197"
+      ],
+      "names": [
+        "Maffei 2"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q2554542",
+      "wikidata_qid": "Q2554542",
+      "identifiers": [
+        "IC4592"
+      ],
+      "names": [
+        "Blue Horsehead Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q261879",
+      "wikidata_qid": "Q261879",
+      "identifiers": [
+        "IC5146"
+      ],
+      "names": [
+        "Cocoon Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q265515",
+      "wikidata_qid": "Q265515",
+      "identifiers": [
+        "NGC7000",
+        "SH2117"
+      ],
+      "names": [
+        "North America Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q267072",
+      "wikidata_qid": "Q267072",
+      "identifiers": [
+        "NGC6752"
+      ],
+      "names": [
+        "Caldwell 93"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q279134",
+      "wikidata_qid": "Q279134",
+      "identifiers": [
+        "NGC6744"
+      ],
+      "names": [
+        "Pavo Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q291059",
+      "wikidata_qid": "Q291059",
+      "identifiers": [
+        "IC2529",
+        "NGC3081"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q291545",
+      "wikidata_qid": "Q291545",
+      "identifiers": [
+        "VDB34"
+      ],
+      "names": [
+        "AE Aur",
+        "AE Aurigae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q29312",
+      "wikidata_qid": "Q29312",
+      "identifiers": [
+        "NGC17",
+        "NGC34"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3083343",
+      "wikidata_qid": "Q3083343",
+      "identifiers": [
+        "M54"
+      ],
+      "names": [
+        "Rapsodie espagnole"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3099056",
+      "wikidata_qid": "Q3099056",
+      "identifiers": [
+        "IC1470",
+        "SH2156"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3102341",
+      "wikidata_qid": "Q3102341",
+      "identifiers": [
+        "IC4889",
+        "IC4891"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q31264",
+      "wikidata_qid": "Q31264",
+      "identifiers": [
+        "NGC20",
+        "NGC6"
+      ],
+      "names": [
+        "Thiên thể NGC 20",
+        "Thiên thể NGC 6"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3146561",
+      "wikidata_qid": "Q3146561",
+      "identifiers": [
+        "IC410"
+      ],
+      "names": [
+        "Tadpole Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3146562",
+      "wikidata_qid": "Q3146562",
+      "identifiers": [
+        "IC4441",
+        "IC4444"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3146566",
+      "wikidata_qid": "Q3146566",
+      "identifiers": [
+        "IC4628"
+      ],
+      "names": [
+        "Prawn Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3191176",
+      "wikidata_qid": "Q3191176",
+      "identifiers": [
+        "SH2279"
+      ],
+      "names": [
+        "Running Man Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3194569",
+      "wikidata_qid": "Q3194569",
+      "identifiers": [
+        "IC3247",
+        "NGC4338"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q33586",
+      "wikidata_qid": "Q33586",
+      "identifiers": [
+        "IC1805",
+        "SH2190"
+      ],
+      "names": [
+        "Heart Nebula",
+        "Running dog nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q338392",
+      "wikidata_qid": "Q338392",
+      "identifiers": [
+        "NGC2261"
+      ],
+      "names": [
+        "Caldwell 46",
+        "Hubble's Variable Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q34500",
+      "wikidata_qid": "Q34500",
+      "identifiers": [
+        "NGC21",
+        "NGC29"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3481114",
+      "wikidata_qid": "Q3481114",
+      "identifiers": [
+        "SH2239"
+      ],
+      "names": [
+        "[TP72] 11"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3597406",
+      "wikidata_qid": "Q3597406",
+      "identifiers": [
+        "VDB81"
+      ],
+      "names": [
+        "13 Mon",
+        "13 Monocerotis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3679338",
+      "wikidata_qid": "Q3679338",
+      "identifiers": [
+        "IC2169",
+        "IC447"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3679578",
+      "wikidata_qid": "Q3679578",
+      "identifiers": [
+        "IC5362",
+        "IC5363"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3679820",
+      "wikidata_qid": "Q3679820",
+      "identifiers": [
+        "IC5299"
+      ],
+      "names": [
+        "2MASX J23161913+2051209"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3680393",
+      "wikidata_qid": "Q3680393",
+      "identifiers": [
+        "IC5179",
+        "IC5183",
+        "IC5184"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3680400",
+      "wikidata_qid": "Q3680400",
+      "identifiers": [
+        "IC5173",
+        "IC5173A"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3680477",
+      "wikidata_qid": "Q3680477",
+      "identifiers": [
+        "IC5117"
+      ],
+      "names": [
+        "MITG J2132+4435"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3680522",
+      "wikidata_qid": "Q3680522",
+      "identifiers": [
+        "IC5126"
+      ],
+      "names": [
+        "6dFGS gJ214028.6-062045"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3680862",
+      "wikidata_qid": "Q3680862",
+      "identifiers": [
+        "IC5011",
+        "IC5013"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3681026",
+      "wikidata_qid": "Q3681026",
+      "identifiers": [
+        "IC4854",
+        "IC4855"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3681037",
+      "wikidata_qid": "Q3681037",
+      "identifiers": [
+        "IC4857",
+        "IC4858"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3681159",
+      "wikidata_qid": "Q3681159",
+      "identifiers": [
+        "IC4998",
+        "IC5018"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3681439",
+      "wikidata_qid": "Q3681439",
+      "identifiers": [
+        "IC4871",
+        "IC4872"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3682693",
+      "wikidata_qid": "Q3682693",
+      "identifiers": [
+        "IC4476"
+      ],
+      "names": [
+        "2MASX J14395187-1614405"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3683789",
+      "wikidata_qid": "Q3683789",
+      "identifiers": [
+        "IC4183"
+      ],
+      "names": [
+        "2MASX J13061153+2130155"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3684181",
+      "wikidata_qid": "Q3684181",
+      "identifiers": [
+        "IC4059"
+      ],
+      "names": [
+        "LAMOST J130115.46+191624.7"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3684341",
+      "wikidata_qid": "Q3684341",
+      "identifiers": [
+        "IC4067",
+        "IC4068"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3684822",
+      "wikidata_qid": "Q3684822",
+      "identifiers": [
+        "IC3917",
+        "IC3918"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3684902",
+      "wikidata_qid": "Q3684902",
+      "identifiers": [
+        "IC3877",
+        "IC3881"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3685205",
+      "wikidata_qid": "Q3685205",
+      "identifiers": [
+        "IC3808",
+        "IC3810"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3685211",
+      "wikidata_qid": "Q3685211",
+      "identifiers": [
+        "IC3827",
+        "IC3838"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3685863",
+      "wikidata_qid": "Q3685863",
+      "identifiers": [
+        "IC3716",
+        "IC3719"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3685946",
+      "wikidata_qid": "Q3685946",
+      "identifiers": [
+        "IC3721",
+        "IC3725"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3686260",
+      "wikidata_qid": "Q3686260",
+      "identifiers": [
+        "IC3496",
+        "IC3498"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3686351",
+      "wikidata_qid": "Q3686351",
+      "identifiers": [
+        "IC3644",
+        "IC3645"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3686424",
+      "wikidata_qid": "Q3686424",
+      "identifiers": [
+        "IC3612",
+        "IC3616"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3687068",
+      "wikidata_qid": "Q3687068",
+      "identifiers": [
+        "IC3301",
+        "IC3307"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3687645",
+      "wikidata_qid": "Q3687645",
+      "identifiers": [
+        "IC3131",
+        "IC3132"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3689296",
+      "wikidata_qid": "Q3689296",
+      "identifiers": [
+        "IC2672",
+        "IC2673"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3689363",
+      "wikidata_qid": "Q3689363",
+      "identifiers": [
+        "IC2511",
+        "IC2512"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3689737",
+      "wikidata_qid": "Q3689737",
+      "identifiers": [
+        "IC2513",
+        "IC2514"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3690832",
+      "wikidata_qid": "Q3690832",
+      "identifiers": [
+        "IC2336",
+        "IC2337"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3691083",
+      "wikidata_qid": "Q3691083",
+      "identifiers": [
+        "IC2365",
+        "IC2366"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3691499",
+      "wikidata_qid": "Q3691499",
+      "identifiers": [
+        "IC2135",
+        "IC2136"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3691770",
+      "wikidata_qid": "Q3691770",
+      "identifiers": [
+        "IC2282",
+        "IC2283"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3691786",
+      "wikidata_qid": "Q3691786",
+      "identifiers": [
+        "IC2162",
+        "SH2255"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3691968",
+      "wikidata_qid": "Q3691968",
+      "identifiers": [
+        "IC2220"
+      ],
+      "names": [
+        "Toby Jug Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3691990",
+      "wikidata_qid": "Q3691990",
+      "identifiers": [
+        "IC2099",
+        "NGC1677"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3692141",
+      "wikidata_qid": "Q3692141",
+      "identifiers": [
+        "IC2129",
+        "IC2130"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3692497",
+      "wikidata_qid": "Q3692497",
+      "identifiers": [
+        "IC1826",
+        "IC1830"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3692793",
+      "wikidata_qid": "Q3692793",
+      "identifiers": [
+        "IC2007",
+        "IC2008"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3692835",
+      "wikidata_qid": "Q3692835",
+      "identifiers": [
+        "IC1979",
+        "IC1980"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3693524",
+      "wikidata_qid": "Q3693524",
+      "identifiers": [
+        "IC1490",
+        "IC1524"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3693637",
+      "wikidata_qid": "Q3693637",
+      "identifiers": [
+        "IC1495",
+        "IC5327"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3694136",
+      "wikidata_qid": "Q3694136",
+      "identifiers": [
+        "IC1657",
+        "IC1663"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3694142",
+      "wikidata_qid": "Q3694142",
+      "identifiers": [
+        "IC1523",
+        "IC5368"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3710600",
+      "wikidata_qid": "Q3710600",
+      "identifiers": [
+        "IC1252",
+        "IC4649"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3710780",
+      "wikidata_qid": "Q3710780",
+      "identifiers": [
+        "IC1310"
+      ],
+      "names": [
+        "Berkeley 50"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3710985",
+      "wikidata_qid": "Q3710985",
+      "identifiers": [
+        "IC1172",
+        "IC1192"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711019",
+      "wikidata_qid": "Q3711019",
+      "identifiers": [
+        "IC1118",
+        "IC4543"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711133",
+      "wikidata_qid": "Q3711133",
+      "identifiers": [
+        "IC1012",
+        "IC4431"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711178",
+      "wikidata_qid": "Q3711178",
+      "identifiers": [
+        "IC1056",
+        "IC1057"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711358",
+      "wikidata_qid": "Q3711358",
+      "identifiers": [
+        "IC1055",
+        "IC4491"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711418",
+      "wikidata_qid": "Q3711418",
+      "identifiers": [
+        "IC934",
+        "IC936"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711559",
+      "wikidata_qid": "Q3711559",
+      "identifiers": [
+        "IC4222",
+        "IC879"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711604",
+      "wikidata_qid": "Q3711604",
+      "identifiers": [
+        "IC4205",
+        "IC853"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711605",
+      "wikidata_qid": "Q3711605",
+      "identifiers": [
+        "IC3672",
+        "IC809"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711662",
+      "wikidata_qid": "Q3711662",
+      "identifiers": [
+        "IC3764",
+        "IC817"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3711739",
+      "wikidata_qid": "Q3711739",
+      "identifiers": [
+        "IC3067",
+        "IC772"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3712010",
+      "wikidata_qid": "Q3712010",
+      "identifiers": [
+        "IC610",
+        "IC611"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3712955",
+      "wikidata_qid": "Q3712955",
+      "identifiers": [
+        "IC2131",
+        "IC422"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3712993",
+      "wikidata_qid": "Q3712993",
+      "identifiers": [
+        "IC2123",
+        "IC412"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3713540",
+      "wikidata_qid": "Q3713540",
+      "identifiers": [
+        "IC417",
+        "SH2234"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3713557",
+      "wikidata_qid": "Q3713557",
+      "identifiers": [
+        "IC2124",
+        "IC413"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3713865",
+      "wikidata_qid": "Q3713865",
+      "identifiers": [
+        "IC256",
+        "IC257"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3713935",
+      "wikidata_qid": "Q3713935",
+      "identifiers": [
+        "IC1787",
+        "IC217"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3714069",
+      "wikidata_qid": "Q3714069",
+      "identifiers": [
+        "IC1889",
+        "IC294",
+        "IC295",
+        "IC296"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3714251",
+      "wikidata_qid": "Q3714251",
+      "identifiers": [
+        "IC1887",
+        "IC292"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3714275",
+      "wikidata_qid": "Q3714275",
+      "identifiers": [
+        "IC242",
+        "IC243"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3714528",
+      "wikidata_qid": "Q3714528",
+      "identifiers": [
+        "IC1884",
+        "IC290"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3714535",
+      "wikidata_qid": "Q3714535",
+      "identifiers": [
+        "IC1888",
+        "IC293"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3717693",
+      "wikidata_qid": "Q3717693",
+      "identifiers": [
+        "IC3128",
+        "IC3128A"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3719001",
+      "wikidata_qid": "Q3719001",
+      "identifiers": [
+        "IC1407",
+        "NGC7148"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3719027",
+      "wikidata_qid": "Q3719027",
+      "identifiers": [
+        "IC732",
+        "IC732S"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q3719045",
+      "wikidata_qid": "Q3719045",
+      "identifiers": [
+        "IC960",
+        "IC960A"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q372496",
+      "wikidata_qid": "Q372496",
+      "identifiers": [
+        "NGC3532"
+      ],
+      "names": [
+        "Caldwell 91"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3781282",
+      "wikidata_qid": "Q3781282",
+      "identifiers": [
+        "VDB95"
+      ],
+      "names": [
+        "FN Canis Majoris"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q395539",
+      "wikidata_qid": "Q395539",
+      "identifiers": [
+        "NGC87"
+      ],
+      "names": [
+        "Robert's Quartet 1"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3958760",
+      "wikidata_qid": "Q3958760",
+      "identifiers": [
+        "SH2119"
+      ],
+      "names": [
+        "Clamshell Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3958820",
+      "wikidata_qid": "Q3958820",
+      "identifiers": [
+        "SH2261"
+      ],
+      "names": [
+        "Lower's Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q3958876",
+      "wikidata_qid": "Q3958876",
+      "identifiers": [
+        "SH264"
+      ],
+      "names": [
+        "Westerhout 40"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4009100",
+      "wikidata_qid": "Q4009100",
+      "identifiers": [
+        "VDB27"
+      ],
+      "names": [
+        "RY Tauri",
+        "V* RY Tau"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4009140",
+      "wikidata_qid": "Q4009140",
+      "identifiers": [
+        "VDB75"
+      ],
+      "names": [
+        "12 Geminorum"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4009144",
+      "wikidata_qid": "Q4009144",
+      "identifiers": [
+        "SH2293",
+        "VDB88"
+      ],
+      "names": [
+        "GU Canis Majoris"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q43880",
+      "wikidata_qid": "Q43880",
+      "identifiers": [
+        "NGC38"
+      ],
+      "names": [
+        "Stephan XII"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q43933",
+      "wikidata_qid": "Q43933",
+      "identifiers": [
+        "NGC40"
+      ],
+      "names": [
+        "Bow-Tie Nebula",
+        "Bowtie Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4631321",
+      "wikidata_qid": "Q4631321",
+      "identifiers": [
+        "VDB108"
+      ],
+      "names": [
+        "22 Scorpii",
+        "i Scorpii"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4631898",
+      "wikidata_qid": "Q4631898",
+      "identifiers": [
+        "VDB109"
+      ],
+      "names": [
+        "24 Sco",
+        "24 Scorpii"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4658",
+      "wikidata_qid": "Q4658",
+      "identifiers": [
+        "M106",
+        "NGC4258"
+      ],
+      "names": [
+        "Spiral Galaxy M106"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4662",
+      "wikidata_qid": "Q4662",
+      "identifiers": [
+        "NGC205"
+      ],
+      "names": [
+        "Dwarf Elliptical Galaxy M110",
+        "Elliptical Galaxy M110",
+        "ISOSS J00403+4140"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4735429",
+      "wikidata_qid": "Q4735429",
+      "identifiers": [
+        "IC1778",
+        "IC199"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q4746",
+      "wikidata_qid": "Q4746",
+      "identifiers": [
+        "M109",
+        "NGC3992"
+      ],
+      "names": [
+        "Barred Galaxy M109",
+        "Barred Spiral Galaxy M109",
+        "Spiral Galaxy M109"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4751",
+      "wikidata_qid": "Q4751",
+      "identifiers": [
+        "M108",
+        "NGC3556"
+      ],
+      "names": [
+        "Spiral Galaxy M108",
+        "Surfboard Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q4755",
+      "wikidata_qid": "Q4755",
+      "identifiers": [
+        "M107",
+        "NGC6171"
+      ],
+      "names": [
+        "Globular Cluster M107"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q487221",
+      "wikidata_qid": "Q487221",
+      "identifiers": [
+        "NGC253"
+      ],
+      "names": [
+        "Sculptor Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q487244",
+      "wikidata_qid": "Q487244",
+      "identifiers": [
+        "NGC4414"
+      ],
+      "names": [
+        "Dusty Spiral Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q487255",
+      "wikidata_qid": "Q487255",
+      "identifiers": [
+        "NGC5128"
+      ],
+      "names": [
+        "Centaurus A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q48726419",
+      "wikidata_qid": "Q48726419",
+      "identifiers": [
+        "LDN1082"
+      ],
+      "names": [
+        "Seahorse Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q490342",
+      "wikidata_qid": "Q490342",
+      "identifiers": [
+        "NGC2024"
+      ],
+      "names": [
+        "Burning Bush Nebula",
+        "Flame Nebula",
+        "Lips Nebula",
+        "Maple Leaf Nebula",
+        "Orion B",
+        "Tank Tracks Nebula",
+        "The Ghost of Alnitak"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q490345",
+      "wikidata_qid": "Q490345",
+      "identifiers": [
+        "NGC891"
+      ],
+      "names": [
+        "Outer Limits Galaxy",
+        "Silver Sliver Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q490599",
+      "wikidata_qid": "Q490599",
+      "identifiers": [
+        "NGC300"
+      ],
+      "names": [
+        "Caldwell 70"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q490605",
+      "wikidata_qid": "Q490605",
+      "identifiers": [
+        "NGC3628"
+      ],
+      "names": [
+        "Hamburger Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q494007",
+      "wikidata_qid": "Q494007",
+      "identifiers": [
+        "NGC2683"
+      ],
+      "names": [
+        "UFO Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q494019",
+      "wikidata_qid": "Q494019",
+      "identifiers": [
+        "NGC1499",
+        "SH2220"
+      ],
+      "names": [
+        "California Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q494054",
+      "wikidata_qid": "Q494054",
+      "identifiers": [
+        "NGC1365"
+      ],
+      "names": [
+        "Fornax Propeller Galaxy",
+        "Great Barred Spiral Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q496342",
+      "wikidata_qid": "Q496342",
+      "identifiers": [
+        "NGC89"
+      ],
+      "names": [
+        "Robert's Quartet 3"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q49682",
+      "wikidata_qid": "Q49682",
+      "identifiers": [
+        "NGC47",
+        "NGC58"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q497687",
+      "wikidata_qid": "Q497687",
+      "identifiers": [
+        "NGC1275"
+      ],
+      "names": [
+        "Perseus A"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q497739",
+      "wikidata_qid": "Q497739",
+      "identifiers": [
+        "NGC6302",
+        "SH26"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q49984",
+      "wikidata_qid": "Q49984",
+      "identifiers": [
+        "NGC292"
+      ],
+      "names": [
+        "SMC",
+        "Small Magellanic Cloud"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q50042",
+      "wikidata_qid": "Q50042",
+      "identifiers": [
+        "NGC3372"
+      ],
+      "names": [
+        "Carina Nebula",
+        "Eta Carina Nebula",
+        "Great Nebula in Carina"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q50050",
+      "wikidata_qid": "Q50050",
+      "identifiers": [
+        "IC2602"
+      ],
+      "names": [
+        "Southern Pleiades",
+        "Theta Carinae Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q5010398",
+      "wikidata_qid": "Q5010398",
+      "identifiers": [
+        "VDB15"
+      ],
+      "names": [
+        "CE Cam",
+        "CE Camelopardalis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q502000",
+      "wikidata_qid": "Q502000",
+      "identifiers": [
+        "IC4625",
+        "NGC6240"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q50325969",
+      "wikidata_qid": "Q50325969",
+      "identifiers": [
+        "M52"
+      ],
+      "names": [
+        "The Apostle Andrew"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q50326447",
+      "wikidata_qid": "Q50326447",
+      "identifiers": [
+        "M62"
+      ],
+      "names": [
+        "Copy of Raphael's Madonna of the Chair"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q506384",
+      "wikidata_qid": "Q506384",
+      "identifiers": [
+        "NGC4631"
+      ],
+      "names": [
+        "Caldwell 32",
+        "Whale Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q50650",
+      "wikidata_qid": "Q50650",
+      "identifiers": [
+        "NGC55"
+      ],
+      "names": [
+        "Caldwell 72",
+        "Nuevo Catálogo General 55",
+        "String of Pearls Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q5098537",
+      "wikidata_qid": "Q5098537",
+      "identifiers": [
+        "VDB134"
+      ],
+      "names": [
+        "45 Cyg",
+        "45 Cygni",
+        "Omega1 Cygni",
+        "ω1 Cyg",
+        "ω1 Cygni",
+        "ω¹ Cyg"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q512722",
+      "wikidata_qid": "Q512722",
+      "identifiers": [
+        "IC5136",
+        "NGC7135"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q5177587",
+      "wikidata_qid": "Q5177587",
+      "identifiers": [
+        "VDB127"
+      ],
+      "names": [
+        "7 Sagittae",
+        "Delta Sagittae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q527158",
+      "wikidata_qid": "Q527158",
+      "identifiers": [
+        "IC5070"
+      ],
+      "names": [
+        "Pelican Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q536591",
+      "wikidata_qid": "Q536591",
+      "identifiers": [
+        "NGC246"
+      ],
+      "names": [
+        "Caldwell 56",
+        "Cetus ring",
+        "pac-man nebula",
+        "skull nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q544217",
+      "wikidata_qid": "Q544217",
+      "identifiers": [
+        "IC2177",
+        "SH2292",
+        "VDB93"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q575282",
+      "wikidata_qid": "Q575282",
+      "identifiers": [
+        "NGC2146"
+      ],
+      "names": [
+        "Dusty Hand Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q578660",
+      "wikidata_qid": "Q578660",
+      "identifiers": [
+        "NGC6394"
+      ],
+      "names": [
+        "SBb"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q580685",
+      "wikidata_qid": "Q580685",
+      "identifiers": [
+        "IC1477",
+        "NGC7596"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q581019",
+      "wikidata_qid": "Q581019",
+      "identifiers": [
+        "NGC3766"
+      ],
+      "names": [
+        "Caldwell 97"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q582073",
+      "wikidata_qid": "Q582073",
+      "identifiers": [
+        "IC3667",
+        "NGC4618"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q582750",
+      "wikidata_qid": "Q582750",
+      "identifiers": [
+        "IC1983",
+        "NGC1415"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q583803",
+      "wikidata_qid": "Q583803",
+      "identifiers": [
+        "IC799",
+        "NGC4520"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q587703",
+      "wikidata_qid": "Q587703",
+      "identifiers": [
+        "NGC3370"
+      ],
+      "names": [
+        "Silverado Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q591242",
+      "wikidata_qid": "Q591242",
+      "identifiers": [
+        "IC4615",
+        "NGC6196"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q593465",
+      "wikidata_qid": "Q593465",
+      "identifiers": [
+        "IC2062",
+        "NGC1560"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q594780",
+      "wikidata_qid": "Q594780",
+      "identifiers": [
+        "IC652",
+        "NGC3421"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q597212",
+      "wikidata_qid": "Q597212",
+      "identifiers": [
+        "NGC362"
+      ],
+      "names": [
+        "Caldwell 104"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q603587",
+      "wikidata_qid": "Q603587",
+      "identifiers": [
+        "NGC203",
+        "NGC211"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q612606",
+      "wikidata_qid": "Q612606",
+      "identifiers": [
+        "NGC6723"
+      ],
+      "names": [
+        "Chandelier Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q622690",
+      "wikidata_qid": "Q622690",
+      "identifiers": [
+        "NGC4565"
+      ],
+      "names": [
+        "Needle Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q622708",
+      "wikidata_qid": "Q622708",
+      "identifiers": [
+        "NGC88"
+      ],
+      "names": [
+        "Robert's Quartet 2"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q622789",
+      "wikidata_qid": "Q622789",
+      "identifiers": [
+        "IC4895",
+        "NGC6822"
+      ],
+      "names": [
+        "Caldwell 57"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q631985",
+      "wikidata_qid": "Q631985",
+      "identifiers": [
+        "NGC577",
+        "NGC580"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q639439",
+      "wikidata_qid": "Q639439",
+      "identifiers": [
+        "NGC92"
+      ],
+      "names": [
+        "Robert's Quartet 4"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q641074",
+      "wikidata_qid": "Q641074",
+      "identifiers": [
+        "NGC281",
+        "SH2184"
+      ],
+      "names": [
+        "Pacman Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q645537",
+      "wikidata_qid": "Q645537",
+      "identifiers": [
+        "IC1108",
+        "NGC5882"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q649379",
+      "wikidata_qid": "Q649379",
+      "identifiers": [
+        "NGC7023"
+      ],
+      "names": [
+        "Iris Nebula",
+        "NAME IRIS Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q658321",
+      "wikidata_qid": "Q658321",
+      "identifiers": [
+        "IC1808",
+        "NGC963"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q662643",
+      "wikidata_qid": "Q662643",
+      "identifiers": [
+        "NGC1502"
+      ],
+      "names": [
+        "Golden Harp Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q66362637",
+      "wikidata_qid": "Q66362637",
+      "identifiers": [
+        "VDB122"
+      ],
+      "names": [
+        "W Sct",
+        "W Scuti"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q66476835",
+      "wikidata_qid": "Q66476835",
+      "identifiers": [
+        "NGC2142"
+      ],
+      "names": [
+        "3 Mon",
+        "3 Monocerotis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q671210",
+      "wikidata_qid": "Q671210",
+      "identifiers": [
+        "NGC6946"
+      ],
+      "names": [
+        "Fireworks Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q671468",
+      "wikidata_qid": "Q671468",
+      "identifiers": [
+        "NGC3115"
+      ],
+      "names": [
+        "Caldwell 53"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q675895",
+      "wikidata_qid": "Q675895",
+      "identifiers": [
+        "IC4690",
+        "NGC6589"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q677302",
+      "wikidata_qid": "Q677302",
+      "identifiers": [
+        "NGC1535"
+      ],
+      "names": [
+        "Cleopatra's Eye"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q692891",
+      "wikidata_qid": "Q692891",
+      "identifiers": [
+        "IC3688",
+        "NGC4633"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q696066",
+      "wikidata_qid": "Q696066",
+      "identifiers": [
+        "NGC520"
+      ],
+      "names": [
+        "Flying Ghost"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q696249",
+      "wikidata_qid": "Q696249",
+      "identifiers": [
+        "NGC2174"
+      ],
+      "names": [
+        "Monkey Head Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q696260",
+      "wikidata_qid": "Q696260",
+      "identifiers": [
+        "NGC188"
+      ],
+      "names": [
+        "Polarissima Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q698547",
+      "wikidata_qid": "Q698547",
+      "identifiers": [
+        "IC1127",
+        "IC4553"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q725471",
+      "wikidata_qid": "Q725471",
+      "identifiers": [
+        "NGC7635",
+        "SH2162"
+      ],
+      "names": [
+        "Bubble Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q725477",
+      "wikidata_qid": "Q725477",
+      "identifiers": [
+        "NGC4755"
+      ],
+      "names": [
+        "Caldwell 94",
+        "Jewel Box",
+        "Kappa Crucis Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q725489",
+      "wikidata_qid": "Q725489",
+      "identifiers": [
+        "NGC3132"
+      ],
+      "names": [
+        "Caldwell 74",
+        "Eight-Burst Nebula",
+        "Southern Ring Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q729053",
+      "wikidata_qid": "Q729053",
+      "identifiers": [
+        "NGC4697"
+      ],
+      "names": [
+        "Caldwell 52"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q73008746",
+      "wikidata_qid": "Q73008746",
+      "identifiers": [
+        "M64"
+      ],
+      "names": [
+        "Holy Night"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q73011616",
+      "wikidata_qid": "Q73011616",
+      "identifiers": [
+        "M63"
+      ],
+      "names": [
+        "The Day"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q730450",
+      "wikidata_qid": "Q730450",
+      "identifiers": [
+        "NGC457"
+      ],
+      "names": [
+        "ET Cluster",
+        "Owl Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q731070",
+      "wikidata_qid": "Q731070",
+      "identifiers": [
+        "NGC6193"
+      ],
+      "names": [
+        "Caldwell 82"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q731984",
+      "wikidata_qid": "Q731984",
+      "identifiers": [
+        "IC5313",
+        "NGC7632"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q74183804",
+      "wikidata_qid": "Q74183804",
+      "identifiers": [
+        "LDN935"
+      ],
+      "names": [
+        "NAME Golf of Mexico"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q744991",
+      "wikidata_qid": "Q744991",
+      "identifiers": [
+        "NGC2419"
+      ],
+      "names": [
+        "Intergalactic Wanderer"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q745008",
+      "wikidata_qid": "Q745008",
+      "identifiers": [
+        "NGC2516"
+      ],
+      "names": [
+        "Caldwell 96"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q747344",
+      "wikidata_qid": "Q747344",
+      "identifiers": [
+        "NGC772"
+      ],
+      "names": [
+        "Fiddlehead Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q7486706",
+      "wikidata_qid": "Q7486706",
+      "identifiers": [
+        "NGC6027"
+      ],
+      "names": [
+        "Seyfert's Sextet"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q750725",
+      "wikidata_qid": "Q750725",
+      "identifiers": [
+        "IC2133",
+        "NGC1961"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q754097",
+      "wikidata_qid": "Q754097",
+      "identifiers": [
+        "NGC7479"
+      ],
+      "names": [
+        "Caldwell 44",
+        "Superman Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q757175",
+      "wikidata_qid": "Q757175",
+      "identifiers": [
+        "NGC6397"
+      ],
+      "names": [
+        "Caldwell 86"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q770963",
+      "wikidata_qid": "Q770963",
+      "identifiers": [
+        "IC2410",
+        "NGC2667"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q782342",
+      "wikidata_qid": "Q782342",
+      "identifiers": [
+        "VDB106"
+      ],
+      "names": [
+        "5 Oph",
+        "5 Ophiuchi",
+        "Rho Ophiuchi",
+        "[SC96] Oph 63",
+        "ρ Oph",
+        "ρ Ophiuchi"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q78262275",
+      "wikidata_qid": "Q78262275",
+      "identifiers": [
+        "M92",
+        "NGC6341"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q78384126",
+      "wikidata_qid": "Q78384126",
+      "identifiers": [
+        "M3",
+        "NGC5272"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q79182222",
+      "wikidata_qid": "Q79182222",
+      "identifiers": [
+        "LDN1622"
+      ],
+      "names": [
+        "The Boogeyman Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q79289387",
+      "wikidata_qid": "Q79289387",
+      "identifiers": [
+        "VDB60"
+      ],
+      "names": [
+        "V* V1380 Ori"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q79642350",
+      "wikidata_qid": "Q79642350",
+      "identifiers": [
+        "IC2944"
+      ],
+      "names": [
+        "Caldwell 100",
+        "Lambda Cen Nebula",
+        "Running Chicken Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q80721346",
+      "wikidata_qid": "Q80721346",
+      "identifiers": [
+        "LDN1634"
+      ],
+      "names": [
+        "NAME HH 240/241"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q80941707",
+      "wikidata_qid": "Q80941707",
+      "identifiers": [
+        "NGC6537"
+      ],
+      "names": [
+        "Red Spider Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q81102410",
+      "wikidata_qid": "Q81102410",
+      "identifiers": [
+        "M81",
+        "NGC3031"
+      ],
+      "names": [
+        "Bode's Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q830937",
+      "wikidata_qid": "Q830937",
+      "identifiers": [
+        "NGC5866"
+      ],
+      "names": [
+        "Spindle Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q832978",
+      "wikidata_qid": "Q832978",
+      "identifiers": [
+        "NGC2359",
+        "SH2298"
+      ],
+      "names": [
+        "Nebula Thor Helmet",
+        "Thor's Helmet"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q835928",
+      "wikidata_qid": "Q835928",
+      "identifiers": [
+        "NGC1555",
+        "SH2238"
+      ],
+      "names": [
+        "Hind's Variable Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q840003",
+      "wikidata_qid": "Q840003",
+      "identifiers": [
+        "NGC2477"
+      ],
+      "names": [
+        "Caldwell 71"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q840005",
+      "wikidata_qid": "Q840005",
+      "identifiers": [
+        "NGC6352"
+      ],
+      "names": [
+        "Caldwell 81"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q840800",
+      "wikidata_qid": "Q840800",
+      "identifiers": [
+        "NGC6357",
+        "SH211"
+      ],
+      "names": [
+        "Lobster Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q840805",
+      "wikidata_qid": "Q840805",
+      "identifiers": [
+        "NGC2736"
+      ],
+      "names": [
+        "Pencil Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q840841",
+      "wikidata_qid": "Q840841",
+      "identifiers": [
+        "NGC6729"
+      ],
+      "names": [
+        "Caldwell 68"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q841138",
+      "wikidata_qid": "Q841138",
+      "identifiers": [
+        "NGC2346"
+      ],
+      "names": [
+        "Butterfly Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q841204",
+      "wikidata_qid": "Q841204",
+      "identifiers": [
+        "NGC6124"
+      ],
+      "names": [
+        "Caldwell 75"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q841306",
+      "wikidata_qid": "Q841306",
+      "identifiers": [
+        "IC405"
+      ],
+      "names": [
+        "Flaming Star Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q846418",
+      "wikidata_qid": "Q846418",
+      "identifiers": [
+        "NGC134"
+      ],
+      "names": [
+        "Giant Squid Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q852522",
+      "wikidata_qid": "Q852522",
+      "identifiers": [
+        "IC1712",
+        "NGC584"
+      ],
+      "names": [
+        "Little Spindle Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q853828",
+      "wikidata_qid": "Q853828",
+      "identifiers": [
+        "NGC3626"
+      ],
+      "names": [
+        "3632"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q853868",
+      "wikidata_qid": "Q853868",
+      "identifiers": [
+        "NGC4609"
+      ],
+      "names": [
+        "Caldwell 98"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q85518442",
+      "wikidata_qid": "Q85518442",
+      "identifiers": [
+        "NGC7027"
+      ],
+      "names": [
+        "Jewel Bug Nebula",
+        "Magic Carpet Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q857095",
+      "wikidata_qid": "Q857095",
+      "identifiers": [
+        "NGC5823"
+      ],
+      "names": [
+        "Caldwell 88"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q85781211",
+      "wikidata_qid": "Q85781211",
+      "identifiers": [
+        "NGC1851"
+      ],
+      "names": [
+        "Caldwell 73"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q859146",
+      "wikidata_qid": "Q859146",
+      "identifiers": [
+        "SH2155"
+      ],
+      "names": [
+        "Caldwell 9",
+        "Cave Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q870288",
+      "wikidata_qid": "Q870288",
+      "identifiers": [
+        "NGC149"
+      ],
+      "names": [
+        "New General Galaxy 149"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q872204",
+      "wikidata_qid": "Q872204",
+      "identifiers": [
+        "IC418"
+      ],
+      "names": [
+        "Spirograph Nebula",
+        "ZZ Leporis"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q89211500",
+      "wikidata_qid": "Q89211500",
+      "identifiers": [
+        "LDN1235"
+      ],
+      "names": [
+        "Shark Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q89305680",
+      "wikidata_qid": "Q89305680",
+      "identifiers": [
+        "LDN1688"
+      ],
+      "names": [
+        "NAME Ophiuchus Molecular Cloud"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q899854",
+      "wikidata_qid": "Q899854",
+      "identifiers": [
+        "NGC4372"
+      ],
+      "names": [
+        "Caldwell 108"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q90616042",
+      "wikidata_qid": "Q90616042",
+      "identifiers": [
+        "IC3568"
+      ],
+      "names": [
+        "Lemon slice nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q90638513",
+      "wikidata_qid": "Q90638513",
+      "identifiers": [
+        "LDN1355"
+      ],
+      "names": [
+        "The Helping Hand"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q90703943",
+      "wikidata_qid": "Q90703943",
+      "identifiers": [
+        "IC1016",
+        "IC4424"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q90857529",
+      "wikidata_qid": "Q90857529",
+      "identifiers": [
+        "SH2313"
+      ],
+      "names": [
+        "LW Hydrae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q911918",
+      "wikidata_qid": "Q911918",
+      "identifiers": [
+        "IC26",
+        "NGC135"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q913140",
+      "wikidata_qid": "Q913140",
+      "identifiers": [
+        "NGC6369"
+      ],
+      "names": [
+        "Little Ghost Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q91461627",
+      "wikidata_qid": "Q91461627",
+      "identifiers": [
+        "M104",
+        "NGC4594"
+      ],
+      "names": [
+        "Sombrero Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q915459",
+      "wikidata_qid": "Q915459",
+      "identifiers": [
+        "IC5294",
+        "NGC7552"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q915535",
+      "wikidata_qid": "Q915535",
+      "identifiers": [
+        "NGC5286"
+      ],
+      "names": [
+        "Caldwell 84"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q918631",
+      "wikidata_qid": "Q918631",
+      "identifiers": [
+        "NGC4526",
+        "NGC4560"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q918641",
+      "wikidata_qid": "Q918641",
+      "identifiers": [
+        "NGC1664"
+      ],
+      "names": [
+        "4-H cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q921254",
+      "wikidata_qid": "Q921254",
+      "identifiers": [
+        "NGC2281"
+      ],
+      "names": [
+        "Broken Heart Cluster"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q921266",
+      "wikidata_qid": "Q921266",
+      "identifiers": [
+        "NGC1931",
+        "SH2237"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q92258118",
+      "wikidata_qid": "Q92258118",
+      "identifiers": [
+        "M84",
+        "NGC4374"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q92258250",
+      "wikidata_qid": "Q92258250",
+      "identifiers": [
+        "M86",
+        "NGC4406"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q923728",
+      "wikidata_qid": "Q923728",
+      "identifiers": [
+        "NGC771"
+      ],
+      "names": [
+        "50 Cas",
+        "50 Cassiopeiae"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q923749",
+      "wikidata_qid": "Q923749",
+      "identifiers": [
+        "NGC3918"
+      ],
+      "names": [
+        "Blue Planetary"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q927106",
+      "wikidata_qid": "Q927106",
+      "identifiers": [
+        "IC2972",
+        "NGC3952"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q932017",
+      "wikidata_qid": "Q932017",
+      "identifiers": [
+        "IC1318"
+      ],
+      "names": [
+        "Sadr Region"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q9335937",
+      "wikidata_qid": "Q9335937",
+      "identifiers": [
+        "SH2136"
+      ],
+      "names": [
+        "Ghost Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q935354",
+      "wikidata_qid": "Q935354",
+      "identifiers": [
+        "VDB28"
+      ],
+      "names": [
+        "RAFGL 5121",
+        "T Tau",
+        "T Tauri"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q942024",
+      "wikidata_qid": "Q942024",
+      "identifiers": [
+        "IC3675",
+        "NGC4625"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q942039",
+      "wikidata_qid": "Q942039",
+      "identifiers": [
+        "NGC2537"
+      ],
+      "names": [
+        "Bear Claw Galaxy",
+        "Bear Paw Galaxy"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q942187",
+      "wikidata_qid": "Q942187",
+      "identifiers": [
+        "NGC4151"
+      ],
+      "names": [
+        "Eye of Sauron"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q943090",
+      "wikidata_qid": "Q943090",
+      "identifiers": [
+        "IC1988",
+        "NGC1425"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q945729",
+      "wikidata_qid": "Q945729",
+      "identifiers": [
+        "IC730",
+        "NGC3849"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q949322",
+      "wikidata_qid": "Q949322",
+      "identifiers": [
+        "NGC6781"
+      ],
+      "names": [
+        "Snowglobe Nebula"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q955002",
+      "wikidata_qid": "Q955002",
+      "identifiers": [
+        "IC1653",
+        "NGC443"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q961230",
+      "wikidata_qid": "Q961230",
+      "identifiers": [
+        "IC3833",
+        "NGC4722"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q968868",
+      "wikidata_qid": "Q968868",
+      "identifiers": [
+        "IC2126",
+        "NGC1935"
+      ],
+      "names": []
+    },
+    {
+      "group_key": "wikidata:Q97017048",
+      "wikidata_qid": "Q97017048",
+      "identifiers": [
+        "NGC2867"
+      ],
+      "names": [
+        "Caldwell 90"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q97017061",
+      "wikidata_qid": "Q97017061",
+      "identifiers": [
+        "IC4274",
+        "NGC5189"
+      ],
+      "names": [
+        "Δ252"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q97017154",
+      "wikidata_qid": "Q97017154",
+      "identifiers": [
+        "NGC7293"
+      ],
+      "names": [
+        "Caldwell 63",
+        "Eye of God",
+        "Eye of Sauron",
+        "Helix Nebula",
+        "The Helix"
+      ]
+    },
+    {
+      "group_key": "wikidata:Q977719",
+      "wikidata_qid": "Q977719",
+      "identifiers": [
+        "IC2232",
+        "NGC2543"
+      ],
+      "names": []
+    }
+  ]
+}

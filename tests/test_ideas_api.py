@@ -21,7 +21,7 @@ def test_ideas_request_keeps_shared_duration_but_accepts_short_single_target_val
     assert result["darkness_mode"] == "nautical"
     with pytest.raises(ValueError, match="90"):
         validate_ideas_request(REQUEST | {"search_days": 91})
-    with pytest.raises(ValueError, match="buio"):
+    with pytest.raises(ValueError, match="[Dd]arkness"):
         validate_ideas_request(REQUEST | {"darkness_mode": "civil"})
 
 
@@ -255,7 +255,7 @@ def test_ideas_service_reports_when_no_complete_astronomical_night_exists(monkey
     assert result["night_start"] is None
     assert result["night_end"] is None
     assert result["blocks"] == []
-    assert "notte astronomica" in result["note"].lower()
+    assert "astronomical night" in result["note"].lower()
 
 
 def test_ideas_route_is_local_json_and_rejects_invalid_payload():

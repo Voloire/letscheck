@@ -90,10 +90,10 @@ class AstroCheckerService:
 
     def objects(self, query):
         if not isinstance(query, str):
-            raise ValueError("La ricerca oggetti deve essere testo")
+            raise ValueError("Object search must be text")
         query = query.strip()
         if len(query) > 200:
-            raise ValueError("La ricerca oggetti non puo superare 200 caratteri")
+            raise ValueError("Object search cannot exceed 200 characters")
         try:
             return {"objects": self.catalog.search(query, limit=10)}
         except CatalogError as exc:
@@ -210,15 +210,15 @@ class AstroCheckerService:
     def _suggestion_note(suggestion, *, has_any_window):
         if suggestion is None:
             return (
-                "L'oggetto non e visibile in alcuna finestra continua nei 90 giorni analizzati."
+                "The object is not visible in any continuous window over the next 90 days."
                 if not has_any_window
                 else "Non esiste una proposta che rispetti i criteri indicati."
             )
         if suggestion["tier"] == "adjust":
-            return "Sposta l'orario mantenendo la durata richiesta, nella prima finestra continua utile del periodo analizzato."
+            return "Move the time while keeping the requested duration, using the first useful continuous window in the period."
         if suggestion["tier"] == "future":
-            return "Prima data futura entro 90 giorni con una finestra continua sufficiente per tutta la durata richiesta."
-        return "La durata richiesta non e disponibile: questa e la finestra continua piu ampia trovata nei 90 giorni analizzati."
+            return "First future date within 90 days with a continuous window long enough for the requested duration."
+        return "The requested duration is unavailable; this is the widest continuous window found over the next 90 days."
 
     def check(self, payload):
         request = validate_check_request(payload)
@@ -306,6 +306,9 @@ class AstroCheckerService:
                 "frame": selected["frame"],
                 "type": selected["type"],
                 "aliases": selected["aliases"],
+                "common_names": selected.get("common_names", []),
+                "target_group": selected.get("target_group"),
+                "related_ids": selected.get("related_ids", []),
                 "source": selected["source"],
             },
             "start": request["start"].isoformat(),
@@ -323,10 +326,10 @@ class AstroCheckerService:
             "notes": [
                 "Altezza geometrica senza rifrazione atmosferica; azimut da nord verso est.",
                 "Coordinate ICRS e Sole builtin trasformati localmente con Astropy, senza accesso alla rete.",
-                "Astropy e campionato ogni 30 secondi; vettori orizzontali interpolati alimentano la griglia decisionale conservativa di un secondo. La precisione e verificata dai test, non e un limite universale.",
-                f"Orientamento terrestre da tabella IERS-A locale ({iers_kind} per questo intervallo), copertura UTC da {ephemeris.iers_coverage_start} a prima di {ephemeris.iers_coverage_end_exclusive}.",
-                "La visibilita considera geometria e Sole a -18 gradi; non include meteo, Luna o qualita fotografica.",
-                "Se la richiesta non e completa, le alternative future vengono cercate localmente fino a 90 giorni; la prima finestra completa viene poi verificata con la griglia di un secondo.",
+                "Astropy is sampled every 30 seconds; interpolated horizontal vectors feed a conservative one-second decision grid. Tests verify the precision, but it is not a universal limit.",
+                f"Earth orientation from the local IERS-A table ({iers_kind} for this interval), UTC coverage from {ephemeris.iers_coverage_start} to before {ephemeris.iers_coverage_end_exclusive}.",
+                "Visibility uses geometry and the Sun at -18 degrees; weather, Moon, and imaging quality are not included.",
+                "When the request is incomplete, future alternatives are searched locally for up to 90 days; the first complete window is then checked with the one-second grid.",
             ],
         }
 
@@ -396,10 +399,10 @@ class AstroCheckerService:
                     "catalog_excluded": max(0, len(records) - len(eligible)),
                     "not_evaluated": len(eligible),
                 },
-                "note": "In questa data e postazione non esiste una notte astronomica completa.",
+                "note": "There is no complete astronomical night for this date and site.",
                 "notes": [
-                    "Il piano richiede il Sole sotto -18 gradi dal crepuscolo astronomico serale a quello mattutino.",
-                    "Il buio nautico e mostrato solo come contesto e non sostituisce il criterio astronomico.",
+                    "The plan requires the Sun below -18 degrees from evening through morning astronomical twilight.",
+                    "Nautical darkness is shown as context and does not replace the astronomical criterion.",
                 ],
             }
         candidates = []
@@ -471,10 +474,10 @@ class AstroCheckerService:
                 "not_evaluated": max(0, len(eligible) - evaluated_count),
             },
             "notes": [
-                "Piano della notte calcolato localmente dal catalogo SQLite e da effemeridi offline.",
-                "Il periodo va dal crepuscolo astronomico serale a quello mattutino (Sole <= -18 gradi).",
-                "Due ore sono il blocco preferito per bersaglio; i riempimenti piu brevi sono segnalati.",
-                "Meteo, Luna, attrezzatura e tempi operativi NINA non sono valutati.",
+                "Night plan calculated locally from the SQLite catalog and offline ephemerides.",
+                "The period runs from evening through morning astronomical twilight (Sun <= -18 degrees).",
+                "Two hours is the preferred block per target; shorter fills are marked.",
+                "Weather, Moon, equipment, and NINA operating times are not evaluated.",
             ],
         })
         return result
@@ -505,7 +508,7 @@ class AstroCheckerService:
                 site = validate_site_request(payload)
             except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
                 raise ApiError(
-                    "La postazione salvata non e leggibile o non e valida",
+                    "Saved site cannot be read or is invalid",
                     "site",
                     500,
                 ) from exc
@@ -534,7 +537,7 @@ class AstroCheckerService:
                 temporary_path = None
             except OSError as exc:
                 raise ApiError(
-                    "Non e stato possibile salvare la postazione locale",
+                    "Could not save the local site",
                     "site",
                     500,
                 ) from exc

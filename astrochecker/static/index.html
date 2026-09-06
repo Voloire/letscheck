@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="it">
+<html lang="en-US">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Pianificazione locale della visibilità astronomica con cataloghi e calcoli sul computer.">
+  <meta name="description" content="Local astronomy planning with bundled catalogs and on-device calculations.">
   <title>AstroChecker</title>
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -21,14 +21,14 @@
         </svg>
         <div>
           <div class="brand-row">
-            <span class="eyebrow">ALFA LOCALE · 0.4.0-alpha.1</span>
+            <span class="eyebrow">LOCAL ALPHA · 0.4.0-alpha.1</span>
             <span class="connection-pill" id="header-connection">
               <span class="status-dot" aria-hidden="true"></span>
-              <span>Controllo cataloghi…</span>
+              <span>Checking catalogs…</span>
             </span>
           </div>
           <h1>AstroChecker</h1>
-          <p>Pianifica una finestra osservativa dal tuo balcone.</p>
+          <p>Plan an observing window from your own balcony.</p>
         </div>
       </div>
     </header>
@@ -39,24 +39,24 @@
           <div class="step-heading">
             <span class="step-number" aria-hidden="true">1</span>
             <div>
-              <p class="section-kicker">PREREQUISITO</p>
-              <h2 id="connection-title">Cataloghi locali</h2>
+              <p class="section-kicker">PREREQUISITE</p>
+              <h2 id="connection-title">Local catalogs</h2>
             </div>
           </div>
 
-          <p class="catalog-lead">M · NGC · IC · Sh2 · vdB · LDN disponibili su questo computer</p>
+          <p class="catalog-lead">M · NGC · IC · Sh2 · vdB · LDN available on this computer</p>
           <div class="catalog-meta" aria-live="polite">
-            <span id="catalog-version">Versione in controllo</span>
-            <span id="catalog-summary">Controllo dei cataloghi locali…</span>
+            <span id="catalog-version">Checking version</span>
+            <span id="catalog-summary">Checking local catalogs…</span>
           </div>
 
           <div class="connection-actions">
             <button class="button button-secondary" id="verify-connection" type="button" hidden>
-              <span class="button-label">Riprova controllo</span>
+              <span class="button-label">Check again</span>
               <span class="spinner" aria-hidden="true"></span>
             </button>
             <p class="status-message" id="connection-status" role="status" aria-live="polite">
-              Controllo del catalogo locale in corso…
+              Checking the local catalog…
             </p>
           </div>
         </section>
@@ -65,61 +65,61 @@
           <div class="step-heading compact-heading">
             <span class="step-number" aria-hidden="true">2</span>
             <div>
-              <p class="section-kicker">OSSERVAZIONE</p>
-              <h2 id="planner-title">Imposta la ricerca</h2>
+              <p class="section-kicker">OBSERVATION</p>
+              <h2 id="planner-title">Set up a search</h2>
             </div>
           </div>
 
-          <p class="unlock-note" id="unlock-note">Attendi il controllo dei cataloghi locali.</p>
+          <p class="unlock-note" id="unlock-note">Waiting for the local catalogs to load.</p>
 
           <form id="planner-form" novalidate>
             <fieldset id="planner-fields" disabled>
-              <legend class="visually-hidden">Parametri della ricerca</legend>
+              <legend class="visually-hidden">Search settings</legend>
 
               <div class="field field-wide search-field">
-                <label for="object">Oggetto celeste</label>
+                <label for="object">Sky object</label>
                 <input id="object" name="object" type="text" value="M13" maxlength="200" required autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="object-results" aria-expanded="false" aria-describedby="object-help object-search-status">
                 <ul class="object-results" id="object-results" role="listbox" hidden></ul>
-                <p class="field-help" id="object-help">Cataloghi locali M, NGC, IC, Sh2, vdB e LDN. Digita una sigla o un nome comune e scegli il risultato.</p>
+                <p class="field-help" id="object-help">Local catalogs M, NGC, IC, Sh2, vdB e LDN. Type a catalog ID or a common name, then pick a result.</p>
                 <p class="search-status" id="object-search-status" role="status" aria-live="polite"></p>
               </div>
 
               <div class="field-group field-wide" role="group" aria-labelledby="position-group-label">
-                <p class="group-label" id="position-group-label">Postazione di osservazione</p>
+                <p class="group-label" id="position-group-label">Observing site</p>
                 <div class="field site-name-field">
-                  <label for="site-name">Nome postazione</label>
-                  <input id="site-name" name="site_name" type="text" value="Balcone di Chiusanico" maxlength="80" autocomplete="off">
+                  <label for="site-name">Site name</label>
+                  <input id="site-name" name="site_name" type="text" value="Chiusanico balcony" maxlength="80" autocomplete="off">
                 </div>
                 <div class="field-grid two-columns">
                   <div class="field">
-                    <label for="latitude">Latitudine</label>
+                    <label for="latitude">Latitude</label>
                     <div class="input-unit"><input id="latitude" name="latitude" type="number" value="43.9729" min="-90" max="90" step="any" required><span>°</span></div>
                   </div>
                   <div class="field">
-                    <label for="longitude">Longitudine</label>
+                    <label for="longitude">Longitude</label>
                     <div class="input-unit"><input id="longitude" name="longitude" type="number" value="7.9944" min="-180" max="180" step="any" required><span>°</span></div>
                   </div>
                 </div>
-                <p class="field-help">Valori positivi: nord/est. Valori negativi: sud/ovest.</p>
+                <p class="field-help">Positive values mean north/east; negative values mean south/west.</p>
                 <div class="site-actions">
                   <button class="button button-compact button-secondary" id="save-site" type="button">
-                    <span class="button-label">Salva postazione</span>
+                    <span class="button-label">Save site</span>
                     <span class="spinner" aria-hidden="true"></span>
                   </button>
                   <button class="button button-compact button-secondary" id="detect-location" type="button">
-                    <span class="button-label">Usa la mia posizione</span>
+                    <span class="button-label">Use my location</span>
                     <span class="spinner" aria-hidden="true"></span>
                   </button>
                 </div>
                 <div class="location-proposal" id="location-proposal" hidden>
                   <div>
-                    <strong>Posizione rilevata</strong>
+                    <strong>Location found</strong>
                     <p><span id="proposal-latitude"></span> · <span id="proposal-longitude"></span></p>
                     <p id="proposal-accuracy"></p>
                   </div>
                   <div class="location-proposal-actions">
-                    <button class="button button-compact button-primary" id="accept-location" type="button">Usa questa posizione</button>
-                    <button class="button button-compact button-secondary" id="cancel-location" type="button">Annulla</button>
+                    <button class="button button-compact button-primary" id="accept-location" type="button">Use this location</button>
+                    <button class="button button-compact button-secondary" id="cancel-location" type="button">Cancel</button>
                   </div>
                 </div>
                 <p class="site-status" id="site-status" role="status" aria-live="polite"></p>
@@ -127,66 +127,66 @@
 
               <div class="field-grid two-columns field-wide">
                 <div class="field date-field">
-                  <label for="start">Data e ora della postazione</label>
+                  <label for="start">Site date and time</label>
                   <input id="start" name="start" type="datetime-local" required>
                 </div>
                 <div class="field">
-                  <label for="timezone">Fuso della postazione (IANA)</label>
+                  <label for="timezone">Site time zone (IANA)</label>
                   <input id="timezone" name="timezone" type="text" value="Europe/Rome" maxlength="200" required autocomplete="off" list="common-timezones" placeholder="Europe/Rome">
                   <datalist id="common-timezones"><option value="Europe/Rome"><option value="Europe/Paris"><option value="America/New_York"><option value="UTC"></datalist>
                 </div>
               </div>
               <div class="field field-wide duration-field">
-                <label for="duration">Durata continua</label>
+                <label for="duration">Continuous duration</label>
                 <div class="input-unit"><input id="duration" name="duration" type="number" value="60" min="0" max="1440" step="any" required><span>min</span></div>
               </div>
-              <p class="field-help field-wide time-note">Le 24 ore analizzate partono dall’istante scelto nel fuso <strong id="time-zone-note">Europe/Rome</strong>.</p>
+              <p class="field-help field-wide time-note">The analyzed 24 hours start at the selected instant in <strong id="time-zone-note">Europe/Rome</strong>.</p>
 
               <div class="field-group field-wide balcony-group" role="group" aria-labelledby="balcony-group-label">
                 <div class="group-title-row">
-                  <p class="group-label" id="balcony-group-label">Finestra visibile dal balcone</p>
+                  <p class="group-label" id="balcony-group-label">Balcony visibility window</p>
                   <span class="tiny-key">Altezze geometriche</span>
                 </div>
                 <div class="field-grid four-columns">
                   <div class="field">
-                    <label for="min-alt">Altezza minima</label>
+                    <label for="min-alt">Minimum altitude</label>
                     <div class="input-unit"><input id="min-alt" name="min_alt" type="number" value="10" min="0" max="90" step="any" required><span>°</span></div>
                   </div>
                   <div class="field">
-                    <label for="max-alt">Altezza massima</label>
+                    <label for="max-alt">Maximum altitude</label>
                     <div class="input-unit"><input id="max-alt" name="max_alt" type="number" value="30" min="0" max="90" step="any" required><span>°</span></div>
                   </div>
                   <div class="field">
-                    <label for="az-start">Azimut iniziale</label>
+                    <label for="az-start">Starting azimuth</label>
                     <div class="input-unit"><input id="az-start" name="az_start" type="number" value="0" min="0" max="360" step="any" required><span>°</span></div>
                   </div>
                   <div class="field">
-                    <label for="az-end">Azimut finale</label>
+                    <label for="az-end">Ending azimuth</label>
                     <div class="input-unit"><input id="az-end" name="az_end" type="number" value="360" min="0" max="360" step="any" required><span>°</span></div>
                   </div>
                 </div>
-                <p class="field-help">Azimut: nord 0°, est 90°, sud 180°, ovest 270°. Può attraversare il nord; 0° → 360° include tutto l’orizzonte. Estremi uguali non sono validi.</p>
+                <p class="field-help">Azimuth: north 0°, east 90°, south 180°, west 270°. It can cross north; 0° → 360° covers the whole horizon. Matching endpoints are not valid.</p>
               </div>
 
               <div class="constraint-strip field-wide">
                 <span class="constraint-symbol" aria-hidden="true">☾</span>
-                <span><strong>Buio astronomico</strong><small>Sole ≤ −18° per tutta la finestra</small></span>
+                <span><strong>Astronomical darkness</strong><small>Sun ≤ −18° for the whole window</small></span>
                 <span class="constraint-divider" aria-hidden="true"></span>
-                <span><strong>Ricerca</strong><small>Prime 24 ore, durata continua</small></span>
+                <span><strong>Search</strong><small>First 24 hours, continuous duration</small></span>
               </div>
 
               <div class="form-error" id="form-error" role="alert" aria-live="assertive" hidden></div>
 
               <button class="button button-primary field-wide" id="calculate" type="submit">
-                <span class="button-label">Calcola visibilità</span>
+                <span class="button-label">Check visibility</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
               <button class="button button-secondary field-wide ideas-button" id="ideas" type="button">
-                <span class="button-label">Cerchi Idee?</span>
+                <span class="button-label">Need ideas?</span>
                 <span class="spinner" aria-hidden="true"></span>
               </button>
-              <p class="calculation-note field-wide" id="ideas-explanation">Pianifica la data scelta dal crepuscolo astronomico serale a quello mattutino. Ora e durata restano riferite al calcolo del singolo bersaglio.</p>
-            <p class="calculation-note field-wide">Cataloghi ed effemeridi sono elaborati localmente per le prossime 24 ore; le proposte future cercano fino a 90 giorni.</p>
+              <p class="calculation-note field-wide" id="ideas-explanation">Plan the selected date from evening astronomical twilight through morning twilight. The time and duration stay tied to the selected target.</p>
+            <p class="calculation-note field-wide">Catalogs and ephemerides run locally for the next 24 hours; future suggestions look up to 90 days.</p>
             </fieldset>
           </form>
         </section>
@@ -195,10 +195,10 @@
       <section class="results-column" id="results" aria-labelledby="results-title">
         <div class="results-heading">
           <div>
-            <p class="section-kicker">RISULTATO</p>
-            <h2 id="results-title">Finestra osservativa</h2>
+            <p class="section-kicker">RESULT</p>
+            <h2 id="results-title">Observing window</h2>
           </div>
-          <span class="stale-badge" id="stale-badge" hidden>Parametri modificati · ricalcola</span>
+          <span class="stale-badge" id="stale-badge" hidden>Settings changed · run again</span>
         </div>
 
         <div id="result-live" class="visually-hidden" role="status" aria-live="polite"></div>
@@ -210,8 +210,8 @@
             <path d="M18 77h144M37 77v17M143 77v17M29 94h122" class="empty-balcony"/>
             <circle cx="119" cy="21" r="3"/><circle cx="145" cy="37" r="1.7"/><circle cx="78" cy="27" r="1.4"/>
           </svg>
-          <h3>Pronto per la notte</h3>
-          <p>I risultati appariranno qui dopo il calcolo.</p>
+          <h3>Ready for the night</h3>
+          <p>Results will show up here after you run a check.</p>
         </div>
 
         <div id="result-content" class="result-content" hidden>
@@ -225,21 +225,21 @@
               </div>
             </div>
             <div class="summary-metrics">
-              <div><span id="visible-duration">—</span><small>nel periodo richiesto</small></div>
-              <div><span id="longest-duration">—</span><small>tratto continuo massimo in 24 h</small></div>
+              <div><span id="visible-duration">—</span><small>of the requested period</small></div>
+              <div><span id="longest-duration">—</span><small>longest continuous stretch in 24 hours</small></div>
             </div>
           </article>
 
           <article class="first-window" id="first-window-card">
             <div class="window-marker" aria-hidden="true"></div>
             <div class="first-window-content">
-              <p class="section-kicker">PROSSIMA OCCASIONE</p>
+              <p class="section-kicker">NEXT CHANCE</p>
               <h3 id="first-window-title"></h3>
               <p id="first-window-time"></p>
               <p class="first-window-note" id="first-window-note"></p>
               <div class="nina-action">
                 <button class="button button-secondary nina-button" type="button" disabled>Export TARGET to NINA</button>
-                <span class="coming-soon">Prossimamente</span>
+                <span class="coming-soon">Coming soon</span>
               </div>
             </div>
           </article>
@@ -247,10 +247,10 @@
           <article class="suggestions-card" id="suggestions-card" hidden aria-labelledby="suggestions-title">
             <div class="article-heading">
               <div>
-                <h3 id="suggestions-title">Suggerimento prioritario</h3>
+                <h3 id="suggestions-title">Top suggestion</h3>
                 <p id="suggestions-note"></p>
               </div>
-              <span class="suggestion-limit">Ricerca futura: 90 giorni</span>
+              <span class="suggestion-limit">Future search: 90 days</span>
             </div>
             <button class="suggestion-item" id="suggestion-item" type="button" aria-pressed="false">
               <span class="suggestion-tier" id="suggestion-tier"></span>
@@ -265,20 +265,20 @@
           <article class="visual-card" aria-labelledby="timeline-title">
             <div class="article-heading">
               <div>
-                <h3 id="timeline-title">Timeline delle 24 ore</h3>
-                <p>Verde: intervalli continui disponibili. Ambra: periodo richiesto.</p>
+                <h3 id="timeline-title">24-hour timeline</h3>
+                <p>Green: continuous windows available. Amber: requested period.</p>
               </div>
               <span class="timeline-date" id="timeline-date"></span>
             </div>
             <div class="darkness-panel">
               <p class="darkness-summary" id="darkness-summary"></p>
               <div class="darkness-events" id="darkness-events">
-                <div><span>Inizio buio astronomico</span><strong id="darkness-start">—</strong></div>
-                <div><span>Fine buio astronomico</span><strong id="darkness-end">—</strong></div>
+                <div><span>Darkness starts</span><strong id="darkness-start">—</strong></div>
+                <div><span>Darkness ends</span><strong id="darkness-end">—</strong></div>
               </div>
             </div>
             <div class="timeline-wrap">
-              <div class="timeline" id="timeline" role="img" aria-label="Timeline della visibilità nelle 24 ore">
+              <div class="timeline" id="timeline" role="img" aria-label="24-hour visibility timeline">
                 <div class="timeline-request" id="timeline-request"></div>
                 <div class="timeline-intervals" id="timeline-intervals"></div>
               </div>
@@ -289,8 +289,8 @@
           <article class="visual-card trajectory-card" aria-labelledby="trajectory-title">
             <div class="article-heading">
               <div>
-                <h3 id="trajectory-title">Altezza dell’oggetto</h3>
-                <p>La fascia evidenziata è l’altezza visibile dal balcone.</p>
+                <h3 id="trajectory-title">Object altitude</h3>
+                <p>The highlighted band is the altitude range visible from the balcony.</p>
               </div>
             </div>
             <div class="trajectory-wrap" id="trajectory"></div>
@@ -299,8 +299,8 @@
           <article class="interval-card" aria-labelledby="intervals-title">
             <div class="article-heading">
               <div>
-                <h3 id="intervals-title">Intervalli continui disponibili</h3>
-                <p>Gli intervalli separati non vengono sommati.</p>
+                <h3 id="intervals-title">Available continuous windows</h3>
+                <p>Separate intervals are not added together.</p>
               </div>
               <span class="interval-count" id="interval-count"></span>
             </div>
@@ -308,12 +308,12 @@
           </article>
 
           <article class="criteria-card" aria-labelledby="criteria-title">
-            <h3 id="criteria-title">Lettura del risultato</h3>
+            <h3 id="criteria-title">How to read the result</h3>
             <div class="reason-list" id="reason-list"></div>
             <details>
               <summary>Metodo e limiti dell’alfa</summary>
               <ul id="method-notes"></ul>
-              <p>I cataloghi inclusi forniscono coordinate ICRS. AstroChecker calcola localmente finestre stimate, altezza, azimut e Sole, senza rifrazione e senza richieste remote. La griglia decisionale di 1 secondo è una risoluzione di calcolo, non una garanzia di accuratezza astronomica al secondo. Meteo, Luna, qualità del cielo e attrezzatura non sono valutati.</p>
+              <p>The bundled catalogs provide ICRS coordinates. AstroChecker calculates estimated windows, altitude, azimuth, and Sun locally, without refraction or remote requests. The one-second decision grid is a calculation resolution, not a promise of one-second astronomical accuracy. Weather, Moon, sky quality, and equipment are not evaluated.</p>
             </details>
           </article>
         </div>
@@ -327,27 +327,27 @@
             </div>
             <div class="night-coverage-box">
               <strong id="night-coverage">0%</strong>
-              <span>notte coperta</span>
+              <span>night covered</span>
             </div>
           </article>
 
           <article class="night-chain-card" aria-labelledby="night-chain-title">
             <div class="article-heading">
               <div>
-                <h3 id="night-chain-title">Sequenza operativa</h3>
+                <h3 id="night-chain-title">Observing sequence</h3>
                 <p id="night-note"></p>
               </div>
-              <span class="suggestion-limit">Buio astronomico</span>
+              <span class="suggestion-limit">Astronomical darkness</span>
             </div>
             <p class="night-chain" id="night-chain"></p>
-            <div class="night-timeline" id="night-timeline" role="img" aria-label="Sequenza dei bersagli nella notte astronomica"></div>
+            <div class="night-timeline" id="night-timeline" role="img" aria-label="Target sequence during astronomical night"></div>
           </article>
 
           <article class="night-list-card" aria-labelledby="night-blocks-title">
             <div class="article-heading">
               <div>
-                <h3 id="night-blocks-title">Bersagli in ordine</h3>
-                <p>Ogni riga &egrave; una tappa continua della sequenza.</p>
+                <h3 id="night-blocks-title">Targets in order</h3>
+                <p>Each row is one continuous step in the sequence.</p>
               </div>
             </div>
             <ol class="night-blocks" id="night-blocks"></ol>
@@ -356,24 +356,24 @@
           <article class="night-gaps-card" id="night-gaps-card" aria-labelledby="night-gaps-title" hidden>
             <div class="article-heading">
               <div>
-                <h3 id="night-gaps-title">Intervalli scoperti</h3>
-                <p>I buchi rimangono espliciti: non vengono nascosti o sommati.</p>
+                <h3 id="night-gaps-title">Open gaps</h3>
+                <p>Gaps stay visible; they are not hidden or added together.</p>
               </div>
             </div>
             <ul class="night-gaps" id="night-gaps"></ul>
           </article>
 
           <div class="night-actions">
-            <button class="button button-secondary" id="export-night-nina" type="button" disabled>Esporta in NINA</button>
-            <span class="coming-soon">Struttura pronta · esportazione futura</span>
+            <button class="button button-secondary" id="export-night-nina" type="button" disabled>Export to NINA</button>
+            <span class="coming-soon">UI ready · export coming later</span>
           </div>
         </div>
       </section>
     </main>
 
     <footer>
-      <span>Funziona solo su questo computer.</span>
-      <span>Cataloghi locali · geometria + Sole ≤ −18°</span>
+      <span>Runs only on this computer.</span>
+      <span>Local catalogs · geometry + Sun ≤ −18°</span>
     </footer>
   </div>
   <script src="/app.js" defer></script>

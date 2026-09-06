@@ -46,7 +46,7 @@ def test_galaxy_without_angular_size_is_excluded_from_automatic_ideas():
     profile = classify_candidate(record("G", "NGC 9999"))
 
     assert profile["eligible"] is False
-    assert "dimension" in profile["reason"].lower()
+    assert "angular" in profile["reason"].lower()
 
 
 def test_stellar_unknown_duplicate_and_incomplete_records_are_excluded_with_reasons():

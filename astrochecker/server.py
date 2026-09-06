@@ -32,44 +32,44 @@ class ApiError(Exception):
 def _number(payload, name, label):
     value = payload.get(name)
     if isinstance(value, bool) or not isinstance(value, Real):
-        raise ValueError(f"La {label} deve essere un numero")
+        raise ValueError(f"{label} must be a number")
     result = float(value)
     if not math.isfinite(result):
-        raise ValueError(f"La {label} deve essere finita")
+        raise ValueError(f"{label} must be finite")
     return result
 
 
 def _timezone(payload, *, default=None):
     value = payload.get("timezone", default)
     if not isinstance(value, str) or not value.strip():
-        raise ValueError("Fuso orario obbligatorio")
+        raise ValueError("Time zone is required")
     value = value.strip()
     if len(value) > MAX_TIMEZONE_LENGTH:
-        raise ValueError("Fuso orario troppo lungo")
+        raise ValueError("Time zone is too long")
     try:
         ZoneInfo(value)
     except (ZoneInfoNotFoundError, ValueError) as exc:
-        raise ValueError("Fuso orario non disponibile") from exc
+        raise ValueError("Time zone is unavailable") from exc
     return value
 
 
 def validate_check_request(payload):
     if not isinstance(payload, dict):
-        raise ValueError("Il corpo JSON deve essere un oggetto")
+        raise ValueError("JSON body must be an object")
     object_name = payload.get("object")
     if not isinstance(object_name, str) or not object_name.strip():
-        raise ValueError("Il nome dell'oggetto e obbligatorio")
+        raise ValueError("Object name is required")
     object_name = object_name.strip()
     if len(object_name) > 200 or any(c in object_name for c in ('"', "\r", "\n", "\x00")):
-        raise ValueError("Il nome dell'oggetto contiene caratteri non ammessi")
+        raise ValueError("Object name contains unsupported characters")
 
-    latitude = _number(payload, "latitude", "latitudine")
-    longitude = _number(payload, "longitude", "longitudine")
-    duration_minutes = _number(payload, "duration_minutes", "durata")
+    latitude = _number(payload, "latitude", "latitude")
+    longitude = _number(payload, "longitude", "longitude")
+    duration_minutes = _number(payload, "duration_minutes", "duration")
     if not -90 <= latitude <= 90:
-        raise ValueError("La latitudine deve essere compresa tra -90 e 90 gradi")
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     if not -180 <= longitude <= 180:
-        raise ValueError("La longitudine deve essere compresa tra -180 e 180 gradi")
+        raise ValueError("Longitude must be between -180 and 180 degrees")
 
     values = validate_limits(
         duration_seconds=duration_minutes * 60,
@@ -96,20 +96,20 @@ def validate_check_request(payload):
 
 def validate_site_request(payload):
     if not isinstance(payload, dict):
-        raise ValueError("Il corpo JSON della postazione deve essere un oggetto")
+        raise ValueError("Site JSON body must be an object")
     name = payload.get("name")
     if not isinstance(name, str) or not name.strip():
-        raise ValueError("Il nome della postazione e obbligatorio")
+        raise ValueError("Site name is required")
     name = name.strip()
     if len(name) > 80:
-        raise ValueError("Il nome della postazione non puo superare 80 caratteri")
+        raise ValueError("Site name cannot exceed 80 characters")
 
-    latitude = _number(payload, "latitude", "latitudine")
-    longitude = _number(payload, "longitude", "longitudine")
+    latitude = _number(payload, "latitude", "latitude")
+    longitude = _number(payload, "longitude", "longitude")
     if not -90 <= latitude <= 90:
-        raise ValueError("La latitudine deve essere compresa tra -90 e 90 gradi")
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     if not -180 <= longitude <= 180:
-        raise ValueError("La longitudine deve essere compresa tra -180 e 180 gradi")
+        raise ValueError("Longitude must be between -180 and 180 degrees")
     timezone_name = _timezone(payload)
     limits = validate_limits(
         duration_seconds=1,
@@ -134,17 +134,17 @@ def validate_site_request(payload):
 def validate_ideas_request(payload):
     """Validate a multi-object ideas request without resolving an object."""
     if not isinstance(payload, dict):
-        raise ValueError("Il corpo JSON deve essere un oggetto")
-    latitude = _number(payload, "latitude", "latitudine")
-    longitude = _number(payload, "longitude", "longitudine")
+        raise ValueError("JSON body must be an object")
+    latitude = _number(payload, "latitude", "latitude")
+    longitude = _number(payload, "longitude", "longitude")
     if not -90 <= latitude <= 90:
-        raise ValueError("La latitudine deve essere compresa tra -90 e 90 gradi")
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     if not -180 <= longitude <= 180:
-        raise ValueError("La longitudine deve essere compresa tra -180 e 180 gradi")
+        raise ValueError("Longitude must be between -180 and 180 degrees")
     timezone_name = _timezone(payload, default="Europe/Rome")
     start = parse_start(payload.get("start"), timezone_name)
     values = validate_limits(
-        duration_seconds=_number(payload, "duration_minutes", "durata") * 60,
+        duration_seconds=_number(payload, "duration_minutes", "duration") * 60,
         horizon_seconds=86400,
         min_alt=payload.get("min_alt"),
         max_alt=payload.get("max_alt"),
@@ -153,13 +153,13 @@ def validate_ideas_request(payload):
     )
     mode = payload.get("darkness_mode", "astronomical")
     if mode not in ("astronomical", "nautical"):
-        raise ValueError("La modalita di buio deve essere astronomica o nautica")
+        raise ValueError("Darkness mode must be astronomical or nautical")
     search_days = payload.get("search_days", 1)
     if isinstance(search_days, bool) or not isinstance(search_days, Real) or not float(search_days).is_integer():
-        raise ValueError("Il periodo di ricerca deve essere espresso in giorni interi")
+        raise ValueError("Search period must be an integer number of days")
     search_days = int(search_days)
     if not 1 <= search_days <= 90:
-        raise ValueError("Il periodo di ricerca deve essere compreso tra 1 e 90 giorni")
+        raise ValueError("Search period must be between 1 and 90 days")
     return {
         "latitude": latitude, "longitude": longitude, "start": start,
         "timezone": timezone_name, "darkness_mode": mode,
@@ -218,7 +218,7 @@ def make_handler(service):
                 return False
             self._early_json(
                 403,
-                {"error": "Richiesta non locale rifiutata", "code": "validation"},
+                {"error": "Non-local request rejected", "code": "validation"},
             )
             return True
 
@@ -277,7 +277,7 @@ def make_handler(service):
             if content_type != "application/json":
                 self._early_json(
                     415,
-                    {"error": "E richiesto un corpo JSON", "code": "validation"},
+                    {"error": "A JSON body is required", "code": "validation"},
                 )
                 return INVALID_JSON
             try:
@@ -285,20 +285,20 @@ def make_handler(service):
             except ValueError:
                 self._early_json(
                     400,
-                    {"error": "Corpo JSON non valido", "code": "validation"},
+                    {"error": "Invalid JSON body", "code": "validation"},
                 )
                 return INVALID_JSON
             if length < 0 or length > MAX_REQUEST_BYTES:
                 self._early_json(
                     400,
-                    {"error": "Corpo JSON non valido", "code": "validation"},
+                    {"error": "Invalid JSON body", "code": "validation"},
                 )
                 return INVALID_JSON
             try:
                 raw = self.rfile.read(length)
                 return json.loads(raw.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
-                self._json(400, {"error": "Corpo JSON non valido", "code": "validation"})
+                self._json(400, {"error": "Invalid JSON body", "code": "validation"})
                 return INVALID_JSON
 
         def do_GET(self):
@@ -308,7 +308,7 @@ def make_handler(service):
             if parsed.path == "/api/status":
                 self._service_json(
                     service.status,
-                    generic_message="Errore interno durante la verifica del catalogo locale",
+                    generic_message="Internal error while checking the local catalog",
                     generic_code="catalog",
                 )
                 return
@@ -323,19 +323,19 @@ def make_handler(service):
                     return
                 self._service_json(
                     lambda: service.objects(queries[0]),
-                    generic_message="Ricerca nel catalogo locale non riuscita",
+                    generic_message="Local catalog search failed",
                     generic_code="catalog",
                 )
                 return
             if parsed.path == "/api/site":
                 self._service_json(
                     service.get_site,
-                    generic_message="Lettura della postazione locale non riuscita",
+                    generic_message="Loading the local site failed",
                     generic_code="site",
                 )
                 return
             if parsed.path.startswith("/api/"):
-                self._json(404, {"error": "Risorsa non trovata", "code": "validation"})
+                self._json(404, {"error": "Resource not found", "code": "validation"})
                 return
             super().do_GET()
 
@@ -346,7 +346,7 @@ def make_handler(service):
             if parsed.path not in ("/api/check", "/api/ideas", "/api/site"):
                 self._early_json(
                     404,
-                    {"error": "Risorsa non trovata", "code": "validation"},
+                    {"error": "Resource not found", "code": "validation"},
                 )
                 return
             payload = self._read_json()
@@ -355,17 +355,17 @@ def make_handler(service):
             if parsed.path == "/api/check":
                 self._service_json(
                     lambda: service.check(payload),
-                    generic_message="Calcolo non riuscito",
+                    generic_message="Calculation failed",
                 )
             elif parsed.path == "/api/ideas":
                 self._service_json(
                     lambda: service.ideas(payload),
-                    generic_message="Pianificazione delle idee non riuscita",
+                    generic_message="Idea planning failed",
                 )
             else:
                 self._service_json(
                     lambda: service.save_site(payload),
-                    generic_message="Salvataggio della postazione locale non riuscito",
+                    generic_message="Saving the local site failed",
                     generic_code="site",
                 )
 

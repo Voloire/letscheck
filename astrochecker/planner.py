@@ -34,27 +34,27 @@ def plan_night_sequence(
     """Build a deterministic coverage-first target chain for one complete night."""
     def integer(name, value):
         if isinstance(value, bool) or not isinstance(value, Real) or not float(value).is_integer():
-            raise ValueError(f"{name} deve essere un intero")
+            raise ValueError(f"{name} must be an integer")
         return int(value)
 
     try:
-        night_start = integer("L'inizio della notte", night_interval["start"])
-        night_end = integer("La fine della notte", night_interval["end"])
-        slot = integer("La granularita", slot_seconds)
-        preferred = integer("Il blocco preferito", preferred_block_seconds)
+        night_start = integer("Night start", night_interval["start"])
+        night_end = integer("Night end", night_interval["end"])
+        slot = integer("Slot size", slot_seconds)
+        preferred = integer("Preferred block", preferred_block_seconds)
     except (KeyError, TypeError, ValueError) as exc:
-        raise ValueError("Intervallo notturno e granularita devono essere interi") from exc
+        raise ValueError("Night interval and slot size must be integers") from exc
     if night_end <= night_start or slot <= 0 or preferred <= 0:
-        raise ValueError("Intervallo notturno e granularita devono essere positivi")
+        raise ValueError("Night interval and slot size must be positive")
 
     prepared = []
     candidate_keys = set()
     for item in candidates or []:
         if not isinstance(item, dict):
-            raise ValueError("Ogni candidato del piano deve essere una mappa")
+            raise ValueError("Each plan candidate must be a mapping")
         profile = item.get("profile") or {}
         if not isinstance(profile, dict):
-            raise ValueError("Il profilo del candidato deve essere una mappa")
+            raise ValueError("Candidate profile must be a mapping")
         if profile.get("eligible", item.get("eligible", True)) is False:
             continue
         raw_intervals = item.get("intervals") or []
@@ -65,8 +65,8 @@ def plan_night_sequence(
             if not isinstance(interval, dict) or "start" not in interval or "end" not in interval:
                 raise ValueError("Gli intervalli del candidato devono avere inizio e fine interi")
             try:
-                start = integer("L'inizio degli intervalli", interval["start"])
-                end = integer("La fine degli intervalli", interval["end"])
+                start = integer("Interval start", interval["start"])
+                end = integer("Interval end", interval["end"])
             except ValueError as exc:
                 raise ValueError("Gli intervalli del candidato devono avere inizio e fine interi") from exc
             validated_intervals.append({"start": start, "end": end})
@@ -88,7 +88,7 @@ def plan_night_sequence(
                 merged.append((start, end))
         prepared.append({
             "key": key,
-            "priority": integer("La priorita", profile.get("priority", item.get("priority", 0)) or 0),
+            "priority": integer("Priority", profile.get("priority", item.get("priority", 0)) or 0),
             "intervals": merged,
             "target": {
                 "name": name,
@@ -96,8 +96,11 @@ def plan_night_sequence(
                 "ra_deg": item.get("ra_deg"),
                 "dec_deg": item.get("dec_deg"),
                 "aliases": list(item.get("aliases") or []),
+                "common_names": list(item.get("common_names") or []),
+                "target_group": item.get("target_group"),
+                "related_ids": list(item.get("related_ids") or []),
             },
-            "reason": profile.get("reason", item.get("reason", "Finestra continua disponibile.")),
+            "reason": profile.get("reason", item.get("reason", "Continuous window available.")),
         })
     prepared.sort(key=lambda item: (-item["priority"], item["key"]))
 
@@ -244,11 +247,11 @@ def plan_night_sequence(
         "gaps": gaps,
         "object_count": len(blocks),
         "note": (
-            "Piano completo dal crepuscolo astronomico serale a quello mattutino."
+            "Complete plan from evening to morning astronomical twilight."
             if status == "full" else
-            "Piano parziale: alcuni tratti della notte non hanno bersagli visibili compatibili."
+            "Partial plan: some parts of the night have no compatible visible targets."
             if status == "partial" else
-            "Nessun bersaglio compatibile e visibile durante la notte astronomica."
+            "No compatible target is visible during astronomical night."
         ),
     }
 
@@ -264,9 +267,9 @@ def plan_ideas(candidates, darkness_intervals, total_seconds, minimum_block_seco
         total = int(total_seconds)
         minimum = int(minimum_block_seconds)
     except (TypeError, ValueError) as exc:
-        raise ValueError("La durata del piano deve essere espressa in secondi interi") from exc
+        raise ValueError("Plan duration must be an integer number of seconds") from exc
     if total <= 0 or minimum <= 0:
-        raise ValueError("La durata del piano e il blocco minimo devono essere positivi")
+        raise ValueError("Plan duration and minimum block must be positive")
 
     if isinstance(darkness_intervals, dict):
         darkness_intervals = darkness_intervals.get("intervals", [])
@@ -304,7 +307,7 @@ def plan_ideas(candidates, darkness_intervals, total_seconds, minimum_block_seco
             "start": start,
             "end": end,
             "priority": priority,
-            "reason": profile.get("reason", candidate.get("reason", "Finestra continua disponibile.")),
+            "reason": profile.get("reason", candidate.get("reason", "Continuous window available.")),
         })
 
     options.sort(key=lambda item: (item["end"], item["start"], -item["priority"], item["object"].casefold()))
@@ -347,11 +350,11 @@ def plan_ideas(candidates, darkness_intervals, total_seconds, minimum_block_seco
         "object_count": len(blocks),
         "skipped": skipped,
         "note": (
-            "Piano completo con blocchi continui di almeno due ore."
+            "Complete plan with continuous blocks of at least two hours."
             if covered >= total else
-            "Piano parziale: le finestre continue disponibili non coprono tutta la durata richiesta."
+            "Partial plan: available continuous windows do not cover the full requested duration."
             if covered else
-            "Nessun oggetto dispone di una finestra continua di almeno due ore nel buio richiesto."
+            "No object has a continuous window of at least two hours in the requested darkness."
         ),
     }
 
@@ -373,10 +376,10 @@ def _normalise_intervals(intervals, lower, upper):
 
 def _finite_number(name: str, value: object) -> float:
     if isinstance(value, bool) or not isinstance(value, Real):
-        raise ValueError(f"{name} deve essere un numero")
+        raise ValueError(f"{name} must be a number")
     number = float(value)
     if not math.isfinite(number):
-        raise ValueError(f"{name} deve essere finito")
+        raise ValueError(f"{name} must be finite")
     return number
 
 
@@ -384,7 +387,7 @@ def validate_limits(*, duration_seconds: object, horizon_seconds: object,
                     min_alt: object, max_alt: object,
                     az_start: object, az_end: object) -> dict[str, float]:
     """Validate and normalize planner inputs without contacting SkyChart."""
-    duration = _finite_number("La durata", duration_seconds)
+    duration = _finite_number("La duration", duration_seconds)
     horizon = _finite_number("Il periodo di ricerca", horizon_seconds)
     floor = _finite_number("L'altezza minima", min_alt)
     ceiling = _finite_number("L'altezza massima", max_alt)
@@ -392,22 +395,22 @@ def validate_limits(*, duration_seconds: object, horizon_seconds: object,
     azimuth_end = _finite_number("L'azimut finale", az_end)
 
     if duration <= 0:
-        raise ValueError("La durata deve essere maggiore di zero")
+        raise ValueError("Duration must be greater than zero")
     if horizon <= 0:
-        raise ValueError("Il periodo di ricerca deve essere maggiore di zero")
+        raise ValueError("Search period must be greater than zero")
     if duration > horizon:
-        raise ValueError("La durata non puo superare il periodo di ricerca")
+        raise ValueError("Duration cannot exceed the search period")
     if not 0 <= floor <= 90 or not 0 <= ceiling <= 90:
         raise ValueError("Le altezze devono essere comprese tra 0 e 90 gradi")
     if ceiling <= floor:
-        raise ValueError("L'altezza massima deve superare quella minima")
+        raise ValueError("Maximum altitude must exceed minimum altitude")
     if not 0 <= azimuth_start <= 360 or not 0 <= azimuth_end <= 360:
         raise ValueError("Gli azimut devono essere compresi tra 0 e 360 gradi")
     if azimuth_start == azimuth_end or (
         azimuth_start % 360 == azimuth_end % 360
         and not (azimuth_start == 0 and azimuth_end == 360)
     ):
-        raise ValueError("Un settore con azimut iniziale e finale uguali e ambiguo")
+        raise ValueError("A sector with matching start and end azimuths is ambiguous")
 
     return {
         "duration_seconds": duration,
@@ -421,7 +424,7 @@ def validate_limits(*, duration_seconds: object, horizon_seconds: object,
 
 def azimuth_is_visible(azimuth: object, start: float, end: float) -> bool:
     """Return whether an azimuth lies in the inclusive balcony sector."""
-    az = _finite_number("L'azimut calcolato", azimuth) % 360.0
+    az = _finite_number("Calculated azimuth", azimuth) % 360.0
     if start == 0 and end == 360:
         return True
     normalized_start = start % 360.0
@@ -434,10 +437,10 @@ def azimuth_is_visible(azimuth: object, start: float, end: float) -> bool:
 def position_is_visible(position: object, *, min_alt: float, max_alt: float,
                         az_start: float, az_end: float) -> bool:
     if not isinstance(position, dict):
-        raise ValueError("SkyChart ha restituito una posizione non valida")
+        raise ValueError("SkyChart returned an invalid position")
     try:
-        altitude = _finite_number("L'altezza calcolata", position["alt"])
-        sun_altitude = _finite_number("L'altezza del Sole", position["sun_alt"])
+        altitude = _finite_number("Calculated altitude", position["alt"])
+        sun_altitude = _finite_number("Sun altitude", position["sun_alt"])
         azimuth = position["az"]
     except KeyError as exc:
         raise ValueError("SkyChart ha restituito una posizione incompleta") from exc
@@ -461,11 +464,11 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
         az_end=az_end,
     )
     if not callable(position_at):
-        raise ValueError("La sorgente delle posizioni non e valida")
+        raise ValueError("Position source is invalid")
     if isinstance(resolution_seconds, bool) or not isinstance(resolution_seconds, int):
-        raise ValueError("La risoluzione deve essere espressa in secondi interi")
+        raise ValueError("Resolution must be an integer number of seconds")
     if resolution_seconds <= 0:
-        raise ValueError("La risoluzione deve essere maggiore di zero")
+        raise ValueError("Resolution must be greater than zero")
 
     horizon_end = int(math.floor(values["horizon_seconds"]))
     required = values["duration_seconds"]
@@ -594,13 +597,13 @@ def parse_start(value, timezone="Europe/Rome"):
     try:
         parsed = datetime.fromisoformat(value.strip())
     except ValueError as exc:
-        raise ValueError("Data e ora di inizio non valide") from exc
+        raise ValueError("Start date and time are invalid") from exc
     if parsed.tzinfo is not None:
-        raise ValueError("Inserire un orario locale senza offset")
+        raise ValueError("Enter a local time without an offset")
     try:
         zone = ZoneInfo(timezone)
     except (ZoneInfoNotFoundError, TypeError) as exc:
-        raise ValueError("Fuso orario non disponibile") from exc
+        raise ValueError("Time zone is unavailable") from exc
 
     candidates = []
     for fold in (0, 1):
@@ -609,15 +612,15 @@ def parse_start(value, timezone="Europe/Rome"):
         if round_trip.replace(tzinfo=None) == parsed and round_trip.fold == fold:
             candidates.append(aware)
     if len(candidates) != 1:
-        raise ValueError("L'orario locale e inesistente o ambiguo; sceglierne un altro")
+        raise ValueError("Local time does not exist or is ambiguous; choose another")
     return candidates[0]
 
 
 def elapsed_end(start, seconds):
     """Add physical elapsed seconds across midnight and daylight-saving changes."""
     if not isinstance(start, datetime) or start.tzinfo is None:
-        raise ValueError("L'inizio deve includere il fuso orario")
-    elapsed = _finite_number("La durata", seconds)
+        raise ValueError("Start must include a time zone")
+    elapsed = _finite_number("La duration", seconds)
     if elapsed < 0:
-        raise ValueError("La durata non puo essere negativa")
+        raise ValueError("Duration cannot be negative")
     return (start.astimezone(utc_timezone.utc) + timedelta(seconds=elapsed)).astimezone(start.tzinfo)

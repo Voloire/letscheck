@@ -45,17 +45,17 @@ class LocalEphemeris:
         try:
             index = operator.index(offset)
         except TypeError as exc:
-            raise ValueError("L'offset astronomico deve essere un secondo intero") from exc
+            raise ValueError("Astronomical offset must be an integer number of seconds") from exc
         if self.sample_offsets is None:
             if not 0 <= index < len(self.target_alt):
-                raise ValueError("L'offset astronomico e fuori dal periodo calcolato")
+                raise ValueError("Astronomical offset is outside the calculated period")
             sample_index = index
         else:
             if not 0 <= index <= int(self.sample_offsets[-1]):
-                raise ValueError("L'offset astronomico e fuori dal periodo calcolato")
+                raise ValueError("Astronomical offset is outside the calculated period")
             sample_index = int(np.searchsorted(self.sample_offsets, index))
             if sample_index >= len(self.sample_offsets) or int(self.sample_offsets[sample_index]) != index:
-                raise ValueError("L'offset astronomico non coincide con la griglia calcolata")
+                raise ValueError("Astronomical offset does not match the calculated grid")
         return {
             "alt": float(self.target_alt[sample_index]),
             "az": float(self.target_az[sample_index]),
@@ -69,7 +69,7 @@ def _bundled_iers_table():
         return iers.IERS_A.open(iers.IERS_A_FILE)
     except (OSError, ValueError) as exc:
         raise AstronomyDataError(
-            "La tabella IERS-A locale non e disponibile o non e valida"
+            "The local IERS-A table is unavailable or invalid"
         ) from exc
 
 
@@ -82,7 +82,7 @@ def _time_metadata(table, start, horizon_seconds):
         _, _, polar_status = table.pm_xy(endpoints, return_status=True)
     except (IndexError, ValueError) as exc:
         raise AstronomyDataError(
-            "L'intervallo richiesto non puo essere verificato con i dati IERS locali"
+            "The requested interval cannot be checked with local IERS data"
         ) from exc
 
     statuses = np.concatenate(
@@ -90,7 +90,7 @@ def _time_metadata(table, start, horizon_seconds):
     )
     if np.any(statuses < 0):
         raise AstronomyDataError(
-            "L'intero intervallo richiesto deve rientrare nella copertura della tabella IERS-A locale"
+            "The full requested interval must fit within the local IERS-A table coverage"
         )
 
     first_mjd = float(table["MJD"][0].value)
@@ -127,7 +127,7 @@ def _interpolate_vectors(knot_offsets, knot_vectors, offsets):
     )
     lengths = np.linalg.norm(vectors, axis=1)
     if not np.all(np.isfinite(vectors)) or np.any(lengths <= 0):
-        raise AstronomyDataError("Le coordinate astronomiche calcolate non sono valide")
+        raise AstronomyDataError("Calculated astronomical coordinates are invalid")
     return vectors / lengths[:, np.newaxis]
 
 
@@ -150,19 +150,19 @@ def build_ephemeris(
 ):
     """Build one-second local positions from vectorized Astropy knots."""
     if not isinstance(start, datetime) or start.tzinfo is None:
-        raise ValueError("L'inizio astronomico deve includere il fuso orario")
+        raise ValueError("Astronomical start must include a time zone")
     if isinstance(horizon_seconds, bool) or not isinstance(horizon_seconds, int):
-        raise ValueError("Il periodo astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical period must be an integer number of seconds")
     if horizon_seconds <= 0:
-        raise ValueError("Il periodo astronomico deve essere maggiore di zero")
+        raise ValueError("Astronomical period must be greater than zero")
     if isinstance(knot_step_seconds, bool) or not isinstance(knot_step_seconds, int):
-        raise ValueError("Il passo astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical step must be an integer number of seconds")
     if knot_step_seconds <= 0:
-        raise ValueError("Il passo astronomico deve essere maggiore di zero")
+        raise ValueError("Astronomical step must be greater than zero")
     if isinstance(output_step_seconds, bool) or not isinstance(output_step_seconds, int):
-        raise ValueError("Il passo di uscita astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical output step must be an integer number of seconds")
     if output_step_seconds <= 0:
-        raise ValueError("Il passo di uscita astronomico deve essere maggiore di zero")
+        raise ValueError("Astronomical output step must be greater than zero")
 
     table = _bundled_iers_table()
     start_utc, uses_prediction, coverage_start, coverage_end = _time_metadata(
@@ -203,7 +203,7 @@ def build_ephemeris(
     except AstronomyDataError:
         raise
     except (IndexError, TypeError, ValueError) as exc:
-        raise AstronomyDataError("Il calcolo astronomico locale non e riuscito") from exc
+        raise AstronomyDataError("Local astronomy calculation failed") from exc
 
     target_vectors = _interpolate_vectors(knot_offsets, target_knots, offsets)
     sun_vectors = _interpolate_vectors(knot_offsets, sun_knots, offsets)
@@ -214,7 +214,7 @@ def build_ephemeris(
         and np.all(np.isfinite(target_az))
         and np.all(np.isfinite(sun_alt))
     ):
-        raise AstronomyDataError("Le coordinate astronomiche calcolate non sono finite")
+        raise AstronomyDataError("Calculated astronomical coordinates are not finite")
 
     return LocalEphemeris(
         target_alt=target_alt,
@@ -241,20 +241,20 @@ def build_catalog_ephemerides(
     if not coordinates:
         return []
     if not isinstance(start, datetime) or start.tzinfo is None:
-        raise ValueError("L'inizio astronomico deve includere il fuso orario")
+        raise ValueError("Astronomical start must include a time zone")
     try:
         ras = np.asarray([float(item[0]) for item in coordinates], dtype=float)
         decs = np.asarray([float(item[1]) for item in coordinates], dtype=float)
     except (TypeError, ValueError, IndexError) as exc:
-        raise ValueError("Le coordinate del catalogo non sono valide") from exc
+        raise ValueError("Catalog coordinates are invalid") from exc
     if not np.all(np.isfinite(ras)) or not np.all(np.isfinite(decs)):
-        raise ValueError("Le coordinate del catalogo non sono finite")
+        raise ValueError("Catalog coordinates are not finite")
     if isinstance(horizon_seconds, bool) or not isinstance(horizon_seconds, int) or horizon_seconds <= 0:
-        raise ValueError("Il periodo astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical period must be an integer number of seconds")
     if isinstance(knot_step_seconds, bool) or not isinstance(knot_step_seconds, int) or knot_step_seconds <= 0:
-        raise ValueError("Il passo astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical step must be an integer number of seconds")
     if isinstance(output_step_seconds, bool) or not isinstance(output_step_seconds, int) or output_step_seconds <= 0:
-        raise ValueError("Il passo di uscita astronomico deve essere espresso in secondi interi")
+        raise ValueError("Astronomical output step must be an integer number of seconds")
 
     table = _bundled_iers_table()
     start_utc, uses_prediction, coverage_start, coverage_end = _time_metadata(
@@ -280,7 +280,7 @@ def build_catalog_ephemerides(
     except iers.IERSWarning as exc:
         raise AstronomyDataError("Astropy ha segnalato un limite nei dati IERS locali") from exc
     except (IndexError, TypeError, ValueError) as exc:
-        raise AstronomyDataError("Il calcolo astronomico locale non e riuscito") from exc
+        raise AstronomyDataError("Local astronomy calculation failed") from exc
 
     target_alt_knots = horizontal.alt.to_value(u.rad)
     target_az_knots = horizontal.az.to_value(u.rad)
@@ -302,7 +302,7 @@ def build_catalog_ephemerides(
     )
     lengths = np.linalg.norm(target_vectors, axis=2)
     if not np.all(np.isfinite(target_vectors)) or np.any(lengths <= 0):
-        raise AstronomyDataError("Le coordinate astronomiche calcolate non sono valide")
+        raise AstronomyDataError("Calculated astronomical coordinates are invalid")
     target_vectors /= lengths[:, :, None]
     target_alt = np.degrees(np.arcsin(np.clip(target_vectors[:, :, 2], -1.0, 1.0)))
     target_az = np.degrees(np.arctan2(target_vectors[:, :, 1], target_vectors[:, :, 0])) % 360.0

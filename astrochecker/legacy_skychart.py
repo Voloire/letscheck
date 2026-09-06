@@ -59,7 +59,7 @@ class AstroCheckerService:
         message = (
             "SkyChart collegato e pronto"
             if connected
-            else "SkyChart non raggiungibile. Avviarlo e abilitare il server su 127.0.0.1:3292, poi riprovare."
+            else "SkyChart is unreachable. Start it, enable the server on 127.0.0.1:3292, and try again."
         )
         return {"connected": connected, "message": message, "port": 3292}
 
@@ -72,7 +72,7 @@ class AstroCheckerService:
             target = client.lookup(request["object"])
             if not target_is_static(target.get("kind")):
                 raise SkyChartObjectError(
-                    "Questa alfa supporta solo stelle e oggetti del cielo profondo; gli oggetti in movimento non sono ancora supportati"
+                    "This alpha supports stars and deep-sky objects; moving objects are not supported yet"
                 )
             sun = client.lookup("Sun", object_class=8)
             if selected is None:
@@ -92,7 +92,7 @@ class AstroCheckerService:
                     client.finish_temporary()
         except SkyChartConnectionError as exc:
             raise ApiError(
-                "Connessione a SkyChart non disponibile o interrotta. Verificare il server su 127.0.0.1:3292 e riprovare.",
+                "SkyChart connection is unavailable or interrupted. Check the server on 127.0.0.1:3292 and try again.",
                 "connection",
                 503,
             ) from exc
@@ -163,8 +163,8 @@ class AstroCheckerService:
             "notes": [
                 "Altezza geometrica senza rifrazione atmosferica; azimut da nord verso est.",
                 "Coordinate apparenti fornite da SkyChart e interpolate tra effemeridi orarie.",
-                "Nel confronto dei 24 punti intermedi del 5 settembre 2026, l'errore osservato nell'interpolazione del Sole e stato inferiore a 0,00005 gradi; e una verifica locale, non un limite garantito per ogni data.",
-                "Decisione su griglia conservativa di un secondo: tutti gli estremi campionati risultano validi, senza pretesa di esattezza astronomica al secondo.",
-                "La visibilita considera geometria e Sole a -18 gradi; non include meteo o qualita fotografica.",
+                "In a comparison of 24 points on September 5, 2026, observed Sun interpolation error stayed below 0.00005 degrees; this is a local check, not a guarantee for every date.",
+                "One-second conservative grid decision: all sampled endpoints are valid; this does not claim one-second astronomical accuracy.",
+                "Visibility uses geometry and the Sun at -18 degrees; weather and imaging quality are not included.",
             ],
         }
