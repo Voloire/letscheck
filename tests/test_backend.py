@@ -41,13 +41,13 @@ def test_request_validation_normalizes_before_skychart_access():
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        ({"object": ""}, "oggetto"),
-        ({"object": 'M31"\nQUIT'}, "oggetto"),
-        ({"latitude": 91}, "latitudine"),
-        ({"longitude": -181}, "longitudine"),
-        ({"duration_minutes": "molto"}, "durata"),
-        ({"az_start": 0, "az_end": 0}, "settore"),
-        ({"start": "2026-03-29T02:30"}, "inesistente"),
+        ({"object": ""}, "[Oo]bject"),
+        ({"object": 'M31"\nQUIT'}, "[Oo]bject"),
+        ({"latitude": 91}, "[Ll]atitude"),
+        ({"longitude": -181}, "[Ll]ongitude"),
+        ({"duration_minutes": "molto"}, "duration"),
+        ({"az_start": 0, "az_end": 0}, "sector"),
+        ({"start": "2026-03-29T02:30"}, "does not exist"),
     ],
 )
 def test_request_validation_rejects_unsafe_or_invalid_values(change, message):
@@ -141,7 +141,7 @@ def test_selected_object_parser_accepts_installed_sexagesimal_format():
 
 
 def test_selected_object_parser_rejects_non_date_frame():
-    with pytest.raises(SkyChartProtocolError, match="equinozio"):
+    with pytest.raises(SkyChartProtocolError, match="equinox"):
         parse_selected_object(
             "OK! 14h16m52.59s\t+19°02'44.9\"\t*\tAlp Boo\tEquinox:J2000"
         )
@@ -251,7 +251,7 @@ def test_service_rejects_moving_user_target_and_cleans_chart():
     with pytest.raises(ApiError) as caught:
         service.check(VALID_REQUEST | {"object": "Mars"})
     assert caught.value.code == "object"
-    assert "stelle" in caught.value.message
+    assert "stars" in caught.value.message
     assert MovingTargetSkyChart.instances[0].finished
 
 

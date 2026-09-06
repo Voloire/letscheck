@@ -1,6 +1,5 @@
-# Segnalazioni di sicurezza
+# Security
 
-Non pubblicare vulnerabilità o dati sensibili nelle issue. Invia una
-segnalazione privata al maintainer tramite il contatto indicato nel profilo
-GitHub di [Voloire](https://github.com/Voloire), descrivendo versione,
-ambiente e passi per riprodurre il problema.
+Please do not include credentials, private observing-site data, conversation exports, or other sensitive material in issues or pull requests.
+
+AstroChecker is a local experiment. If you find a security problem in the code or release artifacts, report it privately to the repository owner before publishing details.

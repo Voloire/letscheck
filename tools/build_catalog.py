@@ -25,9 +25,10 @@ import astropy.units as u
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
 DEFAULT_OUTPUT = ROOT / "data" / "catalog.sqlite3"
-VERSION = "2026.09.05-3"
+VERSION = "2026.09.06-1"
 OPENNGC_COMMIT = "da90466031b0372c896588b85be6016c617e205b"
 CATALOG_ORDER = ("messier", "ngc", "ic", "sh2", "vdb", "ldn")
+CROSSWALK = RAW / "wikidata-crosswalk.json"
 
 SNAPSHOTS = {
     "openngc-ngc.csv": {
@@ -109,6 +110,29 @@ CREATE TABLE aliases (
     UNIQUE(object_id, normalized)
 );
 CREATE INDEX aliases_normalized_idx ON aliases(normalized);
+CREATE TABLE target_groups (
+    group_key TEXT PRIMARY KEY,
+    wikidata_qid TEXT UNIQUE,
+    source TEXT NOT NULL
+);
+CREATE TABLE target_group_members (
+    group_key TEXT NOT NULL REFERENCES target_groups(group_key),
+    object_id INTEGER NOT NULL REFERENCES objects(id),
+    canonical_key TEXT NOT NULL,
+    UNIQUE(group_key, object_id),
+    UNIQUE(group_key, canonical_key)
+);
+CREATE TABLE target_names (
+    group_key TEXT NOT NULL REFERENCES target_groups(group_key),
+    display_name TEXT NOT NULL,
+    normalized TEXT NOT NULL,
+    language TEXT NOT NULL,
+    source TEXT NOT NULL,
+    priority INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(group_key, normalized)
+);
+CREATE INDEX target_names_normalized_idx ON target_names(normalized);
+CREATE INDEX target_group_members_object_idx ON target_group_members(object_id);
 """
 
 
@@ -433,6 +457,60 @@ def import_vdb(writer: Writer) -> dict[str, int | list[int]]:
     }
 
 
+def import_wikidata_crosswalk(connection: sqlite3.Connection) -> dict[str, int]:
+    """Import the reviewed, versioned CC0 cross-catalog name crosswalk."""
+    payload = json.loads(CROSSWALK.read_text(encoding="utf-8"))
+    groups = names = members = 0
+    for group in payload.get("groups", []):
+        group_key = str(group.get("group_key", "")).strip()
+        if not group_key:
+            continue
+        matched: dict[int, str] = {}
+        for identifier in group.get("identifiers", []):
+            normalized = normalize_designation(str(identifier))
+            row = connection.execute(
+                """
+                SELECT o.id, o.canonical_key
+                FROM aliases AS a JOIN objects AS o ON o.id = a.object_id
+                WHERE a.normalized = ?
+                ORDER BY o.id
+                LIMIT 1
+                """,
+                (normalized,),
+            ).fetchone()
+            if row:
+                matched[int(row[0])] = str(row[1])
+        clean_names = []
+        for value in group.get("names", []):
+            display = " ".join(str(value).split()).strip()
+            if display:
+                clean_names.append(display)
+        if not matched or not clean_names:
+            continue
+        connection.execute(
+            "INSERT OR IGNORE INTO target_groups(group_key, wikidata_qid, source) VALUES (?, ?, ?)",
+            (group_key, group.get("wikidata_qid"), payload.get("source", "Wikidata")),
+        )
+        for object_id, canonical_key in matched.items():
+            connection.execute(
+                "INSERT OR IGNORE INTO target_group_members(group_key, object_id, canonical_key) VALUES (?, ?, ?)",
+                (group_key, object_id, canonical_key),
+            )
+            members += 1
+        for priority, display in enumerate(dict.fromkeys(clean_names)):
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO target_names(
+                    group_key, display_name, normalized, language, source, priority
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (group_key, display, normalize_designation(display), "en", payload.get("source", "Wikidata"), priority),
+            )
+            names += 1
+        groups += 1
+    return {"crosswalk_groups": groups, "crosswalk_members": members, "crosswalk_names": names}
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as source:
@@ -443,6 +521,8 @@ def sha256(path: Path) -> str:
 
 def build(output: Path) -> dict:
     missing = [name for name in SNAPSHOTS if not (RAW / name).is_file()]
+    if not CROSSWALK.is_file():
+        missing.append(CROSSWALK.name)
     if missing:
         raise SystemExit("Missing local snapshots: " + ", ".join(missing))
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -458,6 +538,7 @@ def build(output: Path) -> dict:
         ldn_rows, ldn_imported = import_ldn(writer)
         stats.update({"ldn_rows": ldn_rows, "ldn_imported": ldn_imported})
         stats.update(import_vdb(writer))
+        stats.update(import_wikidata_crosswalk(connection))
 
         for position, catalog_id in enumerate(CATALOG_ORDER):
             count = connection.execute(
@@ -472,6 +553,15 @@ def build(output: Path) -> dict:
         source_metadata = {
             name: details | {"sha256": sha256(RAW / name)}
             for name, details in SNAPSHOTS.items()
+        }
+        crosswalk_payload = json.loads(CROSSWALK.read_text(encoding="utf-8"))
+        source_metadata[CROSSWALK.name] = {
+            "source": "Wikidata structured data plus project supplement",
+            "version": crosswalk_payload.get("retrieved", "unknown"),
+            "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+            "license": "CC0-1.0",
+            "citation": "Wikidata entities and labels; project-maintained crosswalk",
+            "sha256": sha256(CROSSWALK),
         }
         metadata = {
             "version": VERSION,

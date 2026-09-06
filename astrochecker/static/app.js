@@ -82,13 +82,13 @@ function updatePlannerAvailability() {
   fields.disabled = !catalogReady || !siteLoaded || calculationRunning;
   if (!siteLoaded) {
     unlockNote.classList.remove("unlocked");
-    unlockNote.textContent = "Caricamento della postazione locale…";
+    unlockNote.textContent = "Loading your local site…";
   } else if (catalogReady) {
     unlockNote.classList.add("unlocked");
-    unlockNote.textContent = "Cataloghi pronti. Il pianificatore è disponibile.";
+    unlockNote.textContent = "Catalogs are ready. The planner is available.";
   } else {
     unlockNote.classList.remove("unlocked");
-    unlockNote.textContent = "Il catalogo locale deve essere disponibile per usare il pianificatore.";
+    unlockNote.textContent = "The local catalog must be available before you can plan.";
   }
 }
 
@@ -106,9 +106,9 @@ function catalogLabel(id) {
 function setCatalogChecking() {
   catalogReady = false;
   headerConnection.classList.remove("connected", "failed");
-  headerConnection.querySelector("span:last-child").textContent = "Controllo cataloghi…";
+  headerConnection.querySelector("span:last-child").textContent = "Checking catalogs…";
   connectionStatus.className = "status-message";
-  connectionStatus.textContent = "Controllo del catalogo locale in corso…";
+  connectionStatus.textContent = "Checking the local catalog…";
   document.querySelector("#catalog-version").textContent = "Versione in controllo";
   document.querySelector("#catalog-summary").textContent = "Controllo dei cataloghi locali…";
   updatePlannerAvailability();
@@ -119,19 +119,19 @@ function setCatalogState(data) {
   headerConnection.classList.toggle("connected", catalogReady);
   headerConnection.classList.toggle("failed", !catalogReady);
   headerConnection.querySelector("span:last-child").textContent = catalogReady
-    ? "Cataloghi pronti"
-    : "Cataloghi non disponibili";
+    ? "Catalogs ready"
+    : "Catalogs unavailable";
   connectionStatus.className = `status-message ${catalogReady ? "success" : "error"}`;
   connectionStatus.textContent = data?.message || (catalogReady
-    ? "Catalogo locale pronto."
-    : "Catalogo locale non disponibile.");
+    ? "Local catalog ready."
+    : "Local catalog unavailable.");
   document.querySelector("#catalog-version").textContent = catalogReady && data.version
     ? `Versione ${data.version}`
-    : "Versione non disponibile";
+    : "Version unavailable";
   const catalogs = Array.isArray(data?.catalogs) ? data.catalogs : [];
   document.querySelector("#catalog-summary").textContent = catalogs.length
     ? catalogs.map((catalog) => `${catalogLabel(catalog.id)} ${catalog.count}`).join(" · ")
-    : "Nessun catalogo disponibile";
+    : "No catalogs available";
   verifyButton.hidden = catalogReady;
   updatePlannerAvailability();
 }
@@ -141,7 +141,7 @@ async function readJson(response) {
   try {
     return text ? JSON.parse(text) : {};
   } catch {
-    throw new Error("Il server ha restituito una risposta non leggibile.");
+    throw new Error("The server returned an unreadable response.");
   }
 }
 
@@ -156,14 +156,14 @@ async function loadCatalogStatus({retry = false} = {}) {
   try {
     const response = await fetch("/api/status", {headers: {Accept: "application/json"}});
     const data = await readJson(response);
-    if (!response.ok) throw new Error(data.error || "Controllo del catalogo non riuscito.");
+    if (!response.ok) throw new Error(data.error || "Catalog check failed.");
     setCatalogState(data);
   } catch (error) {
     setCatalogState({
       ready: false,
       version: "",
       catalogs: [],
-      message: error instanceof Error ? error.message : "Catalogo locale non disponibile.",
+      message: error instanceof Error ? error.message : "Local catalog unavailable.",
     });
   } finally {
     if (retry) setButtonLoading(verifyButton, false, "");
@@ -195,15 +195,15 @@ async function loadSite() {
   try {
     const response = await fetch("/api/site", {headers: {Accept: "application/json"}});
     const data = await readJson(response);
-    if (!response.ok) throw new Error(data.error || "Lettura della postazione non riuscita.");
+    if (!response.ok) throw new Error(data.error || "Could not load the saved site.");
     if (data.site) {
       applySite(data.site);
-      setSiteStatus(`Postazione ${data.site.name} caricata.`, "success");
+      setSiteStatus(`Site ${data.site.name} loaded.`, "success");
     } else {
-      setSiteStatus("Nessuna postazione salvata. I valori di Chiusanico sono un esempio modificabile.");
+      setSiteStatus("No saved site yet. The Chiusanico values are just editable examples.");
     }
   } catch (error) {
-    setSiteStatus(error instanceof Error ? error.message : "Postazione salvata non leggibile.", "error");
+    setSiteStatus(error instanceof Error ? error.message : "Saved site could not be read.", "error");
   } finally {
     siteLoaded = true;
     if (!field("#start").value) field("#start").value = localDateAtTenPm(timezoneInput.value.trim());
@@ -240,7 +240,7 @@ function showFormError(message, invalidInput) {
 function validTimeZone(value) {
   if (!value.trim()) return false;
   try {
-    new Intl.DateTimeFormat("it-IT", {timeZone: value.trim()}).format();
+    new Intl.DateTimeFormat("en-US", {timeZone: value.trim()}).format();
     return true;
   } catch {
     return false;
@@ -266,7 +266,7 @@ function validateRules(rules) {
   const azEnd = numberValue("#az-end");
   const isWholeHorizon = azStart === 0 && azEnd === 360;
   if (!isWholeHorizon && azStart % 360 === azEnd % 360) {
-    showFormError("Gli azimut iniziale e finale uguali sono ambigui. Usa 0° → 360° per tutto l’orizzonte.", field("#az-end"));
+    showFormError("Matching start and end azimuths are ambiguous. Use 0° → 360° for the whole horizon.", field("#az-end"));
     return false;
   }
   return true;
@@ -274,10 +274,10 @@ function validateRules(rules) {
 
 function siteRules() {
   return [
-    ["#site-name", (value) => value.trim().length > 0 && value.trim().length <= 80, "Inserisci un nome per la postazione (massimo 80 caratteri)."],
-    ["#latitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -90 && Number(value) <= 90, "La latitudine deve essere compresa tra −90° e 90°."],
-    ["#longitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -180 && Number(value) <= 180, "La longitudine deve essere compresa tra −180° e 180°."],
-    ["#timezone", validTimeZone, "Inserisci un fuso IANA disponibile, per esempio Europe/Rome."],
+    ["#site-name", (value) => value.trim().length > 0 && value.trim().length <= 80, "Enter a site name (up to 80 characters)."],
+    ["#latitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -90 && Number(value) <= 90, "Latitude must be between −90° and 90°."],
+    ["#longitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -180 && Number(value) <= 180, "Longitude must be between −180° and 180°."],
+    ["#timezone", validTimeZone, "Enter a valid IANA time zone, such as Europe/Rome."],
     ["#min-alt", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 90, "L’altezza minima deve essere compresa tra 0° e 90°."],
     ["#max-alt", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 90, "L’altezza massima deve essere compresa tra 0° e 90°."],
     ["#az-start", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 360, "L’azimut iniziale deve essere compreso tra 0° e 360°."],
@@ -287,17 +287,17 @@ function siteRules() {
 
 function validateForm({requireObject = true} = {}) {
   const rules = [
-    ["#latitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -90 && Number(value) <= 90, "La latitudine deve essere compresa tra −90° e 90°."],
-    ["#longitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -180 && Number(value) <= 180, "La longitudine deve essere compresa tra −180° e 180°."],
-    ["#start", (value) => value !== "", "Scegli una data e un’ora della postazione."],
-    ["#timezone", validTimeZone, "Inserisci un fuso IANA disponibile, per esempio Europe/Rome."],
-    ["#duration", (value) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= 1440, "La durata deve essere maggiore di 0 e non superare 1.440 minuti."],
+    ["#latitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -90 && Number(value) <= 90, "Latitude must be between −90° and 90°."],
+    ["#longitude", (value) => Number.isFinite(Number(value)) && Number(value) >= -180 && Number(value) <= 180, "Longitude must be between −180° and 180°."],
+    ["#start", (value) => value !== "", "Choose a site date and time."],
+    ["#timezone", validTimeZone, "Enter a valid IANA time zone, such as Europe/Rome."],
+    ["#duration", (value) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= 1440, "Duration must be greater than 0 and no more than 1,440 minutes."],
     ["#min-alt", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 90, "L’altezza minima deve essere compresa tra 0° e 90°."],
     ["#max-alt", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 90, "L’altezza massima deve essere compresa tra 0° e 90°."],
     ["#az-start", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 360, "L’azimut iniziale deve essere compreso tra 0° e 360°."],
     ["#az-end", (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 360, "L’azimut finale deve essere compreso tra 0° e 360°."],
   ];
-  if (requireObject) rules.unshift(["#object", (value) => value.trim().length > 0, "Inserisci la sigla dell'oggetto."]);
+  if (requireObject) rules.unshift(["#object", (value) => value.trim().length > 0, "Enter the object ID."]);
   return validateRules(rules);
 }
 
@@ -332,7 +332,7 @@ function currentPayload() {
 async function saveSite() {
   setSiteStatus("");
   if (!validateRules(siteRules())) return;
-  setButtonLoading(saveSiteButton, true, "Salvataggio…");
+  setButtonLoading(saveSiteButton, true, "Saving…");
   try {
     const response = await fetch("/api/site", {
       method: "POST",
@@ -340,10 +340,10 @@ async function saveSite() {
       body: JSON.stringify(currentSitePayload()),
     });
     const data = await readJson(response);
-    if (!response.ok) throw new Error(data.error || "Salvataggio postazione non riuscito.");
-    setSiteStatus(`Postazione ${data.site.name} salvata.`, "success");
+    if (!response.ok) throw new Error(data.error || "Could not save the site.");
+    setSiteStatus(`Site ${data.site.name} saved.`, "success");
   } catch (error) {
-    setSiteStatus(error instanceof Error ? error.message : "Salvataggio postazione non riuscito.", "error");
+    setSiteStatus(error instanceof Error ? error.message : "Could not save the site.", "error");
   } finally {
     setButtonLoading(saveSiteButton, false, "");
   }
@@ -371,9 +371,18 @@ function closeObjectList() {
 }
 
 function optionAliases(item) {
-  return (Array.isArray(item.aliases) ? item.aliases : []).filter(
-    (alias) => alias.toLocaleUpperCase("it-IT") !== String(item.name).toLocaleUpperCase("it-IT")
+  const values = [...(Array.isArray(item.common_names) ? item.common_names : []), ...(Array.isArray(item.related_ids) ? item.related_ids : []), ...(Array.isArray(item.aliases) ? item.aliases : [])];
+  return [...new Set(values)].filter(
+    (alias) => alias.toLocaleUpperCase("en-US") !== String(item.name).toLocaleUpperCase("en-US")
   );
+}
+
+function formatTargetLabel(item, fallback = "Target") {
+  const name = item?.name || item?.object || fallback;
+  const nickname = Array.isArray(item?.common_names) ? item.common_names[0] : "";
+  return nickname && nickname.toLocaleUpperCase("en-US") !== String(name).toLocaleUpperCase("en-US")
+    ? `${name} — ${nickname}`
+    : name;
 }
 
 function renderObjectOptions(items) {
@@ -382,7 +391,7 @@ function renderObjectOptions(items) {
   activeObjectIndex = -1;
   if (!items.length) {
     closeObjectList();
-    objectSearchStatus.textContent = "Nessun oggetto trovato";
+    objectSearchStatus.textContent = "No objects found";
     return;
   }
   items.forEach((item, index) => {
@@ -392,7 +401,7 @@ function renderObjectOptions(items) {
     option.setAttribute("role", "option");
     option.setAttribute("aria-selected", "false");
     const name = document.createElement("strong");
-    name.textContent = item.name;
+    name.textContent = formatTargetLabel(item);
     option.append(name);
     if (item.type) {
       const type = document.createElement("span");
@@ -413,7 +422,7 @@ function renderObjectOptions(items) {
   });
   objectResults.hidden = false;
   objectInput.setAttribute("aria-expanded", "true");
-  objectSearchStatus.textContent = `${items.length} ${items.length === 1 ? "risultato disponibile" : "risultati disponibili"}. Scegli con frecce e Invio oppure con un clic.`;
+  objectSearchStatus.textContent = `${items.length} ${items.length === 1 ? "result available" : "results available"}. Use the arrow keys and Enter, or click a result.`;
 }
 
 function setActiveObject(index) {
@@ -435,8 +444,8 @@ function selectObject(index) {
   objectInput.removeAttribute("aria-invalid");
   const aliases = optionAliases(item);
   objectSearchStatus.textContent = aliases.length
-    ? `Selezionato ${item.name}. Alias: ${aliases.join(", ")}.`
-    : `Selezionato ${item.name}.`;
+    ? `Selected ${formatTargetLabel(item)}. Aliases: ${aliases.join(", ")}.`
+    : `Selected ${formatTargetLabel(item)}.`;
   searchGeneration += 1;
   closeObjectList();
   markStale();
@@ -446,13 +455,13 @@ async function searchObjects(query, generation) {
   try {
     const response = await fetch(`/api/objects?q=${encodeURIComponent(query)}`, {headers: {Accept: "application/json"}});
     const data = await readJson(response);
-    if (!response.ok) throw new Error(data.error || "Ricerca nel catalogo non riuscita.");
+    if (!response.ok) throw new Error(data.error || "Catalog search failed.");
     if (generation !== searchGeneration || objectInput.value.trim() !== query) return;
     renderObjectOptions(Array.isArray(data.objects) ? data.objects : []);
   } catch (error) {
     if (generation !== searchGeneration) return;
     closeObjectList();
-    objectSearchStatus.textContent = error instanceof Error ? error.message : "Ricerca nel catalogo non riuscita.";
+    objectSearchStatus.textContent = error instanceof Error ? error.message : "Catalog search failed.";
   }
 }
 
@@ -468,7 +477,7 @@ function scheduleObjectSearch() {
     objectSearchStatus.textContent = "";
     return;
   }
-  objectSearchStatus.textContent = "Ricerca nel catalogo…";
+  objectSearchStatus.textContent = "Searching the catalog…";
   searchTimer = window.setTimeout(() => searchObjects(query, generation), SEARCH_DELAY_MS);
 }
 
@@ -516,23 +525,23 @@ function showLocationProposal(position) {
   field("#proposal-longitude").textContent = `Longitudine ${proposedLocation.longitude.toFixed(4)}°`;
   field("#proposal-accuracy").textContent = `Accuratezza ± ${Math.round(proposedLocation.accuracy)} m`;
   field("#location-proposal").hidden = false;
-  setSiteStatus("Posizione rilevata. Conferma per usarla.");
+  setSiteStatus("Location found. Confirm to use it.");
 }
 
 function locationErrorMessage(error) {
   if (error?.code === error?.PERMISSION_DENIED || error?.code === 1) {
-    return "Permesso di geolocalizzazione negato. I valori manuali restano disponibili.";
+    return "Location permission was denied. Manual values are still available.";
   }
   if (error?.code === error?.TIMEOUT || error?.code === 3) {
-    return "Tempo scaduto durante la geolocalizzazione. I valori manuali restano disponibili.";
+    return "Location lookup timed out. Manual values are still available.";
   }
-  return "Posizione non disponibile. I valori manuali restano disponibili.";
+  return "Location is unavailable. Manual values are still available.";
 }
 
 function requestLocation() {
   setSiteStatus("");
   if (!navigator.geolocation?.getCurrentPosition) {
-    setSiteStatus("Geolocalizzazione non disponibile in questo browser. I valori manuali restano disponibili.", "error");
+    setSiteStatus("Location lookup is unavailable in this browser. Manual values are still available.", "error");
     return;
   }
   setButtonLoading(detectLocationButton, true, "Rilevamento…");
@@ -552,7 +561,7 @@ function requestLocation() {
 function cancelLocationProposal() {
   proposedLocation = null;
   field("#location-proposal").hidden = true;
-  setSiteStatus("Posizione rilevata annullata. I valori manuali non sono cambiati.");
+  setSiteStatus("Location proposal canceled. Manual values were not changed.");
 }
 
 function acceptLocationProposal() {
@@ -563,7 +572,7 @@ function acceptLocationProposal() {
   field("#longitude").removeAttribute("aria-invalid");
   proposedLocation = null;
   field("#location-proposal").hidden = true;
-  setSiteStatus("Posizione applicata ai campi. Salva la postazione se vuoi conservarla.", "success");
+  setSiteStatus("Location applied. Save the site if you want to keep it.", "success");
   markStale();
 }
 
@@ -585,12 +594,12 @@ function formatInstant(startIso, offsetSeconds, timeZone = DEFAULT_TIME_ZONE, in
     timeZoneName: "short",
   };
   if (includeWeekday) options.weekday = "short";
-  return new Intl.DateTimeFormat("it-IT", options).format(instant);
+  return new Intl.DateTimeFormat("en-US", options).format(instant);
 }
 
 function formatClock(startIso, offsetSeconds, timeZone = DEFAULT_TIME_ZONE) {
   const instant = new Date(new Date(startIso).getTime() + Number(offsetSeconds) * 1000);
-  return new Intl.DateTimeFormat("it-IT", {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -614,10 +623,10 @@ function formatDuration(seconds) {
 
 function statusLabel(status) {
   return {
-    full: "Visibile per tutta la durata",
-    partial: "Visibile solo in parte",
-    none: "Non visibile nel periodo richiesto",
-  }[status] || "Risultato non riconosciuto";
+    full: "Visible for the full duration",
+    partial: "Only partly visible",
+    none: "Not visible for the requested period",
+  }[status] || "Unknown result";
 }
 
 function renderDarkness(data) {
@@ -629,7 +638,7 @@ function renderDarkness(data) {
     const matching = events.filter((event) => event.kind === kind);
     host.replaceChildren();
     if (!matching.length) {
-      host.textContent = "Non presente nelle 24 h";
+      host.textContent = "Not present in the 24-hour window";
       return;
     }
     matching.forEach((event) => {
@@ -646,15 +655,15 @@ function renderDarkness(data) {
     && Number(intervals[0].start) <= 0
     && Number(intervals[0].end) >= horizon
     && events.length === 0;
-  let summary = "Buio astronomico presente nelle 24 h";
+  let summary = "Astronomical darkness appears in the 24-hour window";
   if (coversWholeHorizon) {
-    summary = "Buio astronomico per tutte le 24 h";
+    summary = "Astronomical darkness covers all 24 hours";
   } else if (!intervals.length && !events.length && !darkness.at_start) {
-    summary = "Nessun buio astronomico nelle 24 h";
+    summary = "No astronomical darkness in the 24-hour window";
   } else if (darkness.at_start) {
-    summary = "Le 24 ore iniziano già nel buio astronomico";
+    summary = "The 24-hour window starts in astronomical darkness";
   } else if (intervals.some((interval) => Number(interval.end) >= horizon)) {
-    summary = "Le 24 ore terminano nel buio astronomico";
+    summary = "The 24-hour window ends in astronomical darkness";
   }
   field("#darkness-summary").textContent = summary;
 }
@@ -673,7 +682,7 @@ function renderTimeline(data) {
   }
   const requested = field("#timeline-request");
   requested.style.width = `${Math.min(100, Number(data.duration_seconds) / horizon * 100)}%`;
-  requested.title = "Periodo richiesto";
+  requested.title = "Requested period";
   const axis = field("#timeline-axis");
   axis.replaceChildren();
   [0, .25, .5, .75, 1].forEach((part) => {
@@ -684,7 +693,7 @@ function renderTimeline(data) {
   field("#timeline-date").textContent = `${formatInstant(data.start, 0, data.timezone, false)} → ${formatInstant(data.start, horizon, data.timezone, false)} · ${data.timezone}`;
   field("#timeline").setAttribute(
     "aria-label",
-    `${(data.intervals || []).length} intervalli visibili nelle 24 ore. Periodo richiesto: ${formatDuration(data.duration_seconds)}. Fuso ${data.timezone}.`
+    `${(data.intervals || []).length} visible intervals in 24 hours. Requested period: ${formatDuration(data.duration_seconds)}. Time zone ${data.timezone}.`
   );
 }
 
@@ -701,7 +710,7 @@ function renderTrajectory(data, payload) {
   if (!samples.length) {
     const note = document.createElement("p");
     note.className = "empty-intervals";
-    note.textContent = "Traiettoria non disponibile.";
+    note.textContent = "Trajectory unavailable.";
     host.append(note);
     return;
   }
@@ -721,9 +730,9 @@ function renderTrajectory(data, payload) {
   const y = (alt) => top + (90 - Math.max(axisBottom, Math.min(90, alt))) / axisSpan * plotHeight;
   const svg = svgElement("svg", {viewBox: `0 0 ${width} ${height}`, class: "trajectory-svg", role: "img", "aria-labelledby": "trajectory-svg-title trajectory-svg-desc"});
   const title = svgElement("title", {id: "trajectory-svg-title"});
-  title.textContent = "Traiettoria dell’altezza nelle 24 ore";
+  title.textContent = "Altitude trajectory over 24 hours";
   const desc = svgElement("desc", {id: "trajectory-svg-desc"});
-  desc.textContent = `Altezza geometrica dell’oggetto e fascia visibile tra ${payload.min_alt} e ${payload.max_alt} gradi.`;
+  desc.textContent = `Geometric object altitude and visible band between ${payload.min_alt} e ${payload.max_alt} gradi.`;
   svg.append(title, desc);
   svg.append(svgElement("rect", {x: left, y: y(payload.max_alt), width: plotWidth, height: Math.max(1, y(payload.min_alt) - y(payload.max_alt)), class: "trajectory-band"}));
   for (let altitude = axisBottom; altitude <= 90; altitude += 30) {
@@ -741,11 +750,11 @@ function renderIntervals(data) {
   const list = field("#interval-list");
   list.replaceChildren();
   const items = data.intervals || [];
-  field("#interval-count").textContent = `${items.length} ${items.length === 1 ? "intervallo" : "intervalli"}`;
+  field("#interval-count").textContent = `${items.length} ${items.length === 1 ? "interval" : "intervals"}`;
   if (!items.length) {
     const empty = document.createElement("li");
     empty.className = "empty-intervals";
-    empty.textContent = "Nessun intervallo rispetta insieme balcone e buio astronomico.";
+    empty.textContent = "No interval meets both the balcony limits and astronomical darkness.";
     list.append(empty);
     return;
   }
@@ -778,17 +787,17 @@ function renderReasons(data, payload) {
   host.replaceChildren();
   const requested = (data.samples || []).filter((sample) => Number(sample.offset) <= Number(data.duration_seconds));
   const sampledReasons = [
-    ["Sotto l’altezza minima", requested.some((sample) => Number(sample.alt) < payload.min_alt)],
-    ["Sopra l’altezza massima", requested.some((sample) => Number(sample.alt) > payload.max_alt)],
-    ["Fuori dal settore di azimut", requested.some((sample) => !azimuthVisible(Number(sample.az), payload.az_start, payload.az_end))],
-    ["Sole sopra −18°", requested.some((sample) => Number(sample.sun_alt) > -18)],
+    ["Below minimum altitude", requested.some((sample) => Number(sample.alt) < payload.min_alt)],
+    ["Above maximum altitude", requested.some((sample) => Number(sample.alt) > payload.max_alt)],
+    ["Outside the azimuth sector", requested.some((sample) => !azimuthVisible(Number(sample.az), payload.az_start, payload.az_end))],
+    ["Sun above −18°", requested.some((sample) => Number(sample.sun_alt) > -18)],
   ];
   const statusReason = {
-    full: "Tutti i criteri rispettati nel periodo richiesto",
-    partial: "Il periodo richiesto è visibile solo in parte",
-    none: "Il periodo richiesto non contiene una finestra continua completa",
-  }[data.status] || "Risultato non riconosciuto";
-  const reasons = [[statusReason, true], ...sampledReasons.map(([label, active]) => [`Campioni ogni 5 minuti: ${label}`, active])];
+    full: "All criteria met for the requested period",
+    partial: "The requested period is only partly visible",
+    none: "The requested period has no complete continuous window",
+  }[data.status] || "Unknown result";
+  const reasons = [[statusReason, true], ...sampledReasons.map(([label, active]) => [`Samples every 5 minutes: ${label}`, active])];
   reasons.forEach(([label, active]) => {
     if (!active) return;
     const chip = document.createElement("span");
@@ -827,30 +836,30 @@ function renderSuggestions(data) {
   suggestionItem.setAttribute("aria-pressed", "false");
   if (!suggestion) {
     tier.textContent = "—";
-    label.textContent = "Nessun criterio valido soddisfatto";
+    label.textContent = "No valid criteria met";
     time.textContent = "";
-    detail.textContent = data.suggestion_note || "Non esiste una finestra utile.";
-    note.textContent = "L'oggetto non offre una proposta valida con i parametri indicati.";
+    detail.textContent = data.suggestion_note || "There is no useful window.";
+    note.textContent = "This object has no valid suggestion for these settings.";
     return;
   }
   selectedSuggestion = suggestion;
   const labels = {
-    adjust: ["1", "Correggi l'orario attuale"],
-    future: ["2", "Scegli una data futura"],
-    widest: ["3", "Usa la finestra continua piu ampia"],
+    adjust: ["1", "Adjust the current time"],
+    future: ["2", "Choose a future date"],
+    widest: ["3", "Use the widest continuous window"],
   };
-  const [number, title] = labels[suggestion.tier] || ["", "Proposta"];
+  const [number, title] = labels[suggestion.tier] || ["", "Suggestion"];
   tier.textContent = number;
   label.textContent = title;
   time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
   detail.textContent = suggestion.tier === "widest"
-    ? `Disponibile ${formatDuration(suggestion.duration_seconds)} su ${formatDuration(suggestion.requested_duration_seconds)} richiesti.`
-    : `Durata continua: ${formatDuration(suggestion.duration_seconds)}.`;
-  note.textContent = data.suggestion_note || "Proposta calcolata localmente.";
+    ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
+    : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`;
+  note.textContent = data.suggestion_note || "Suggestion calculated locally.";
 }
 
 function renderNightPlan(data) {
-  resultsTitle.textContent = "Piano della notte";
+  resultsTitle.textContent = "Night plan";
   emptyResult.hidden = true;
   resultError.hidden = true;
   resultContent.hidden = true;
@@ -864,17 +873,17 @@ function renderNightPlan(data) {
   nightBlocks.replaceChildren();
   nightGaps.replaceChildren();
   nightTimeline.replaceChildren();
-  field("#night-note").textContent = data.note || "Piano calcolato localmente.";
-  field("#night-coverage").textContent = `${Number(data.coverage_percent || 0).toLocaleString("it-IT")}%`;
+  field("#night-note").textContent = data.note || "Plan calculated locally.";
+  field("#night-coverage").textContent = `${Number(data.coverage_percent || 0).toLocaleString("en-US")}%`;
 
   if (data.night_start && data.night_end) {
     field("#night-period").textContent = `${formatInstant(data.night_start, 0, data.timezone)} → ${formatInstant(data.night_end, 0, data.timezone)} · ${formatDuration(data.night_duration_seconds)}`;
   } else {
-    field("#night-period").textContent = "Nessuna notte astronomica completa per la data e la postazione selezionate.";
+    field("#night-period").textContent = "No complete astronomical night for the selected date and site.";
   }
   field("#night-chain").textContent = blocks.length
-    ? blocks.map((block) => block.target?.name || block.object || "Bersaglio").join(" → ")
-    : "Nessuna sequenza disponibile";
+    ? blocks.map((block) => formatTargetLabel(block.target, "Target")).join(" → ")
+    : "No sequence available";
 
   blocks.forEach((block, index) => {
     const item = document.createElement("li");
@@ -885,11 +894,11 @@ function renderNightPlan(data) {
     detail.className = "night-block-detail";
     const title = document.createElement("strong");
     const target = block.target || {};
-    title.textContent = `${target.name || block.object || "Bersaglio"} · ${target.type || block.type || "DSO"}`;
+    title.textContent = `${formatTargetLabel(target)} · ${target.type || block.type || "DSO"}`;
     const times = document.createElement("span");
     times.textContent = `${formatInstant(block.start, 0, data.timezone)} → ${formatInstant(block.end, 0, data.timezone)} · ${formatDuration(block.duration_seconds)}`;
     const reason = document.createElement("small");
-    reason.textContent = block.reason || "Visibile nella finestra del balcone.";
+    reason.textContent = block.reason || "Visible in the balcony window.";
     detail.append(title, times, reason);
     if (block.short_fill) {
       const badge = document.createElement("span");
@@ -903,13 +912,13 @@ function renderNightPlan(data) {
   if (!blocks.length) {
     const empty = document.createElement("li");
     empty.className = "empty-intervals";
-    empty.textContent = data.note || "Nessun bersaglio visibile durante la notte astronomica.";
+    empty.textContent = data.note || "No target is visible during astronomical night.";
     nightBlocks.append(empty);
   }
 
   gaps.forEach((gap) => {
     const item = document.createElement("li");
-    item.textContent = `Intervallo scoperto · ${formatInstant(gap.start, 0, data.timezone)} → ${formatInstant(gap.end, 0, data.timezone)} · ${formatDuration(gap.duration_seconds)}`;
+    item.textContent = `Open gap · ${formatInstant(gap.start, 0, data.timezone)} → ${formatInstant(gap.end, 0, data.timezone)} · ${formatDuration(gap.duration_seconds)}`;
     nightGaps.append(item);
   });
   field("#night-gaps-card").hidden = gaps.length === 0;
@@ -924,8 +933,8 @@ function renderNightPlan(data) {
     bar.className = segment.kind === "gap" ? "night-segment gap" : `night-segment target target-${segment.colorIndex % 5}`;
     bar.style.flexBasis = total > 0 ? `${100 * Number(segment.duration_seconds || 0) / total}%` : "0%";
     bar.title = segment.kind === "gap"
-      ? `Intervallo scoperto · ${formatDuration(segment.duration_seconds)}`
-      : `${segment.target?.name || "Bersaglio"} · ${formatDuration(segment.duration_seconds)}`;
+      ? `Open gap · ${formatDuration(segment.duration_seconds)}`
+      : `${formatTargetLabel(segment.target, "Target")} · ${formatDuration(segment.duration_seconds)}`;
     nightTimeline.append(bar);
   });
 }
@@ -940,11 +949,11 @@ suggestionItem.addEventListener("click", () => {
   if (!selectedSuggestion) return;
   suggestionItem.classList.add("selected");
   suggestionItem.setAttribute("aria-pressed", "true");
-  resultLive.textContent = "Proposta acquisita";
+  resultLive.textContent = "Suggestion selected";
 });
 
 function renderResult(data, payload) {
-  resultsTitle.textContent = "Finestra osservativa";
+  resultsTitle.textContent = "Observing window";
   nightPlan.hidden = true;
   emptyResult.hidden = true;
   resultError.hidden = true;
@@ -959,12 +968,12 @@ function renderResult(data, payload) {
     selectedObject = data.object;
     const aliases = optionAliases(data.object);
     objectSearchStatus.textContent = aliases.length
-      ? `Risolto come ${data.object.name}. Alias: ${aliases.join(", ")}.`
-      : `Risolto come ${data.object.name}.`;
+      ? `Resolved as ${formatTargetLabel(data.object)}. Aliases: ${aliases.join(", ")}.`
+      : `Resolved as ${formatTargetLabel(data.object)}.`;
   }
   const summary = field("#result-summary");
   summary.className = `result-summary ${data.status}`;
-  field("#result-object").textContent = data.object?.name || payload.object;
+  field("#result-object").textContent = formatTargetLabel(data.object, payload.object);
   const label = statusLabel(data.status);
   field("#result-status").textContent = label;
   field("#result-period").textContent = `${formatInstant(data.start, 0, data.timezone)} – ${formatInstant(data.start, data.duration_seconds, data.timezone)}`;
@@ -977,19 +986,19 @@ function renderResult(data, payload) {
   const windowNote = field("#first-window-note");
   if (data.first_window) {
     windowCard.classList.remove("no-window");
-    windowTitle.textContent = "Prima finestra completa";
+    windowTitle.textContent = "First complete window";
     windowTime.textContent = `${formatInstant(data.start, data.first_window.start, data.timezone)} – ${formatInstant(data.start, data.first_window.end, data.timezone)}`;
     windowNote.textContent = Number(data.first_window.start) === 0
-      ? "Coincide con l’inizio richiesto. Gli estremi includono i secondi calcolati."
-      : "Prima partenza utile nelle 24 ore analizzate; gli estremi includono i secondi calcolati.";
+      ? "It starts at the requested time. Endpoints include the calculated seconds."
+      : "First useful start in the analyzed 24 hours; endpoints include the calculated seconds.";
   } else {
     windowCard.classList.add("no-window");
-    windowTitle.textContent = "Nessuna soluzione nelle 24 ore analizzate";
-    windowTime.textContent = "Non esiste un singolo intervallo continuo della durata richiesta.";
+    windowTitle.textContent = "No solution in the analyzed 24 hours";
+    windowTime.textContent = "There is no single continuous interval of the requested duration.";
     const edges = data.horizon_edges || {};
     windowNote.textContent = edges.start || edges.end
-      ? "Un tratto tocca il limite delle 24 ore e può continuare oltre il periodo analizzato."
-      : "Intervalli più brevi possono comunque comparire qui sotto.";
+      ? "One interval reaches the 24-hour boundary and may continue beyond the analyzed period."
+      : "Shorter intervals may still appear below.";
   }
 
   renderDarkness(data);
@@ -999,12 +1008,12 @@ function renderResult(data, payload) {
   renderReasons(data, payload);
   renderNotes(data);
   renderSuggestions(data);
-  resultLive.textContent = `${data.object?.name || payload.object}: ${label}. Orari nel fuso ${data.timezone}.`;
+  resultLive.textContent = `${data.object?.name || payload.object}: ${label}. Times in the time zone ${data.timezone}.`;
 }
 
 async function requestIdeas() {
   if (!catalogReady) {
-    setCatalogState({ready: false, message: "Catalogo locale non disponibile. Riprova il controllo.", version: "", catalogs: []});
+    setCatalogState({ready: false, message: "Local catalog unavailable. Check again.", version: "", catalogs: []});
     verifyButton.focus();
     return;
   }
@@ -1012,12 +1021,12 @@ async function requestIdeas() {
   clearSuggestionAcknowledgement();
   calculationRunning = true;
   updatePlannerAvailability();
-  setButtonLoading(ideasButton, true, "Cerco idee...");
+  setButtonLoading(ideasButton, true, "Finding ideas…");
   emptyResult.hidden = true;
   resultContent.hidden = true;
   nightPlan.hidden = true;
   resultError.hidden = true;
-  resultLive.textContent = "Ricerca locale di una sequenza osservativa in corso.";
+  resultLive.textContent = "Finding a local observing sequence…";
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
@@ -1025,11 +1034,11 @@ async function requestIdeas() {
       body: JSON.stringify(currentPayload()),
     });
     const data = await readJson(response);
-    if (!response.ok) throw new Error(data.error || "Pianificazione delle idee non riuscita.");
+    if (!response.ok) throw new Error(data.error || "Idea planning failed.");
     renderNightPlan(data);
-    resultLive.textContent = data.note || "Piano idee disponibile.";
+    resultLive.textContent = data.note || "Idea plan ready.";
   } catch (error) {
-    showResultError(error instanceof Error ? error.message : "Pianificazione delle idee non riuscita.");
+    showResultError(error instanceof Error ? error.message : "Idea planning failed.");
     nightPlan.hidden = true;
   } finally {
     calculationRunning = false;
@@ -1062,7 +1071,7 @@ function showResultError(message) {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!catalogReady) {
-    setCatalogState({ready: false, message: "Catalogo locale non disponibile. Riprova il controllo.", version: "", catalogs: []});
+    setCatalogState({ready: false, message: "Local catalog unavailable. Check again.", version: "", catalogs: []});
     verifyButton.focus();
     return;
   }
@@ -1075,9 +1084,9 @@ form.addEventListener("submit", async (event) => {
   closeObjectList();
   calculationRunning = true;
   updatePlannerAvailability();
-  setButtonLoading(calculateButton, true, "Calcolo in corso…");
+  setButtonLoading(calculateButton, true, "Calculating…");
   resultError.hidden = true;
-  resultLive.textContent = "Calcolo locale delle prossime 24 ore in corso.";
+  resultLive.textContent = "Calculating the next 24 hours locally…";
 
   try {
     const response = await fetch("/api/check", {
@@ -1087,13 +1096,13 @@ form.addEventListener("submit", async (event) => {
     });
     const data = await readJson(response);
     if (!response.ok) {
-      const error = new Error(data.error || "Calcolo non riuscito.");
+      const error = new Error(data.error || "Calculation failed.");
       error.code = data.code;
       throw error;
     }
     renderResult(data, payload);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Calcolo non riuscito. Riprova.";
+    const message = error instanceof Error ? error.message : "Calculation failed. Try again.";
     if (error.code === "object") {
       showFormError(message, objectInput);
       objectSearchStatus.textContent = message;

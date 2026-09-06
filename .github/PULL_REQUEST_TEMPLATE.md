@@ -1,13 +1,13 @@
-## Modifica
+## Change
 
-Descrivi il comportamento osservabile che cambia e il motivo.
+Describe the user-visible behavior that changes and why.
 
-## Verifica
+## Checks
 
-- [ ] Ho aggiunto o aggiornato test di accettazione pertinenti.
-- [ ] `python -m pytest -q` passa localmente.
-- [ ] Non ho rimosso o indebolito criteri di accettazione per ottenere il verde.
+- [ ] I added or updated relevant acceptance tests.
+- [ ] `python -m pytest -q` passes locally.
+- [ ] I did not remove or weaken acceptance criteria to get a green build.
 
-## Note
+## Notes
 
-Indica limiti, dati o istruzioni di migrazione rilevanti per chi revisiona.
+List any limits, data details, or migration instructions reviewers should know.

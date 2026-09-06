@@ -1,1 +1,1 @@
-"""AstroChecker: pianificazione osservativa locale."""
+"""AstroChecker: local observing planner."""

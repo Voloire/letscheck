@@ -176,7 +176,7 @@ def test_coarse_ephemeris_exposes_only_requested_probe_grid():
 
     assert len(ephemeris.target_alt) == 3
     assert ephemeris.position_at(30)["alt"] == pytest.approx(ephemeris.target_alt[1])
-    with pytest.raises(ValueError, match="griglia"):
+    with pytest.raises(ValueError, match="grid"):
         ephemeris.position_at(15)
 
 
@@ -303,7 +303,7 @@ def test_service_response_preserves_a_truly_fractional_duration():
 def test_check_validation_rejects_invalid_timezone_values(timezone_name):
     from astrochecker.server import validate_check_request
 
-    with pytest.raises(ValueError, match="Fuso"):
+    with pytest.raises(ValueError, match="Time zone"):
         validate_check_request(CHECK_REQUEST | {"timezone": timezone_name})
 
 
@@ -509,21 +509,21 @@ def test_json_null_is_rejected_as_a_non_object_payload(local_api_server):
             "application/json",
             "https://example.com",
             403,
-            {"error": "Richiesta non locale rifiutata", "code": "validation"},
+            {"error": "Non-local request rejected", "code": "validation"},
         ),
         (
             "/api/missing",
             "application/json",
             None,
             404,
-            {"error": "Risorsa non trovata", "code": "validation"},
+            {"error": "Resource not found", "code": "validation"},
         ),
         (
             "/api/check",
             "text/plain",
             None,
             415,
-            {"error": "E richiesto un corpo JSON", "code": "validation"},
+            {"error": "A JSON body is required", "code": "validation"},
         ),
     ],
 )

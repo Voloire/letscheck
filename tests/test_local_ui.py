@@ -87,7 +87,7 @@ class UiService(AstroCheckerService):
             or [
                 {
                     "ready": True,
-                    "version": "2026.09.05-1",
+                    "version": "2026.09.06-1",
                     "catalogs": CATALOGS,
                     "message": "Catalogo locale pronto",
                 }
@@ -145,21 +145,21 @@ class UiService(AstroCheckerService):
         if self.site_gate is not None:
             self.site_gate.wait(timeout=5)
         if self.fail_site_load:
-            raise ApiError("Postazione salvata non leggibile", "site", 500)
+            raise ApiError("Postazione saved non leggibile", "site", 500)
         return super().get_site()
 
     def save_site(self, payload):
         if self.fail_site_save:
-            raise ApiError("Salvataggio postazione non riuscito", "site", 500)
+            raise ApiError("Saving site failed", "site", 500)
         return super().save_site(payload)
 
     def check(self, payload):
         self.check_payloads.append(copy.deepcopy(payload))
         normalized = "".join(str(payload.get("object", "")).upper().split())
         if normalized in {"INESISTENTE", "ZZZ"}:
-            raise ApiError("Oggetto non trovato nel catalogo locale", "object", 404)
+            raise ApiError("Object not found in the local catalog", "object", 404)
         if normalized == "M101":
-            raise ApiError("M 101 è una sigla ambigua; scegliere un risultato", "object", 409)
+            raise ApiError("M 101 is ambiguous; choose a result", "object", 409)
         if normalized == "M31":
             result = result_fixture(object_name="NGC 224")
             result["object"]["aliases"] = ["NGC 224", "M 31"]
@@ -212,7 +212,7 @@ class UiService(AstroCheckerService):
                 "duration_seconds": 3600,
                 "requested_duration_seconds": 3600,
             }]
-            result["suggestion_note"] = "Prima data futura entro 90 giorni."
+            result["suggestion_note"] = "Prima future date entro 90 days."
             result["suggestion_search_days"] = 90
             return result
         timezone = str(payload.get("timezone", "Europe/Rome"))
@@ -255,13 +255,13 @@ def open_page(browser, url, *, init_script=None, viewport=None):
 
 
 def wait_until_ready(page):
-    expect(page.get_by_label("Oggetto celeste", exact=True)).to_be_enabled()
+    expect(page.get_by_label("Sky object", exact=True)).to_be_enabled()
 
 
 def submit_object(page, name):
-    field = page.get_by_label("Oggetto celeste", exact=True)
+    field = page.get_by_label("Sky object", exact=True)
     field.fill(name)
-    page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+    page.get_by_role("button", name="Check visibility", exact=True).click()
 
 
 def test_catalog_boot_is_automatic_and_failed_status_retries_without_reload(tmp_path, ui_browser):
@@ -269,11 +269,11 @@ def test_catalog_boot_is_automatic_and_failed_status_retries_without_reload(tmp_
     delayed.site_gate = threading.Event()
     with serve_ui(delayed) as url:
         page, errors = open_page(ui_browser, url)
-        expect(page.get_by_label("Oggetto celeste", exact=True)).to_be_disabled()
+        expect(page.get_by_label("Sky object", exact=True)).to_be_disabled()
         delayed.site_gate.set()
         wait_until_ready(page)
-        expect(page.locator("#header-connection")).to_contain_text("Cataloghi pronti")
-        expect(page.locator("#catalog-version")).to_contain_text("2026.09.05-1")
+        expect(page.locator("#header-connection")).to_contain_text("Catalogs ready")
+        expect(page.locator("#catalog-version")).to_contain_text("2026.09.06-1")
         catalog_text = page.locator("#catalog-summary").inner_text()
         for label in ("M", "NGC", "IC", "Sh2", "vdB", "LDN"):
             assert label in catalog_text
@@ -296,11 +296,11 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
         "ready": False,
         "version": "",
         "catalogs": [],
-        "message": "Catalogo locale non disponibile",
+        "message": "Catalogo locale unavailable",
     }
     ready = {
         "ready": True,
-        "version": "2026.09.05-1",
+        "version": "2026.09.06-1",
         "catalogs": CATALOGS,
         "message": "Catalogo locale pronto",
     }
@@ -308,11 +308,11 @@ def test_header_identifies_the_current_alpha_release(tmp_path, ui_browser):
     retrying.fail_site_load = True
     with serve_ui(retrying) as url:
         page, errors = open_page(ui_browser, url)
-        expect(page.locator("#header-connection")).to_contain_text("Cataloghi non disponibili")
-        expect(page.get_by_label("Oggetto celeste", exact=True)).to_be_disabled()
+        expect(page.locator("#header-connection")).to_contain_text("Catalogs unavailable")
+        expect(page.get_by_label("Sky object", exact=True)).to_be_disabled()
         expect(page.locator("#site-status")).to_contain_text("non leggibile")
         navigation_count = page.evaluate("performance.getEntriesByType('navigation').length")
-        page.get_by_role("button", name="Riprova controllo", exact=True).click()
+        page.get_by_role("button", name="Check again", exact=True).click()
         wait_until_ready(page)
         assert page.evaluate("performance.getEntriesByType('navigation').length") == navigation_count
         assert retrying.status_calls == 2
@@ -325,7 +325,7 @@ def test_object_search_requires_selection_and_exact_submit_canonicalizes(tmp_pat
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
         wait_until_ready(page)
-        field = page.get_by_label("Oggetto celeste", exact=True)
+        field = page.get_by_label("Sky object", exact=True)
 
         field.fill("m 13")
         expect(page.get_by_role("option", name="NGC 6205 GCl M 13")).to_be_visible()
@@ -336,31 +336,31 @@ def test_object_search_requires_selection_and_exact_submit_canonicalizes(tmp_pat
         expect(field).to_have_value("NGC 6205")
         expect(field).to_have_attribute("aria-expanded", "false")
 
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+        page.get_by_role("button", name="Check visibility", exact=True).click()
         expect(page.locator("#result-object")).to_have_text("NGC 6205")
         field.fill("NGC 620")
         expect(page.locator("#stale-badge")).to_be_visible()
 
         field.fill("M 13")
         field.press("Escape")
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+        page.get_by_role("button", name="Check visibility", exact=True).click()
         expect(page.locator("#result-object")).to_have_text("NGC 6205")
         expect(field).to_have_value("NGC 6205")
         expect(page.locator("#object-search-status")).to_contain_text("M 13")
         assert service.check_payloads[-1]["object"] == "M 13"
 
-        field.fill("inesistente")
-        expect(page.locator("#object-search-status")).to_contain_text("Nessun oggetto trovato")
+        field.fill("does not exist")
+        expect(page.locator("#object-search-status")).to_contain_text("No objects found")
         field.press("Escape")
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
-        expect(page.locator("#form-error")).to_contain_text("Oggetto non trovato")
-        assert page.get_by_text("Non visibile nel periodo richiesto", exact=True).count() == 0
+        page.get_by_role("button", name="Check visibility", exact=True).click()
+        expect(page.locator("#form-error")).to_contain_text("Object not found")
+        assert page.get_by_text("Not visible for the requested period", exact=True).count() == 0
 
         field.fill("M 101")
         expect(page.get_by_role("option")).to_have_count(2)
         field.press("Escape")
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
-        expect(page.locator("#form-error")).to_contain_text("sigla ambigua")
+        page.get_by_role("button", name="Check visibility", exact=True).click()
+        expect(page.locator("#form-error")).to_contain_text("ambiguous")
         expect(field).to_have_value("M 101")
 
         field.fill("m 13")
@@ -378,7 +378,7 @@ def test_object_search_requires_selection_and_exact_submit_canonicalizes(tmp_pat
         field.press("ArrowDown")
         assert field.get_attribute("aria-activedescendant")
         field.fill("M 31")
-        assert replacement_started.wait(timeout=2), "La ricerca M31 non è partita"
+        assert replacement_started.wait(timeout=2), "M31 search did not start"
         field.press("Enter")
         assert field.input_value() != "NGC 6205"
         expect(page.locator("#result-object")).to_have_text("NGC 224", timeout=3000)
@@ -395,19 +395,19 @@ def test_site_save_reloads_from_real_temporary_backend_on_another_port(tmp_path,
         page, errors = open_page(ui_browser, first_url)
         wait_until_ready(page)
         values = {
-            "Nome postazione": "Terrazzo",
-            "Latitudine": "45.1234",
-            "Longitudine": "9.5678",
-            "Fuso della postazione (IANA)": "Europe/Paris",
-            "Altezza minima": "12",
-            "Altezza massima": "70",
-            "Azimut iniziale": "330",
-            "Azimut finale": "25",
+            "Site name": "Terrazzo",
+            "Latitude": "45.1234",
+            "Longitude": "9.5678",
+            "Site time zone (IANA)": "Europe/Paris",
+            "Minimum altitude": "12",
+            "Maximum altitude": "70",
+            "Starting azimuth": "330",
+            "Ending azimuth": "25",
         }
         for label, value in values.items():
             page.get_by_label(label, exact=True).fill(value)
-        page.get_by_role("button", name="Salva postazione", exact=True).click()
-        expect(page.locator("#site-status")).to_contain_text("salvata")
+        page.get_by_role("button", name="Save site", exact=True).click()
+        expect(page.locator("#site-status")).to_contain_text("saved")
 
         second_service = UiService(site_path)
         with serve_ui(second_service) as second_url:
@@ -418,22 +418,22 @@ def test_site_save_reloads_from_real_temporary_backend_on_another_port(tmp_path,
                 expect(second_page.get_by_label(label, exact=True)).to_have_value(value)
 
             second_service.fail_site_save = True
-            second_page.get_by_role("button", name="Salva postazione", exact=True).click()
-            expect(second_page.locator("#site-status")).to_contain_text("non riuscito")
-            second_page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+            second_page.get_by_role("button", name="Save site", exact=True).click()
+            expect(second_page.locator("#site-status")).to_contain_text("failed")
+            second_page.get_by_role("button", name="Check visibility", exact=True).click()
             expect(second_page.locator("#result-content")).to_be_visible()
 
-            latitude = second_page.get_by_label("Latitudine", exact=True)
+            latitude = second_page.get_by_label("Latitude", exact=True)
             latitude.fill("91")
-            second_page.get_by_role("button", name="Salva postazione", exact=True).click()
+            second_page.get_by_role("button", name="Save site", exact=True).click()
             expect(latitude).to_have_attribute("aria-invalid", "true")
             assert second_page.evaluate("document.activeElement.id") == "latitude"
 
             latitude.fill("45.1234")
-            timezone = second_page.get_by_label("Fuso della postazione (IANA)", exact=True)
+            timezone = second_page.get_by_label("Site time zone (IANA)", exact=True)
             timezone.fill("Invalid/Nowhere")
             calls_before = len(second_service.check_payloads)
-            second_page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+            second_page.get_by_role("button", name="Check visibility", exact=True).click()
             expect(timezone).to_have_attribute("aria-invalid", "true")
             assert second_page.evaluate("document.activeElement.id") == "timezone"
             assert len(second_service.check_payloads) == calls_before
@@ -451,9 +451,9 @@ def test_prioritized_suggestion_is_visible_and_states_90_day_limit(tmp_path, ui_
         submit_object(page, "Suggestion")
         expect(page.locator("#suggestions-card")).to_be_visible()
         expect(page.locator("#suggestion-tier")).to_have_text("2")
-        expect(page.locator("#suggestion-label")).to_contain_text("data futura")
-        expect(page.locator("#suggestion-time")).to_contain_text("07 set")
-        expect(page.locator("#suggestions-card")).to_contain_text("90 giorni")
+        expect(page.locator("#suggestion-label")).to_contain_text("future date")
+        expect(page.locator("#suggestion-time")).to_contain_text("Sep 07")
+        expect(page.locator("#suggestions-card")).to_contain_text("90 days")
         assert not errors
         page.close()
 
@@ -463,7 +463,7 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         def ideas(self, payload):
             return {
                 "status": "full",
-                "note": "Piano completo dal crepuscolo astronomico serale a quello mattutino.",
+                "note": "Complete plan from evening astronomical twilight to morning twilight.",
                 "darkness_mode": "astronomical",
                 "timezone": "Europe/Rome",
                 "night_start": "2026-09-05T21:00:00+02:00",
@@ -489,7 +489,7 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
                         "target": {"name": "Z", "type": "OCl", "aliases": [], "ra_deg": 5, "dec_deg": 6},
                         "start": "2026-09-06T02:30:00+02:00", "end": "2026-09-06T05:00:00+02:00",
                         "offset_start": 52200, "offset_end": 61200, "duration_seconds": 9000,
-                        "reason": "Completa la notte.", "short_fill": False,
+                        "reason": "Complete the night.", "short_fill": False,
                     },
                 ],
                 "gaps": [],
@@ -500,11 +500,11 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         page, errors = open_page(ui_browser, url)
         wait_until_ready(page)
         page.locator("#object").fill("")
-        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
+        page.get_by_role("button", name="Need ideas?", exact=True).click()
         expect(page.locator("#night-plan")).to_be_visible()
         assert page.locator("#night-plan").evaluate("element => element.parentElement.classList.contains('results-column')")
         expect(page.locator("#result-content")).to_be_hidden()
-        expect(page.locator("#results-title")).to_have_text("Piano della notte")
+        expect(page.locator("#results-title")).to_have_text("Night plan")
         expect(page.get_by_role("heading", name="Sequenza completa", exact=True)).to_be_visible()
         expect(page.locator("#night-period")).to_contain_text("21:00")
         expect(page.locator("#night-period")).to_contain_text("05:00")
@@ -512,7 +512,7 @@ def test_ideas_button_renders_a_dedicated_complete_night_chain(tmp_path, ui_brow
         expect(page.locator("#night-chain")).to_have_text("X → Y → Z")
         expect(page.locator("#night-blocks li")).to_have_count(3)
         expect(page.locator("#night-timeline .night-segment")).to_have_count(3)
-        expect(page.get_by_role("button", name="Esporta in NINA", exact=True)).to_be_disabled()
+        expect(page.get_by_role("button", name="Export TARGET to NINA", exact=True)).to_be_disabled()
         assert not errors
         page.close()
 
@@ -522,9 +522,9 @@ def test_ideas_button_explains_that_date_drives_the_complete_night(tmp_path, ui_
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
         wait_until_ready(page)
-        expect(page.locator("#ideas-explanation")).to_contain_text("data scelta")
-        expect(page.locator("#ideas-explanation")).to_contain_text("crepuscolo astronomico serale")
-        expect(page.locator("#ideas-explanation")).to_contain_text("mattutino")
+        expect(page.locator("#ideas-explanation")).to_contain_text("selected date")
+        expect(page.locator("#ideas-explanation")).to_contain_text("evening astronomical twilight")
+        expect(page.locator("#ideas-explanation")).to_contain_text("morning twilight")
         assert not errors
         page.close()
 
@@ -538,7 +538,7 @@ def test_priority_suggestion_acknowledges_selection_without_network_action(tmp_p
         wait_until_ready(page)
         submit_object(page, "Suggestion")
         suggestion = page.locator("#suggestion-item")
-        expect(page.locator("#suggestion-label")).to_contain_text("data futura")
+        expect(page.locator("#suggestion-label")).to_contain_text("future date")
         expect(suggestion).to_have_attribute("aria-pressed", "false")
         calls_before = len(requests)
 
@@ -546,7 +546,7 @@ def test_priority_suggestion_acknowledges_selection_without_network_action(tmp_p
 
         expect(suggestion).to_have_attribute("aria-pressed", "true")
         expect(suggestion).to_have_class(re.compile(r"\bselected\b"))
-        expect(page.locator("#result-live")).to_have_text("Proposta acquisita")
+        expect(page.locator("#result-live")).to_have_text("Suggestion selected")
         assert len(requests) == calls_before
         assert not errors
         page.close()
@@ -576,9 +576,9 @@ def test_night_plan_shows_gaps_and_short_fill_without_hiding_them(tmp_path, ui_b
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url, viewport={"width": 390, "height": 844})
         wait_until_ready(page)
-        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
-        expect(page.locator("#night-plan")).to_contain_text("Blocco breve")
-        expect(page.locator("#night-gaps")).to_contain_text("Intervallo scoperto")
+        page.get_by_role("button", name="Need ideas?", exact=True).click()
+        expect(page.locator("#night-plan")).to_contain_text("Short block")
+        expect(page.locator("#night-gaps")).to_contain_text("Open gap")
         assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
         assert not errors
         page.close()
@@ -588,7 +588,7 @@ def test_night_plan_shows_an_explicit_no_astronomical_night_state(tmp_path, ui_b
     class NoNightUiService(UiService):
         def ideas(self, payload):
             return {
-                "status": "none", "note": "In questa data non esiste una notte astronomica completa.",
+                "status": "none", "note": "In questa data There is no complete astronomical night.",
                 "darkness_mode": "astronomical", "timezone": "Europe/Rome",
                 "night_start": None, "night_end": None, "night_duration_seconds": 0,
                 "covered_duration_seconds": 0, "coverage_percent": 0,
@@ -599,9 +599,9 @@ def test_night_plan_shows_an_explicit_no_astronomical_night_state(tmp_path, ui_b
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
         wait_until_ready(page)
-        page.get_by_role("button", name="Cerchi Idee?", exact=True).click()
-        expect(page.locator("#night-period")).to_contain_text("Nessuna notte astronomica completa")
-        expect(page.locator("#night-blocks")).to_contain_text("non esiste una notte astronomica completa")
+        page.get_by_role("button", name="Need ideas?", exact=True).click()
+        expect(page.locator("#night-period")).to_contain_text("No complete astronomical night")
+        expect(page.locator("#night-blocks")).to_contain_text("There is no complete astronomical night")
         expect(page.locator("#night-plan")).to_be_visible()
         assert not errors
         page.close()
@@ -622,27 +622,27 @@ def test_geolocation_proposal_confirm_cancel_and_denial_preserve_manual_values(t
         requests = []
         page.on("request", lambda request: requests.append(request.url))
         wait_until_ready(page)
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+        page.get_by_role("button", name="Check visibility", exact=True).click()
         expect(page.locator("#result-content")).to_be_visible()
-        latitude = page.get_by_label("Latitudine", exact=True)
-        longitude = page.get_by_label("Longitudine", exact=True)
-        timezone = page.get_by_label("Fuso della postazione (IANA)", exact=True)
+        latitude = page.get_by_label("Latitude", exact=True)
+        longitude = page.get_by_label("Longitude", exact=True)
+        timezone = page.get_by_label("Site time zone (IANA)", exact=True)
         manual = (latitude.input_value(), longitude.input_value(), timezone.input_value())
 
         locate = page.locator("#detect-location")
         locate.click()
         expect(locate).to_have_attribute("aria-busy", "true")
         page.evaluate("window.completeGeolocation()")
-        expect(page.locator("#location-proposal")).to_contain_text("Accuratezza ± 42 m")
+        expect(page.locator("#location-proposal")).to_contain_text("Accuracy ± 42 m")
         assert (latitude.input_value(), longitude.input_value(), timezone.input_value()) == manual
-        page.get_by_role("button", name="Annulla", exact=True).click()
+        page.get_by_role("button", name="Cancel", exact=True).click()
         expect(page.locator("#location-proposal")).to_be_hidden()
         assert (latitude.input_value(), longitude.input_value(), timezone.input_value()) == manual
 
         locate.click()
         page.evaluate("window.completeGeolocation()")
         expect(page.locator("#location-proposal")).to_be_visible()
-        page.get_by_role("button", name="Usa questa posizione", exact=True).click()
+        page.get_by_role("button", name="Use this location", exact=True).click()
         expect(latitude).to_have_value("45.1234")
         expect(longitude).to_have_value("9.5678")
         expect(timezone).to_have_value(manual[2])
@@ -661,18 +661,18 @@ def test_geolocation_proposal_confirm_cancel_and_denial_preserve_manual_values(t
         """
         denied, denied_errors = open_page(ui_browser, url, init_script=denied_script)
         wait_until_ready(denied)
-        denied_latitude = denied.get_by_label("Latitudine", exact=True).input_value()
-        denied.get_by_role("button", name="Usa la mia posizione", exact=True).click()
-        expect(denied.locator("#site-status")).to_contain_text("Permesso")
-        expect(denied.get_by_label("Latitudine", exact=True)).to_have_value(denied_latitude)
+        denied_latitude = denied.get_by_label("Latitude", exact=True).input_value()
+        denied.get_by_role("button", name="Use my location", exact=True).click()
+        expect(denied.locator("#site-status")).to_contain_text("permission")
+        expect(denied.get_by_label("Latitude", exact=True)).to_have_value(denied_latitude)
         assert not denied_errors
         denied.close()
 
         unavailable_script = "Object.defineProperty(navigator, 'geolocation', {configurable: true, value: undefined});"
         unavailable, unavailable_errors = open_page(ui_browser, url, init_script=unavailable_script)
         wait_until_ready(unavailable)
-        unavailable.get_by_role("button", name="Usa la mia posizione", exact=True).click()
-        expect(unavailable.locator("#site-status")).to_contain_text("non disponibile")
+        unavailable.get_by_role("button", name="Use my location", exact=True).click()
+        expect(unavailable.locator("#site-status")).to_contain_text("unavailable")
         assert not unavailable_errors
         unavailable.close()
 
@@ -684,7 +684,7 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
         requests = []
         page.on("request", lambda request: requests.append(request.url))
         wait_until_ready(page)
-        timezone = page.get_by_label("Fuso della postazione (IANA)", exact=True)
+        timezone = page.get_by_label("Site time zone (IANA)", exact=True)
         timezone.fill("America/New_York")
         submit_object(page, "M 13")
         expect(page.locator("#result-content")).to_be_visible()
@@ -697,20 +697,20 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
         assert page.locator("#result-period").inner_text() == old_period
 
         submit_object(page, "Polar Night")
-        expect(page.locator("#darkness-summary")).to_have_text("Buio astronomico per tutte le 24 h")
-        expect(page.locator("#darkness-start")).to_contain_text("Non presente nelle 24 h")
-        expect(page.locator("#darkness-end")).to_contain_text("Non presente nelle 24 h")
+        expect(page.locator("#darkness-summary")).to_have_text("Astronomical darkness covers all 24 hours")
+        expect(page.locator("#darkness-start")).to_contain_text("Not present in the 24-hour window")
+        expect(page.locator("#darkness-end")).to_contain_text("Not present in the 24-hour window")
 
         submit_object(page, "Polar Day")
-        expect(page.locator("#darkness-summary")).to_have_text("Nessun buio astronomico nelle 24 h")
+        expect(page.locator("#darkness-summary")).to_have_text("No astronomical darkness in the 24-hour window")
         nina = page.get_by_role("button", name="Export TARGET to NINA", exact=True)
         expect(nina).to_be_visible()
         expect(nina).to_be_disabled()
-        expect(page.get_by_text("Prossimamente", exact=True)).to_be_visible()
+        expect(page.get_by_text("Coming soon", exact=True)).to_be_visible()
 
         submit_object(page, "One Event")
-        expect(page.locator("#darkness-summary")).to_contain_text("iniziano già nel buio")
-        expect(page.locator("#darkness-start")).to_contain_text("Non presente nelle 24 h")
+        expect(page.locator("#darkness-summary")).to_contain_text("starts in astronomical darkness")
+        expect(page.locator("#darkness-start")).to_contain_text("Not present in the 24-hour window")
         expect(page.locator("#darkness-end [data-event-kind='night_end']")).to_have_count(1)
 
         submit_object(page, "Multi Event")
@@ -718,8 +718,8 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
         expect(page.locator("#darkness-end [data-event-kind='night_end']")).to_have_count(2)
 
         darkness_before = page.locator("#darkness-events [data-event-kind]").all_inner_texts()
-        page.get_by_label("Altezza minima", exact=True).fill("5")
-        page.get_by_role("button", name="Calcola visibilità", exact=True).click()
+        page.get_by_label("Minimum altitude", exact=True).fill("5")
+        page.get_by_role("button", name="Check visibility", exact=True).click()
         expect(page.locator("#darkness-events [data-event-kind]")).to_have_count(4)
         assert page.locator("#darkness-events [data-event-kind]").all_inner_texts() == darkness_before
         assert service.check_payloads[-1]["timezone"] == "Europe/Rome"
@@ -732,7 +732,7 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp
             }).map(element => ({tag: element.tagName, id: element.id, className: String(element.className), right: element.getBoundingClientRect().right}))"""
         )
         assert not overflowing, overflowing
-        page.get_by_label("Oggetto celeste", exact=True).focus()
+        page.get_by_label("Sky object", exact=True).focus()
         assert page.evaluate("document.activeElement.id") == "object"
         assert not any("nina" in request.lower() for request in requests)
         assert not errors
@@ -755,7 +755,7 @@ def test_datetime_change_closes_native_picker_focus_and_boundary_hint_is_visible
         )
         expect(page.locator("#start")).not_to_be_focused()
         submit_object(page, "Boundary")
-        expect(page.locator("#first-window-note")).to_contain_text("può continuare oltre")
+        expect(page.locator("#first-window-note")).to_contain_text("may continue beyond")
         assert not errors
         page.close()
 

@@ -19,41 +19,41 @@ with sync_playwright() as p:
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(base)
-    expect(page.get_by_label('Oggetto celeste', exact=True)).to_be_disabled()
+    expect(page.get_by_label('Sky object', exact=True)).to_be_disabled()
     page.route('**/api/status', lambda route: route.fulfill(
         status=200, content_type='application/json',
         body=json.dumps({'connected': False, 'message': 'SkyChart non raggiungibile', 'port': 3292})))
     page.get_by_role('button', name='Verifica connessione', exact=True).click()
-    expect(page.get_by_label('Oggetto celeste', exact=True)).to_be_disabled()
+    expect(page.get_by_label('Sky object', exact=True)).to_be_disabled()
     page.unroute('**/api/status')
     page.get_by_role('button', name='Verifica connessione', exact=True).click()
-    expect(page.get_by_label('Oggetto celeste', exact=True)).to_be_enabled(timeout=15000)
+    expect(page.get_by_label('Sky object', exact=True)).to_be_enabled(timeout=15000)
 
-    for label, value in [('Oggetto celeste', 'M13'), ('Latitudine', '43.9729'),
-                         ('Longitudine', '7.9944'), ('Data e ora locale', '2026-09-05T23:00'),
+    for label, value in [('Sky object', 'M13'), ('Latitude', '43.9729'),
+                         ('Longitude', '7.9944'), ('Site date and time', '2026-09-05T23:00'),
                          ('Durata continua', '30'), ('Altezza minima', '0'),
-                         ('Altezza massima', '90'), ('Azimut iniziale', '0'), ('Azimut finale', '360')]:
+                         ('Maximum altitude', '90'), ('Azimut iniziale', '0'), ('Azimut finale', '360')]:
         page.get_by_label(label, exact=True).fill(value)
     with page.expect_response('**/api/check', timeout=180000) as response:
-        page.get_by_role('button', name='Calcola visibilità', exact=True).click()
+        page.get_by_role('button', name='Check visibility', exact=True).click()
     result = response.value.json()
     assert result.get('status') == 'full', result
-    expect(page.get_by_text('Visibile per tutta la durata', exact=True)).to_be_visible(timeout=10000)
-    expect(page.get_by_text('Prima finestra completa', exact=True)).to_be_visible()
+    expect(page.get_by_text('Visible for the full duration', exact=True)).to_be_visible(timeout=10000)
+    expect(page.get_by_text('First complete window', exact=True)).to_be_visible()
     page.screenshot(path=str(artifacts / 'astrochecker-desktop.png'), full_page=True)
     (artifacts / 'live-full.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding='utf-8')
 
-    page.get_by_label('Altezza massima', exact=True).fill('1')
+    page.get_by_label('Maximum altitude', exact=True).fill('1')
     with page.expect_response('**/api/check', timeout=180000) as response:
-        page.get_by_role('button', name='Calcola visibilità', exact=True).click()
+        page.get_by_role('button', name='Check visibility', exact=True).click()
     unavailable = response.value.json()
     assert unavailable.get('status') == 'none', unavailable
     assert unavailable.get('first_window') is None, unavailable
-    expect(page.get_by_text('Nessuna soluzione nelle 24 ore analizzate', exact=True)).to_be_visible()
+    expect(page.get_by_text('No solution in the analyzed 24 hours', exact=True)).to_be_visible()
 
-    page.get_by_label('Oggetto celeste', exact=True).fill('ASTROCHECKER_UNKNOWN_987654321')
+    page.get_by_label('Sky object', exact=True).fill('ASTROCHECKER_UNKNOWN_987654321')
     with page.expect_response('**/api/check', timeout=180000) as response:
-        page.get_by_role('button', name='Calcola visibilità', exact=True).click()
+        page.get_by_role('button', name='Check visibility', exact=True).click()
     unknown = response.value.json()
     assert unknown.get('code') == 'object', unknown
     assert unknown.get('error'), unknown

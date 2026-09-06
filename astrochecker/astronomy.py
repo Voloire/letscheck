@@ -13,20 +13,20 @@ def _vector(ra_degrees, dec_degrees):
 def interpolate_equatorial(first, second, fraction):
     """Interpolate RA/Dec on the unit sphere, including the 0/360 boundary."""
     if not 0 <= fraction <= 1:
-        raise ValueError("La frazione di interpolazione deve essere tra zero e uno")
+        raise ValueError("Interpolation fraction must be between zero and one")
     left = _vector(*first)
     right = _vector(*second)
     vector = tuple(a + (b - a) * fraction for a, b in zip(left, right))
     length = math.sqrt(sum(component * component for component in vector))
     if length == 0:
-        raise ValueError("Le coordinate non possono essere interpolate")
+        raise ValueError("Coordinates cannot be interpolated")
     x, y, z = (component / length for component in vector)
     return math.degrees(math.atan2(y, x)) % 360.0, math.degrees(math.asin(z))
 
 
 def greenwich_mean_sidereal_degrees(instant):
     if not isinstance(instant, datetime) or instant.tzinfo is None:
-        raise ValueError("L'istante astronomico deve includere il fuso orario")
+        raise ValueError("Astronomical instant must include a time zone")
     utc = instant.astimezone(timezone.utc)
     julian_date = utc.timestamp() / 86400.0 + 2440587.5
     days = julian_date - 2451545.0

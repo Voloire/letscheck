@@ -200,9 +200,9 @@ def test_night_sequence_never_shortens_a_target_that_has_a_two_hour_window():
 
 
 def test_night_sequence_rejects_fractional_boolean_and_duplicate_identifiers():
-    with pytest.raises(ValueError, match="interi"):
+    with pytest.raises(ValueError, match="integer"):
         plan_night_sequence([], {"start": 0, "end": 7200}, slot_seconds=300.5)
-    with pytest.raises(ValueError, match="interi"):
+    with pytest.raises(ValueError, match="integer"):
         plan_night_sequence([], {"start": False, "end": 7200})
     with pytest.raises(ValueError, match="univoci"):
         plan_night_sequence(
@@ -212,14 +212,14 @@ def test_night_sequence_rejects_fractional_boolean_and_duplicate_identifiers():
             ],
             {"start": 0, "end": 7200},
         )
-    with pytest.raises(ValueError, match="candidato"):
+    with pytest.raises(ValueError, match="candidate"):
         plan_night_sequence(["not-a-candidate"], {"start": 0, "end": 7200})
-    with pytest.raises(ValueError, match="intervalli"):
+    with pytest.raises(ValueError, match="interval"):
         plan_night_sequence(
             [candidate("Fractional", 10, [{"start": 0.5, "end": 7200}])],
             {"start": 0, "end": 7200},
         )
-    with pytest.raises(ValueError, match="priorita"):
+    with pytest.raises(ValueError, match="[Pp]riority"):
         plan_night_sequence(
             [candidate("Fractional priority", 10.5, [{"start": 0, "end": 7200}])],
             {"start": 0, "end": 7200},

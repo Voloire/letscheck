@@ -20,7 +20,7 @@ def test_missing_database_is_reported_without_creating_an_empty_file(tmp_path):
     status = Catalog(path).status()
 
     assert status["ready"] is False
-    assert "non trovato" in status["message"].lower()
+    assert "not found" in status["message"].lower()
     assert not path.exists()
 
 
@@ -31,7 +31,7 @@ def test_corrupt_database_is_reported_as_unavailable(tmp_path):
     status = Catalog(path).status()
 
     assert status["ready"] is False
-    assert "non valido" in status["message"].lower()
+    assert "invalid" in status["message"].lower()
 
 
 def test_default_catalog_is_ready_and_declares_all_six_dso_catalogs():
@@ -86,6 +86,39 @@ def test_common_name_alias_resolves_and_is_searchable():
     assert result["name"] == "NGC 224"
     assert "Andromeda Galaxy" in result["aliases"]
     assert catalog.search("andromeda galaxy")[0]["name"] == "NGC 224"
+
+
+@pytest.mark.parametrize(
+    ("query", "canonical", "common_name"),
+    [
+        ("Pacman", "NGC 281", "Pacman Nebula"),
+        ("Fossil Footprint", "NGC 1491", "Fossil Footprint Nebula"),
+        ("Casper", "NGC 2068", "Casper the Friendly Ghost Nebula"),
+    ],
+)
+def test_wikidata_common_names_are_searchable_and_resolve_to_the_richest_local_record(
+    query, canonical, common_name
+):
+    catalog = Catalog()
+
+    result = catalog.resolve(query)
+
+    assert result["name"] == canonical
+    assert common_name in result["common_names"]
+    assert result["target_group"]
+    assert canonical in result["related_ids"]
+    assert len(catalog.search(query)) == 1
+
+
+def test_crosswalk_groups_multiple_catalog_ids_without_changing_exact_designation_resolution():
+    catalog = Catalog()
+
+    exact = catalog.resolve("Sh 2-184")
+    grouped = catalog.resolve("Pacman Nebula")
+
+    assert exact["name"] == "Sh 2-184"
+    assert exact["target_group"] == grouped["target_group"]
+    assert set(grouped["related_ids"]) >= {"NGC 281", "Sh 2-184"}
 
 
 @pytest.mark.parametrize(

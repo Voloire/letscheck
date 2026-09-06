@@ -1,13 +1,13 @@
-# Contribuire ad AstroChecker
+# Contributing
 
-Le modifiche arrivano tramite pull request verso `main`. Apri un branch dal
-tuo fork, descrivi il comportamento osservabile che vuoi cambiare e includi
-test che coprano il percorso principale, gli errori rilevanti e i casi limite.
+Thanks for taking a look. Keep changes focused, run the relevant tests, and open a pull request against `main`.
 
-La CI deve completarsi senza errori. Non rimuovere o indebolire i test di
-accettazione per ottenere un risultato verde; se un criterio non è corretto,
-descrivi la modifica richiesta nella pull request.
+The app is intentionally local and experimental. Avoid adding network calls to runtime code, credentials, private conversation data, or generated environment files. User-facing copy uses friendly US English.
 
-Per lavorare localmente installa una versione recente di Python compatibile
-con `requirements.txt` e usa un ambiente virtuale. L’esperimento si esegue
-dal sorgente con i comandi indicati nel README.
+Before opening a PR:
+
+```bash
+python -m pytest -q
+```
+
+Explain the user-visible behavior and the checks you ran in the PR description.

@@ -29,13 +29,13 @@ class SkyChartObjectError(SkyChartError):
 
 def parse_selected_object(response):
     if not isinstance(response, str) or not response.startswith("OK! "):
-        raise SkyChartObjectError("SkyChart non ha risolto l'oggetto richiesto")
+        raise SkyChartObjectError("SkyChart did not resolve the requested object")
     fields = response[4:].split("\t")
     if len(fields) < 4:
         raise SkyChartProtocolError("Descrizione dell'oggetto SkyChart incompleta")
     frame = next((field.strip() for field in fields[4:] if field.strip().casefold().startswith("equinox:")), None)
     if frame is None or frame.casefold() != "equinox:now":
-        raise SkyChartProtocolError("SkyChart ha restituito coordinate con equinozio non supportato")
+        raise SkyChartProtocolError("SkyChart returned coordinates with an unsupported equinox")
 
     ra_text = fields[0].strip()
     dec_text = fields[1].strip()
@@ -44,7 +44,7 @@ def parse_selected_object(response):
     except ValueError:
         match = re.fullmatch(r"(\d{1,2})h(\d{1,2})m(\d+(?:\.\d+)?)s", ra_text)
         if not match:
-            raise SkyChartProtocolError("Ascensione retta SkyChart non riconosciuta")
+            raise SkyChartProtocolError("SkyChart right ascension was not recognized")
         hours, minutes, seconds = (float(value) for value in match.groups())
         ra_hours = hours + minutes / 60.0 + seconds / 3600.0
     try:
@@ -52,12 +52,12 @@ def parse_selected_object(response):
     except ValueError:
         numbers = re.findall(r"[+-]?\d+(?:\.\d+)?", dec_text)
         if len(numbers) != 3:
-            raise SkyChartProtocolError("Declinazione SkyChart non riconosciuta")
+            raise SkyChartProtocolError("SkyChart declination was not recognized")
         degrees, minutes, seconds = (float(value) for value in numbers)
         sign = -1.0 if dec_text.lstrip().startswith("-") else 1.0
         declination = sign * (abs(degrees) + minutes / 60.0 + seconds / 3600.0)
     if not math.isfinite(ra_hours) or not math.isfinite(declination):
-        raise SkyChartProtocolError("Coordinate SkyChart non finite")
+        raise SkyChartProtocolError("SkyChart coordinates are not finite")
     if not 0 <= ra_hours <= 24 or not -90 <= declination <= 90:
         raise SkyChartProtocolError("Coordinate SkyChart fuori intervallo")
     return {
@@ -88,15 +88,15 @@ class SkyChartClient:
         match = re.fullmatch(r"OK! id=\d+ chart=(.*)", banner)
         if not match:
             self.close()
-            raise SkyChartProtocolError("Risposta iniziale di SkyChart non riconosciuta")
+            raise SkyChartProtocolError("Initial SkyChart response was not recognized")
         self.initial_chart = match.group(1)
 
     @staticmethod
     def quote(value):
         if not isinstance(value, str) or not value.strip():
-            raise SkyChartProtocolError("Nome oggetto non valido")
+            raise SkyChartProtocolError("Object name is invalid")
         if any(character in value for character in ('"', "\r", "\n", "\x00")):
-            raise SkyChartProtocolError("Il nome oggetto contiene caratteri non ammessi")
+            raise SkyChartProtocolError("Object name contains unsupported characters")
         return f'"{value.strip()}"'
 
     def _read_substantive_line(self):
@@ -104,7 +104,7 @@ class SkyChartClient:
             try:
                 raw = self.reader.readline(4097)
             except (OSError, TimeoutError) as exc:
-                raise SkyChartConnectionError("SkyChart non ha risposto entro il tempo previsto") from exc
+                raise SkyChartConnectionError("SkyChart did not respond before the timeout") from exc
             if not raw:
                 raise SkyChartConnectionError("SkyChart ha chiuso la connessione")
             if len(raw) > 4096:
@@ -120,7 +120,7 @@ class SkyChartClient:
 
     def _send(self, command):
         if not isinstance(command, str) or not command or any(c in command for c in "\r\n\x00"):
-            raise SkyChartProtocolError("Comando SkyChart non valido")
+            raise SkyChartProtocolError("SkyChart command is invalid")
         if len(command.encode("utf-8")) > 1022:
             raise SkyChartProtocolError("Comando SkyChart troppo lungo")
         try:
@@ -148,7 +148,7 @@ class SkyChartClient:
         self._send("GETCHARTEQSYS")
         response = self._read_substantive_line()
         if response.startswith(("Failed!", "Timeout!")):
-            raise SkyChartProtocolError("SkyChart non ha indicato il sistema di coordinate")
+            raise SkyChartProtocolError("SkyChart did not provide a coordinate system")
         return response
 
     def status(self):
@@ -191,7 +191,7 @@ class SkyChartClient:
         command = f"FIND {int(object_class)} {quoted}" if object_class is not None else f"SEARCH {quoted}"
         response = self.command(command)
         if not response.rsplit("\n", 1)[-1].startswith("OK!"):
-            raise SkyChartObjectError(f"SkyChart non ha trovato l'oggetto '{name}'")
+            raise SkyChartObjectError(f"SkyChart could not find object '{name}'")
         return parse_selected_object(self.command("GETSELECTEDOBJECT"))
 
     def finish_temporary(self):

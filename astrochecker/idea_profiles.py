@@ -81,7 +81,7 @@ def classify_candidate(record: dict) -> dict:
         return {
             "eligible": False, "category": "unknown", "priority": 0,
             "beginner": False, "minimum_block_seconds": IDEA_MIN_BLOCK_SECONDS,
-            "reason": "Record del catalogo non valido.",
+            "reason": "Catalog record is invalid.",
         }
     object_type = record.get("type", record.get("object_type"))
     required = (record.get("name"), object_type, record.get("ra_deg"), record.get("dec_deg"))
@@ -93,7 +93,7 @@ def classify_candidate(record: dict) -> dict:
     except (TypeError, ValueError):
         coordinates_ok = False
     if not coordinates_ok:
-        return _profile(False, "unknown", 0, False, "Record incompleto: coordinate assenti o non valide.")
+        return _profile(False, "unknown", 0, False, "Incomplete record: coordinates are missing or invalid.")
     if record.get("duplicate") or record.get("is_duplicate") or record.get("duplicate_of"):
         return _profile(False, "duplicate", 0, False, "Record duplicato escluso dalle idee automatiche.")
 
@@ -105,12 +105,12 @@ def classify_candidate(record: dict) -> dict:
         # Emission/reflection are deliberately equal top tier.  Generic nebulae
         # remain useful when the local catalog has no richer classification.
         base = 100 if object_type in {"EMN", "HII", "RFN"} else 90
-        return _profile(True, "nebula", base + (10 if beginner else 0), beginner, "Nebulosa adatta alla fotografia DSO locale.")
+        return _profile(True, "nebula", base + (10 if beginner else 0), beginner, "Nebula suited to local DSO imaging.")
     if object_type in _CLUSTER_TYPES:
         return _profile(True, "cluster", 70 + (15 if beginner else 0), beginner, "Ammasso aperto o globulare catalogato.")
     if object_type in _GALAXY_TYPES:
         if not _galaxy_size_known(record):
-            return _profile(False, "galaxy", 0, beginner, "Dimensione angolare della galassia non disponibile.")
+            return _profile(False, "galaxy", 0, beginner, "Galaxy angular size is unavailable.")
         if _extended_galaxy(record):
             return _profile(False, "galaxy", 0, beginner, "Galassia chiaramente estesa esclusa dalle idee automatiche.")
         return _profile(True, "galaxy", 50 + (15 if beginner else 0), beginner, "Galassia compatta adatta alle idee automatiche.")

@@ -39,7 +39,7 @@ class Catalog:
 
     def _connect(self) -> sqlite3.Connection:
         if not self.path.is_file():
-            raise CatalogError(f"Catalogo locale non trovato: {self.path}")
+            raise CatalogError(f"Local catalog not found: {self.path}")
         uri = self.path.resolve().as_uri() + "?mode=ro"
         connection = None
         try:
@@ -50,7 +50,7 @@ class Catalog:
         except sqlite3.Error as exc:
             if connection is not None:
                 connection.close()
-            raise CatalogError(f"Catalogo locale non valido: {exc}") from exc
+            raise CatalogError(f"Local catalog is invalid: {exc}") from exc
 
     def status(self) -> dict:
         try:
@@ -72,7 +72,7 @@ class Catalog:
                     "ready": True,
                     "version": version_row["value"],
                     "catalogs": catalogs,
-                    "message": "Catalogo locale pronto",
+                    "message": "Local catalog ready.",
                 }
         except CatalogError as exc:
             return {"ready": False, "version": "", "catalogs": [], "message": str(exc)}
@@ -81,11 +81,54 @@ class Catalog:
                 "ready": False,
                 "version": "",
                 "catalogs": [],
-                "message": f"Catalogo locale non valido: {exc}",
+                "message": f"Local catalog is invalid: {exc}",
             }
 
     @staticmethod
-    def _result(connection: sqlite3.Connection, row: sqlite3.Row) -> dict:
+    def _group_for_object(connection: sqlite3.Connection, object_id: int) -> str | None:
+        row = connection.execute(
+            "SELECT group_key FROM target_group_members WHERE object_id = ? ORDER BY group_key LIMIT 1",
+            (object_id,),
+        ).fetchone()
+        return str(row[0]) if row else None
+
+    @classmethod
+    def _group_payload(cls, connection: sqlite3.Connection, group_key: str | None, object_id: int) -> tuple[list[str], list[str], str | None]:
+        if not group_key:
+            rows = connection.execute(
+                "SELECT display_name, catalog FROM aliases WHERE object_id = ? ORDER BY is_primary DESC, catalog, display_name",
+                (object_id,),
+            ).fetchall()
+            return [], [str(row[0]) for row in rows if row[1] != "common"], None
+        names = [str(row[0]) for row in connection.execute(
+            "SELECT display_name FROM target_names WHERE group_key = ? ORDER BY priority, display_name", (group_key,)
+        )]
+        related = [str(row[0]) for row in connection.execute(
+            """
+            SELECT DISTINCT a.display_name
+            FROM target_group_members AS m JOIN aliases AS a ON a.object_id = m.object_id
+            WHERE m.group_key = ? AND a.catalog != 'common'
+            ORDER BY a.display_name
+            """, (group_key,)
+        )]
+        return names, related, group_key
+
+    @classmethod
+    def _representative_row(cls, connection: sqlite3.Connection, group_key: str) -> sqlite3.Row:
+        return connection.execute(
+            """
+            SELECT o.*
+            FROM target_group_members AS m JOIN objects AS o ON o.id = m.object_id
+            WHERE m.group_key = ?
+            ORDER BY (o.major_axis_arcmin IS NOT NULL) DESC,
+                     (o.visual_mag IS NOT NULL) DESC,
+                     (o.source = 'OpenNGC') DESC, o.name, o.id
+            LIMIT 1
+            """, (group_key,)
+        ).fetchone()
+
+    @classmethod
+    def _result(cls, connection: sqlite3.Connection, row: sqlite3.Row) -> dict:
         aliases = [
             alias["display_name"]
             for alias in connection.execute(
@@ -94,10 +137,18 @@ class Catalog:
                 FROM aliases
                 WHERE object_id = ?
                 ORDER BY is_primary DESC, catalog, display_name
-                """,
-                (row["id"],),
+                """, (row["id"],)
             )
         ]
+        group_key = cls._group_for_object(connection, int(row["id"]))
+        common_names, related_ids, group_key = cls._group_payload(connection, group_key, int(row["id"]))
+        common_names = list(dict.fromkeys(common_names + [
+            str(alias[0]) for alias in connection.execute(
+                "SELECT display_name FROM aliases WHERE object_id = ? AND catalog = 'common' ORDER BY display_name",
+                (row["id"],),
+            )
+        ]))
+        aliases = list(dict.fromkeys(aliases + common_names))
         return {
             "name": row["name"],
             "ra_deg": row["ra_deg"],
@@ -109,13 +160,16 @@ class Catalog:
             "visual_mag": row["visual_mag"],
             "surface_brightness": row["surface_brightness"],
             "aliases": aliases,
+            "common_names": common_names,
+            "target_group": group_key,
+            "related_ids": related_ids,
             "source": row["source"],
         }
 
     def resolve(self, query: str) -> dict:
         normalized = _normalize(query)
         if not normalized:
-            raise ObjectNotFoundError("Indicare una sigla di catalogo")
+            raise ObjectNotFoundError("Enter a catalog designation.")
         try:
             with closing(self._connect()) as connection:
                 rows = connection.execute(
@@ -129,7 +183,23 @@ class Catalog:
                     (normalized,),
                 ).fetchall()
                 if not rows:
-                    raise ObjectNotFoundError(f"Oggetto non trovato nel catalogo locale: {query}")
+                    groups = connection.execute(
+                        """
+                        SELECT n.group_key, count(m.object_id) AS member_count
+                        FROM target_names AS n
+                        LEFT JOIN target_group_members AS m ON m.group_key = n.group_key
+                        WHERE n.normalized LIKE ?
+                        GROUP BY n.group_key
+                        ORDER BY member_count DESC, n.group_key
+                        """, (normalized + "%",),
+                    ).fetchall()
+                    if groups:
+                        if len(groups) > 1 and groups[0][1] == groups[1][1]:
+                            raise AmbiguousObjectError(f"{query} matches several targets; use a catalog ID.")
+                        representative = self._representative_row(connection, str(groups[0][0]))
+                        if representative:
+                            return self._result(connection, representative)
+                    raise ObjectNotFoundError(f"Target not found in the local catalog: {query}")
                 if len(rows) > 1:
                     candidates = []
                     for row in rows:
@@ -137,12 +207,12 @@ class Catalog:
                         preferred = "M 101" if "M 101" in result["aliases"] else result["name"]
                         candidates.append(preferred)
                     raise AmbiguousObjectError(
-                        f"{query} è una sigla ambigua; scegliere tra "
+                        f"{query} is ambiguous; choose between "
                         + " e ".join(candidates)
                     )
                 return self._result(connection, rows[0])
         except sqlite3.Error as exc:
-            raise CatalogError(f"Catalogo locale non valido: {exc}") from exc
+            raise CatalogError(f"Local catalog is invalid: {exc}") from exc
 
     def search(self, query: str, limit: int = 10) -> list[dict]:
         normalized = _normalize(query)
@@ -151,7 +221,7 @@ class Catalog:
         try:
             bounded_limit = max(1, min(int(limit), MAX_SEARCH_RESULTS))
         except (TypeError, ValueError) as exc:
-            raise CatalogError("Il limite di ricerca deve essere un numero intero") from exc
+            raise CatalogError("The search limit must be an integer.") from exc
         try:
             with closing(self._connect()) as connection:
                 rows = connection.execute(
@@ -167,9 +237,37 @@ class Catalog:
                     """,
                     (normalized, normalized + "%", bounded_limit),
                 ).fetchall()
-                return [self._result(connection, row) for row in rows]
+                results = [self._result(connection, row) for row in rows]
+                seen = {item["target_group"] for item in results if item["target_group"]}
+                name_rows = connection.execute(
+                    """
+                    SELECT group_key FROM (
+                        SELECT n.group_key, n.normalized,
+                               count(m.object_id) AS member_count,
+                               row_number() OVER (
+                                   PARTITION BY n.normalized
+                                   ORDER BY count(m.object_id) DESC, n.group_key
+                               ) AS rank
+                        FROM target_names AS n
+                        LEFT JOIN target_group_members AS m ON m.group_key = n.group_key
+                        WHERE n.normalized LIKE ?
+                        GROUP BY n.group_key, n.normalized
+                    ) WHERE rank = 1
+                    ORDER BY member_count DESC, group_key
+                    LIMIT ?
+                    """, (normalized + "%", bounded_limit),
+                ).fetchall()
+                for group_row in name_rows:
+                    group_key = str(group_row[0])
+                    if group_key in seen:
+                        continue
+                    representative = self._representative_row(connection, group_key)
+                    if representative:
+                        results.append(self._result(connection, representative))
+                        seen.add(group_key)
+                return results[:bounded_limit]
         except sqlite3.Error as exc:
-            raise CatalogError(f"Catalogo locale non valido: {exc}") from exc
+            raise CatalogError(f"Local catalog is invalid: {exc}") from exc
 
     def idea_candidates(self, *, include_ineligible: bool = False) -> list[dict]:
         """Return deterministic catalog records annotated for the ideas planner."""
@@ -197,4 +295,4 @@ class Catalog:
                 )
                 return candidates
         except sqlite3.Error as exc:
-            raise CatalogError(f"Catalogo locale non valido: {exc}") from exc
+            raise CatalogError(f"Local catalog is invalid: {exc}") from exc
