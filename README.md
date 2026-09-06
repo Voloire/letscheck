@@ -32,13 +32,16 @@ The terminal prints `http://127.0.0.1:<port>` if the browser does not open autom
 
 When a result needs a different observing window, AstroChecker shows up to
 three real alternatives ranked from **The Best** down with one to five stars.
-Choose an option, accept it explicitly, enter a sequence name, and export a
-native NINA `CaptureSequenceList` XML file for the Legacy/Simple Sequencer in
-the current user's `Downloads` folder. It uses 300-second LIGHT exposures and
-calculates the number of complete exposures that fit the accepted window;
-other settings remain at NINA defaults. The observing window is not encoded in
-the sequence and must be applied manually in NINA. If fewer valid options are
-available, only those options are shown.
+Each card shows the usable continuous duration immediately. Choose an option
+and accept it explicitly before exporting a single target.
+
+The **Need ideas?** action builds an ordered full-night target set from the
+local catalog. Give that set a name and export it as NINA's native Legacy target
+set XML in the current user's `Downloads` folder. Each target uses 300-second
+LIGHT exposures and the other settings stay at NINA defaults. The file name
+identifies the target set when it is reopened in NINA; observing times still
+need to be applied manually because Legacy XML does not store the astronomical
+window. If fewer valid options or targets are available, only those are shown.
 
 For a fully local workflow, enter your site coordinates and time zone manually. Optional browser geolocation may use your operating system or browser location services.
 

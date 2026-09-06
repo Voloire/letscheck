@@ -3,6 +3,7 @@
 const DEFAULT_TIME_ZONE = "Europe/Rome";
 const HORIZON_SECONDS = 86400;
 const SEARCH_DELAY_MS = 250;
+const IDEAS_TIMEOUT_MS = 15000;
 
 const form = document.querySelector("#planner-form");
 const fields = document.querySelector("#planner-fields");
@@ -38,6 +39,9 @@ const nightPlan = document.querySelector("#night-plan");
 const nightBlocks = document.querySelector("#night-blocks");
 const nightGaps = document.querySelector("#night-gaps");
 const nightTimeline = document.querySelector("#night-timeline");
+const nightSequenceName = document.querySelector("#night-sequence-name");
+const exportNightNina = document.querySelector("#export-night-nina");
+const nightNinaExportStatus = document.querySelector("#night-nina-export-status");
 
 let catalogReady = false;
 let siteLoaded = false;
@@ -53,6 +57,8 @@ let selectedSuggestion = null;
 let acceptedSuggestion = null;
 let selectedResult = null;
 let ninaExportRunning = false;
+let nightPlanData = null;
+let nightNinaExportRunning = false;
 
 function localDateAtTenPm(timeZone = DEFAULT_TIME_ZONE) {
   let formatter;
@@ -209,7 +215,7 @@ async function loadSite() {
       applySite(data.site);
       setSiteStatus(`Site ${data.site.name} loaded.`, "success");
     } else {
-      setSiteStatus("No saved site yet. The Chiusanico values are just editable examples.");
+      setSiteStatus("No saved site yet. Rome values are editable defaults.");
     }
   } catch (error) {
     setSiteStatus(error instanceof Error ? error.message : "Saved site could not be read.", "error");
@@ -884,6 +890,10 @@ function renderSuggestions(data) {
     copy.className = "suggestion-copy";
     const title = document.createElement("strong");
     title.textContent = labels[suggestion.tier] || "Suggestion";
+    const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
+    const duration = document.createElement("span");
+    duration.className = "suggestion-duration";
+    duration.textContent = `Continuous window: ${formatDuration(availableDuration)}`;
     const time = document.createElement("span");
     time.className = "suggestion-time";
     time.textContent = `${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)}`;
@@ -891,10 +901,9 @@ function renderSuggestions(data) {
     detail.textContent = `${suggestion.reason || "Valid observing window."} ` + (suggestion.tier === "widest"
       ? `Available for ${formatDuration(suggestion.duration_seconds)} of the ${formatDuration(suggestion.requested_duration_seconds)} requested.`
       : `Continuous duration: ${formatDuration(suggestion.duration_seconds)}.`);
-    const availableDuration = Number(suggestion.available_duration_seconds ?? suggestion.duration_seconds);
     if (availableDuration > Number(suggestion.duration_seconds)) detail.textContent += ` This window supports up to ${formatDuration(availableDuration)}.`;
     if (suggestion.tier === "future") detail.textContent += " Future date — not shown on today's timeline.";
-    copy.append(title, time, detail);
+    copy.append(title, duration, time, detail);
     select.append(badge, stars, copy);
     const accept = document.createElement("button");
     accept.className = "button button-secondary button-compact suggestion-accept";
@@ -941,8 +950,14 @@ function renderNightPlan(data) {
   nightPlan.classList.remove("is-stale");
   staleBadge.hidden = true;
   hasResult = true;
+  nightPlanData = data;
+  nightNinaExportStatus.className = "status-message";
+  nightNinaExportStatus.textContent = "";
 
   const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+  const exportable = blocks.length > 0 && blocks.every((block) => Number(block.duration_seconds) >= 300);
+  nightSequenceName.value = `AstroChecker_NightPlan_${String(data.requested_start || data.start || "night").slice(0, 10)}`;
+  exportNightNina.disabled = !exportable;
   const gaps = Array.isArray(data.gaps) ? data.gaps : [];
   nightBlocks.replaceChildren();
   nightGaps.replaceChildren();
@@ -1013,12 +1028,67 @@ function renderNightPlan(data) {
   });
 }
 
+async function exportNightPlanToNina() {
+  if (!nightPlanData || nightNinaExportRunning) return;
+  const blocks = Array.isArray(nightPlanData.blocks) ? nightPlanData.blocks : [];
+  const sequenceName = nightSequenceName.value.trim();
+  if (!blocks.length) return;
+  if (!sequenceName) {
+    nightSequenceName.setAttribute("aria-invalid", "true");
+    nightSequenceName.focus();
+    nightNinaExportStatus.className = "status-message error";
+    nightNinaExportStatus.textContent = "Enter a name for the NINA sequence.";
+    return;
+  }
+  if (blocks.some((block) => Number(block.duration_seconds) < 300)) {
+    nightNinaExportStatus.className = "status-message error";
+    nightNinaExportStatus.textContent = "Every target block must be at least 5 minutes for a 300-second exposure.";
+    return;
+  }
+  nightSequenceName.removeAttribute("aria-invalid");
+  nightNinaExportRunning = true;
+  exportNightNina.disabled = true;
+  exportNightNina.classList.add("loading");
+  exportNightNina.setAttribute("aria-busy", "true");
+  nightNinaExportStatus.className = "status-message";
+  nightNinaExportStatus.textContent = "Creating the complete NINA Legacy XML locally…";
+  try {
+    const response = await fetch("/api/nina/legacy-sequence", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", Accept: "application/json"},
+      body: JSON.stringify({
+        targets: blocks.map((block) => ({target: block.target, duration_seconds: block.duration_seconds})),
+        sequence_name: sequenceName,
+      }),
+    });
+    const data = await readJson(response);
+    if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
+    nightNinaExportStatus.className = "status-message success";
+    nightNinaExportStatus.textContent = `Saved locally to Downloads: ${data.filename || data.path}`;
+    resultLive.textContent = `NINA Legacy target set saved: ${data.filename || data.path}`;
+  } catch (error) {
+    nightNinaExportStatus.className = "status-message error";
+    nightNinaExportStatus.textContent = error instanceof Error ? error.message : "NINA sequence export failed.";
+    resultLive.textContent = nightNinaExportStatus.textContent;
+  } finally {
+    nightNinaExportRunning = false;
+    exportNightNina.disabled = false;
+    exportNightNina.classList.remove("loading");
+    exportNightNina.removeAttribute("aria-busy");
+  }
+}
+
+exportNightNina.addEventListener("click", exportNightPlanToNina);
+
 function clearSuggestionAcknowledgement() {
   selectedSuggestion = null;
   acceptedSuggestion = null;
   selectedResult = null;
   acceptedPlan.hidden = true;
   ninaExportStatus.textContent = "";
+  nightPlanData = null;
+  nightNinaExportStatus.textContent = "";
+  exportNightNina.disabled = true;
 }
 
 async function exportAcceptedSuggestion() {
@@ -1145,20 +1215,27 @@ async function requestIdeas() {
   nightPlan.hidden = true;
   resultError.hidden = true;
   resultLive.textContent = "Finding a local observing sequence…";
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), IDEAS_TIMEOUT_MS);
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
       headers: {"Content-Type": "application/json", Accept: "application/json"},
       body: JSON.stringify(currentPayload()),
+      signal: controller.signal,
     });
     const data = await readJson(response);
     if (!response.ok) throw new Error(data.error || "Idea planning failed.");
     renderNightPlan(data);
     resultLive.textContent = data.note || "Idea plan ready.";
   } catch (error) {
-    showResultError(error instanceof Error ? error.message : "Idea planning failed.");
+    const message = error?.name === "AbortError"
+      ? "Idea planning timed out. Try a narrower altitude range or shorter duration."
+      : (error instanceof Error ? error.message : "Idea planning failed.");
+    showResultError(message);
     nightPlan.hidden = true;
   } finally {
+    window.clearTimeout(timeoutId);
     calculationRunning = false;
     updatePlannerAvailability();
     setButtonLoading(ideasButton, false, "");

@@ -27,7 +27,7 @@
               <span>Checking catalogs…</span>
             </span>
           </div>
-          <h1>AstroChecker</h1>
+          <h1>AstroChecker <span class="brand-nickname">· Balcony Stargazer</span></h1>
           <p>Plan an observing window from your own balcony.</p>
         </div>
       </div>
@@ -88,16 +88,16 @@
                 <p class="group-label" id="position-group-label">Observing site</p>
                 <div class="field site-name-field">
                   <label for="site-name">Site name</label>
-                  <input id="site-name" name="site_name" type="text" value="Chiusanico balcony" maxlength="80" autocomplete="off">
+                  <input id="site-name" name="site_name" type="text" value="Rome observing site" maxlength="80" autocomplete="off">
                 </div>
                 <div class="field-grid two-columns">
                   <div class="field">
                     <label for="latitude">Latitude</label>
-                    <div class="input-unit"><input id="latitude" name="latitude" type="number" value="43.9729" min="-90" max="90" step="any" required><span>°</span></div>
+                    <div class="input-unit"><input id="latitude" name="latitude" type="number" value="41.9028" min="-90" max="90" step="any" required><span>°</span></div>
                   </div>
                   <div class="field">
                     <label for="longitude">Longitude</label>
-                    <div class="input-unit"><input id="longitude" name="longitude" type="number" value="7.9944" min="-180" max="180" step="any" required><span>°</span></div>
+                    <div class="input-unit"><input id="longitude" name="longitude" type="number" value="12.4964" min="-180" max="180" step="any" required><span>°</span></div>
                   </div>
                 </div>
                 <p class="field-help">Positive values mean north/east; negative values mean south/west.</p>
@@ -374,8 +374,15 @@
           </article>
 
           <div class="night-actions">
-            <button class="button button-secondary" id="export-night-nina" type="button" disabled>Export to NINA</button>
-            <span class="coming-soon">UI ready · export coming later</span>
+            <div class="field sequence-name-field">
+              <label for="night-sequence-name">NINA sequence name</label>
+              <input id="night-sequence-name" type="text" maxlength="80" autocomplete="off">
+              <p class="field-help">The file name identifies this target set when you reopen it in NINA.</p>
+            </div>
+            <button class="button button-primary" id="export-night-nina" type="button" disabled>
+              <span class="button-label">Export complete sequence to NINA</span><span class="spinner" aria-hidden="true"></span>
+            </button>
+            <p class="status-message" id="night-nina-export-status" aria-live="polite"></p>
           </div>
         </div>
       </section>

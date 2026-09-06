@@ -537,7 +537,8 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
     }
 
 
-def choose_suggestions(*, start, duration_seconds, current_intervals, future_windows, limit=3):
+def choose_suggestions(*, start, duration_seconds, current_intervals, future_windows,
+                       darkness_intervals=None, limit=3):
     """Return up to three deterministic fallback proposals for an invalid request.
 
     ``future_windows`` contains records with an aware/naive ``start`` and
@@ -551,6 +552,18 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
 
     def length(item):
         return max(0, int(item["end"]) - int(item["start"]))
+
+    def restrict_to_darkness(intervals, darkness):
+        if darkness is None:
+            return list(intervals or [])
+        restricted = []
+        for interval in intervals or []:
+            for dark in darkness:
+                left = max(int(interval["start"]), int(dark["start"]))
+                right = min(int(interval["end"]), int(dark["end"]))
+                if right > left:
+                    restricted.append({"start": left, "end": right})
+        return restricted
 
     def proposal(tier, window_start, available):
         duration = required if tier != "widest" else available
@@ -575,7 +588,7 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
             "available_duration_seconds": available,
         }
 
-    current = list(current_intervals or [])
+    current = restrict_to_darkness(current_intervals, darkness_intervals)
     if any(int(item["start"]) == 0 and length(item) >= required for item in current):
         return []
 
@@ -586,10 +599,16 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
     ]
 
     future_complete = []
-    all_windows = [(start, item) for item in current]
+    all_windows = [
+        (start + timedelta(seconds=int(item["start"])), item)
+        for item in current
+    ]
     for record in future_windows or []:
         period_start = record["start"]
-        for item in record.get("intervals", []):
+        record_intervals = restrict_to_darkness(
+            record.get("intervals", []), record.get("darkness_intervals")
+        )
+        for item in record_intervals:
             window_start = period_start + timedelta(seconds=int(item["start"]))
             all_windows.append((window_start, item))
             if length(item) >= required and window_start > start:
@@ -611,13 +630,15 @@ def choose_suggestions(*, start, duration_seconds, current_intervals, future_win
     return ranked[:max(0, int(limit))]
 
 
-def choose_suggestion(*, start, duration_seconds, current_intervals, future_windows):
+def choose_suggestion(*, start, duration_seconds, current_intervals, future_windows,
+                      darkness_intervals=None):
     """Compatibility wrapper returning the highest-ranked fallback proposal."""
     suggestions = choose_suggestions(
         start=start,
         duration_seconds=duration_seconds,
         current_intervals=current_intervals,
         future_windows=future_windows,
+        darkness_intervals=darkness_intervals,
     )
     return suggestions[0] if suggestions else None
 
