@@ -557,6 +557,7 @@ def choose_suggestion(*, start, duration_seconds, current_intervals, future_wind
             "end": window_start + timedelta(seconds=required if tier != "widest" else available),
             "duration_seconds": required if tier != "widest" else available,
             "requested_duration_seconds": required,
+            "available_duration_seconds": available,
         }
 
     current = list(current_intervals or [])
@@ -566,7 +567,7 @@ def choose_suggestion(*, start, duration_seconds, current_intervals, future_wind
     adjustments = [item for item in current if int(item["start"]) > 0 and length(item) >= required]
     if adjustments:
         item = min(adjustments, key=lambda candidate: int(candidate["start"]))
-        return proposal("adjust", start + timedelta(seconds=int(item["start"])), required)
+        return proposal("adjust", start + timedelta(seconds=int(item["start"])), length(item))
 
     future_complete = []
     all_windows = [(start, item) for item in current]
@@ -578,8 +579,8 @@ def choose_suggestion(*, start, duration_seconds, current_intervals, future_wind
             if length(item) >= required and window_start > start:
                 future_complete.append((window_start, item))
     if future_complete:
-        window_start, _ = min(future_complete, key=lambda candidate: candidate[0])
-        return proposal("future", window_start, required)
+        window_start, item = min(future_complete, key=lambda candidate: candidate[0])
+        return proposal("future", window_start, length(item))
 
     available = [(window_start, length(item)) for window_start, item in all_windows if length(item) > 0]
     if not available:

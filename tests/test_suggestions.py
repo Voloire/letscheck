@@ -20,6 +20,7 @@ def test_suggestion_prefers_nearest_same_day_window_and_preserves_duration():
     assert result["start"] == datetime(2026, 9, 5, 22, 40)
     assert result["end"] == datetime(2026, 9, 5, 23, 10)
     assert result["duration_seconds"] == 1800
+    assert result["available_duration_seconds"] == 2600
 
 
 def test_suggestion_uses_earliest_future_complete_window_before_shortest_fallback():
@@ -43,6 +44,7 @@ def test_suggestion_uses_earliest_future_complete_window_before_shortest_fallbac
     assert result["tier"] == "future"
     assert result["start"] == datetime(2026, 9, 7, 22, 10)
     assert result["end"] == datetime(2026, 9, 7, 23, 10)
+    assert result["available_duration_seconds"] == 4400
 
 
 def test_suggestion_falls_back_to_widest_window_and_explains_short_duration():
@@ -64,6 +66,7 @@ def test_suggestion_falls_back_to_widest_window_and_explains_short_duration():
     assert result["end"] == datetime(2026, 9, 5, 22, 20)
     assert result["duration_seconds"] == 1200
     assert result["requested_duration_seconds"] == 3600
+    assert result["available_duration_seconds"] == 1200
 
 
 def test_suggestion_is_empty_when_target_has_no_visible_interval():
