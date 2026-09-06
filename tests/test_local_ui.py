@@ -474,9 +474,9 @@ def test_prioritized_suggestion_is_visible_and_states_90_day_limit(tmp_path, ui_
         wait_until_ready(page)
         submit_object(page, "Suggestion")
         expect(page.locator("#suggestions-card")).to_be_visible()
-        expect(page.locator(".suggestion-item")).to_have_count(1)
-        expect(page.locator(".suggestion-tier")).to_have_text("The Best")
-        expect(page.locator(".suggestion-time")).to_contain_text("Sep 07")
+        expect(page.locator("#suggestion-tier")).to_have_text("2")
+        expect(page.locator("#suggestion-label")).to_contain_text("future date")
+        expect(page.locator("#suggestion-time")).to_contain_text("Sep 07")
         expect(page.locator("#suggestions-card")).to_contain_text("90 days")
         assert not errors
         page.close()
@@ -561,20 +561,17 @@ def test_priority_suggestion_exports_a_nina_legacy_sequence(tmp_path, ui_browser
         page.on("request", lambda request: requests.append(request.url))
         wait_until_ready(page)
         submit_object(page, "Suggestion")
-        suggestion = page.locator(".suggestion-item").first
-        expect(suggestion).to_contain_text("future date")
-        suggestion.locator(".suggestion-select").press("Enter")
+        suggestion = page.locator("#suggestion-item")
+        expect(page.locator("#suggestion-label")).to_contain_text("future date")
+        expect(suggestion).to_have_attribute("aria-pressed", "false")
+        suggestion.press("Enter")
+
+        expect(suggestion).to_have_attribute("aria-pressed", "true")
         expect(suggestion).to_have_class(re.compile(r"\bselected\b"))
-        assert not any(url.endswith("/api/nina/legacy-sequence") for url in requests)
-        suggestion.get_by_role("button", name="Accept this window", exact=True).click()
-        expect(page.locator("#accepted-plan")).to_be_visible()
-        page.locator("#nina-sequence-name").fill("Night at the balcony")
-        page.get_by_role("button", name="Export accepted window to NINA", exact=True).click()
-        expect(page.locator("#result-live")).to_contain_text("NINA sequence saved")
+        expect(page.locator("#result-live")).to_contain_text("NINA Legacy sequence saved")
         assert any(url.endswith("/api/nina/legacy-sequence") for url in requests)
         assert service.export_payloads[0]["object"]["name"] == "Suggestion"
         assert service.export_payloads[0]["duration_seconds"] == 3600
-        assert service.export_payloads[0]["sequence_name"] == "Night at the balcony"
         assert not errors
         page.close()
 
@@ -586,7 +583,7 @@ def test_adjust_suggestion_is_overlaid_on_the_green_timeline(tmp_path, ui_browse
         wait_until_ready(page)
         submit_object(page, "Adjust")
         expect(page.locator("#timeline-suggestion")).to_be_visible()
-        expect(page.locator(".suggestion-item").first).to_contain_text("up to 2 h")
+        expect(page.locator("#suggestion-detail")).to_contain_text("up to 2 h")
         assert page.locator("#timeline-suggestion").evaluate("element => parseFloat(element.style.left) > 0")
         assert not errors
         page.close()
@@ -717,7 +714,7 @@ def test_geolocation_proposal_confirm_cancel_and_denial_preserve_manual_values(t
         unavailable.close()
 
 
-def test_result_uses_response_timezone_renders_darkness_and_keeps_export_until_acceptance(tmp_path, ui_browser):
+def test_result_uses_response_timezone_renders_darkness_and_keeps_nina_inert(tmp_path, ui_browser):
     service = UiService(tmp_path / "result-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url, viewport={"width": 1440, "height": 1100})
@@ -743,8 +740,10 @@ def test_result_uses_response_timezone_renders_darkness_and_keeps_export_until_a
 
         submit_object(page, "Polar Day")
         expect(page.locator("#darkness-summary")).to_have_text("No astronomical darkness in the 24-hour window")
-        expect(page.locator("#accepted-plan")).to_be_hidden()
-        expect(page.locator("#export-accepted-nina")).to_be_hidden()
+        nina = page.get_by_role("button", name="Export TARGET to NINA", exact=True)
+        expect(nina).to_be_visible()
+        expect(nina).to_be_disabled()
+        expect(page.get_by_text("Coming soon", exact=True)).to_be_visible()
 
         submit_object(page, "One Event")
         expect(page.locator("#darkness-summary")).to_contain_text("starts in astronomical darkness")
