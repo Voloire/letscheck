@@ -537,8 +537,8 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
     }
 
 
-def choose_suggestion(*, start, duration_seconds, current_intervals, future_windows):
-    """Choose one deterministic fallback proposal for an invalid request.
+def choose_suggestions(*, start, duration_seconds, current_intervals, future_windows, limit=3):
+    """Return up to three deterministic fallback proposals for an invalid request.
 
     ``future_windows`` contains records with an aware/naive ``start`` and
     intervals expressed as seconds from that start.  The first usable tier is
@@ -546,28 +546,44 @@ def choose_suggestion(*, start, duration_seconds, current_intervals, future_wind
     the longest continuous window available in the searched records.
     """
     required = int(duration_seconds)
+    if required <= 0:
+        return []
 
     def length(item):
         return max(0, int(item["end"]) - int(item["start"]))
 
     def proposal(tier, window_start, available):
+        duration = required if tier != "widest" else available
+        ratio = min(1.0, duration / required)
+        days_away = max(0.0, (window_start - start).total_seconds() / 86400)
+        tier_bonus = {"adjust": 20, "future": 10, "widest": 0}.get(tier, 0)
+        score = round(60 * ratio + tier_bonus + max(0.0, 10 - min(10.0, days_away)))
+        stars = max(1, min(5, int(math.ceil(score / 20))))
         return {
             "tier": tier,
+            "score": score,
+            "stars": stars,
+            "reason": {
+                "adjust": "Keeps the requested duration by moving the start time within this period.",
+                "future": "Keeps the requested duration on the earliest later date found.",
+                "widest": "Uses the longest continuous window available when the full duration is not possible.",
+            }.get(tier, "Valid observing window."),
             "start": window_start,
-            "end": window_start + timedelta(seconds=required if tier != "widest" else available),
-            "duration_seconds": required if tier != "widest" else available,
+            "end": window_start + timedelta(seconds=duration),
+            "duration_seconds": duration,
             "requested_duration_seconds": required,
             "available_duration_seconds": available,
         }
 
     current = list(current_intervals or [])
     if any(int(item["start"]) == 0 and length(item) >= required for item in current):
-        return None
+        return []
 
     adjustments = [item for item in current if int(item["start"]) > 0 and length(item) >= required]
-    if adjustments:
-        item = min(adjustments, key=lambda candidate: int(candidate["start"]))
-        return proposal("adjust", start + timedelta(seconds=int(item["start"])), length(item))
+    proposals = [
+        proposal("adjust", start + timedelta(seconds=int(item["start"])), length(item))
+        for item in sorted(adjustments, key=lambda candidate: (int(candidate["start"]), int(candidate["end"])))
+    ]
 
     future_complete = []
     all_windows = [(start, item) for item in current]
@@ -580,13 +596,30 @@ def choose_suggestion(*, start, duration_seconds, current_intervals, future_wind
                 future_complete.append((window_start, item))
     if future_complete:
         window_start, item = min(future_complete, key=lambda candidate: candidate[0])
-        return proposal("future", window_start, length(item))
+        proposals.append(proposal("future", window_start, length(item)))
 
     available = [(window_start, length(item)) for window_start, item in all_windows if length(item) > 0]
-    if not available:
-        return None
-    window_start, longest = min(available, key=lambda candidate: (-candidate[1], candidate[0]))
-    return proposal("widest", window_start, longest)
+    if available:
+        window_start, longest = min(available, key=lambda candidate: (-candidate[1], candidate[0]))
+        proposals.append(proposal("widest", window_start, longest))
+
+    unique = {}
+    for item in proposals:
+        key = (item["tier"], item["start"], item["end"])
+        unique[key] = item
+    ranked = sorted(unique.values(), key=lambda item: (-item["score"], item["start"], item["tier"]))
+    return ranked[:max(0, int(limit))]
+
+
+def choose_suggestion(*, start, duration_seconds, current_intervals, future_windows):
+    """Compatibility wrapper returning the highest-ranked fallback proposal."""
+    suggestions = choose_suggestions(
+        start=start,
+        duration_seconds=duration_seconds,
+        current_intervals=current_intervals,
+        future_windows=future_windows,
+    )
+    return suggestions[0] if suggestions else None
 
 
 def parse_start(value, timezone="Europe/Rome"):

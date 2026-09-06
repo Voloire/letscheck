@@ -25,6 +25,7 @@ from .nina import NinaSequenceError, export_legacy_sequence
 from .planner import (
     MAX_FUTURE_SEARCH_DAYS,
     choose_suggestion,
+    choose_suggestions,
     elapsed_end,
     parse_start,
     plan_night_sequence,
@@ -106,8 +107,13 @@ class AstroCheckerService:
             raise ValueError("JSON body must be an object")
         target = payload.get("object")
         duration_seconds = payload.get("duration_seconds")
+        sequence_name = payload.get("sequence_name")
         try:
-            return export_legacy_sequence(target, duration_seconds=duration_seconds)
+            return export_legacy_sequence(
+                target,
+                duration_seconds=duration_seconds,
+                sequence_name=sequence_name,
+            )
         except NinaSequenceError as exc:
             raise ApiError(str(exc), "validation", 400) from exc
 
@@ -257,24 +263,15 @@ class AstroCheckerService:
             az_end=request["az_end"],
         )
         future_windows = []
-        suggestion = None
+        suggestions = []
         if result["status"] != "full":
-            current_candidate = choose_suggestion(
+            future_windows = self._future_windows(selected, request, result)
+            suggestions = choose_suggestions(
                 start=request["start"],
                 duration_seconds=request["duration_seconds"],
                 current_intervals=result["intervals"],
-                future_windows=[],
+                future_windows=future_windows,
             )
-            if current_candidate and current_candidate["tier"] == "adjust":
-                suggestion = current_candidate
-            else:
-                future_windows = self._future_windows(selected, request, result)
-                suggestion = choose_suggestion(
-                    start=request["start"],
-                    duration_seconds=request["duration_seconds"],
-                    current_intervals=result["intervals"],
-                    future_windows=future_windows,
-                )
         samples = []
         for offset in range(0, HORIZON_SECONDS + 1, CHART_STEP_SECONDS):
             position = ephemeris.position_at(offset)
@@ -295,20 +292,25 @@ class AstroCheckerService:
             )
 
         iers_kind = "predittivi" if ephemeris.uses_prediction else "osservati"
-        if suggestion is not None:
-            suggestion = {
+        serialized_suggestions = []
+        for suggestion in suggestions:
+            serialized_suggestions.append({
                 **suggestion,
                 "start": suggestion["start"].isoformat(),
                 "end": suggestion["end"].isoformat(),
-            }
+            })
         has_any_window = bool(
             result["intervals"] or any(record["intervals"] for record in future_windows)
         )
         suggestion_note = (
             ""
             if result["status"] == "full"
-            else self._suggestion_note(suggestion, has_any_window=has_any_window)
+            else self._suggestion_note(serialized_suggestions[0] if serialized_suggestions else None, has_any_window=has_any_window)
         )
+        if len(serialized_suggestions) > 1:
+            suggestion_note += f" {len(serialized_suggestions) - 1} additional valid option(s) are available below."
+        elif serialized_suggestions:
+            suggestion_note += " No other valid options were found for these filters."
         return {
             **result,
             "object": {
@@ -330,7 +332,7 @@ class AstroCheckerService:
             "search_end": elapsed_end(request["start"], HORIZON_SECONDS).isoformat(),
             "timezone": request["timezone"],
             "duration_seconds": _tidy(request["duration_seconds"]),
-            "suggestions": [suggestion] if suggestion else [],
+            "suggestions": serialized_suggestions,
             "suggestion_note": suggestion_note,
             "suggestion_search_days": MAX_FUTURE_SEARCH_DAYS,
             "samples": samples,

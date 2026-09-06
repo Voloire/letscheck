@@ -237,36 +237,45 @@
               <h3 id="first-window-title"></h3>
               <p id="first-window-time"></p>
               <p class="first-window-note" id="first-window-note"></p>
-              <div class="nina-action">
-                <button class="button button-secondary nina-button" type="button" disabled>Export TARGET to NINA</button>
-                <span class="coming-soon">Coming soon</span>
-              </div>
             </div>
           </article>
 
           <article class="suggestions-card" id="suggestions-card" hidden aria-labelledby="suggestions-title">
             <div class="article-heading">
               <div>
-                <h3 id="suggestions-title">Top suggestion</h3>
+                <h3 id="suggestions-title">Choose an observing window</h3>
                 <p id="suggestions-note"></p>
               </div>
               <span class="suggestion-limit">Future search: 90 days</span>
             </div>
-            <button class="suggestion-item" id="suggestion-item" type="button" aria-pressed="false">
-              <span class="suggestion-tier" id="suggestion-tier"></span>
-              <span class="suggestion-copy">
-                <strong id="suggestion-label"></strong>
-                <span id="suggestion-time"></span>
-                <small id="suggestion-detail"></small>
-              </span>
-            </button>
+            <div class="suggestion-list" id="suggestion-list"></div>
+            <p class="suggestions-empty" id="suggestions-empty" hidden>No other valid options were found for these filters.</p>
+            <section class="accepted-plan" id="accepted-plan" hidden aria-labelledby="accepted-plan-title">
+              <div class="accepted-heading">
+                <div>
+                  <p class="section-kicker">ACCEPTED PLAN</p>
+                  <h4 id="accepted-plan-title">Ready to export</h4>
+                </div>
+                <span class="accepted-badge">Accepted</span>
+              </div>
+              <p id="accepted-plan-summary"></p>
+              <p class="field-help">This plan uses 300-second LIGHT exposures. Other settings remain at NINA defaults.</p>
+              <div class="field sequence-name-field">
+                <label for="nina-sequence-name">NINA sequence name</label>
+                <input id="nina-sequence-name" type="text" maxlength="80" autocomplete="off">
+              </div>
+              <button class="button button-primary" id="export-accepted-nina" type="button">
+                <span class="button-label">Export accepted window to NINA</span><span class="spinner" aria-hidden="true"></span>
+              </button>
+              <p class="status-message" id="nina-export-status" aria-live="polite"></p>
+            </section>
           </article>
 
           <article class="visual-card" aria-labelledby="timeline-title">
             <div class="article-heading">
               <div>
                 <h3 id="timeline-title">24-hour timeline</h3>
-                <p>Green: available windows. Amber: requested period. White outline: suggested window.</p>
+                <p>Green: available windows. Amber: requested period. White outline: selected or accepted plan.</p>
               </div>
               <span class="timeline-date" id="timeline-date"></span>
             </div>

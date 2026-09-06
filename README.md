@@ -30,12 +30,15 @@ python3 -m venv .venv
 
 The terminal prints `http://127.0.0.1:<port>` if the browser does not open automatically. Stop the server with `Ctrl+C`.
 
-When a result offers an alternative observing window, select the suggestion to
-save a native NINA `CaptureSequenceList` XML file for the Legacy/Simple
-Sequencer in the current user's `Downloads` folder. It uses 300-second LIGHT
-exposures and calculates the number of complete exposures that fit the proposed
-window; other settings remain at NINA defaults. The observing window is not
-encoded in the sequence and must be applied manually in NINA.
+When a result needs a different observing window, AstroChecker shows up to
+three real alternatives ranked from **The Best** down with one to five stars.
+Choose an option, accept it explicitly, enter a sequence name, and export a
+native NINA `CaptureSequenceList` XML file for the Legacy/Simple Sequencer in
+the current user's `Downloads` folder. It uses 300-second LIGHT exposures and
+calculates the number of complete exposures that fit the accepted window;
+other settings remain at NINA defaults. The observing window is not encoded in
+the sequence and must be applied manually in NINA. If fewer valid options are
+available, only those options are shown.
 
 For a fully local workflow, enter your site coordinates and time zone manually. Optional browser geolocation may use your operating system or browser location services.
 
