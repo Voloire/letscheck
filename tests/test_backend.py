@@ -351,8 +351,8 @@ def test_ui_defaults_to_supported_objects_and_full_azimuth(running_server):
         page.goto(f"http://127.0.0.1:{running_server.server_port}/")
         assert page.locator("#az-start").input_value() == "0"
         assert page.locator("#az-end").input_value() == "360"
-        assert "Cataloghi locali M, NGC, IC, Sh2, vdB e LDN" in page.locator("#object-help").inner_text()
-        assert "finestre stimate" in page.locator(".criteria-card details").text_content()
+        assert "Local catalogs M, NGC, IC, Sh2, vdB and LDN" in page.locator("#object-help").inner_text()
+        assert "estimated windows" in page.locator(".criteria-card details").text_content()
         browser.close()
 
 
@@ -370,8 +370,8 @@ def test_partial_reason_never_claims_all_criteria_passed_from_coarse_samples(run
             )"""
         )
         reasons = page.locator("#reason-list").inner_text()
-        assert "Tutti i criteri rispettati" not in reasons
-        assert "solo in parte" in reasons
+        assert "All criteria met" not in reasons
+        assert "only partly" in reasons
         browser.close()
 
 
