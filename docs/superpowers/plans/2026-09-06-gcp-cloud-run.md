@@ -21,6 +21,16 @@
 - The instance must start when the URL is invoked and stop when unused for about ten minutes. No babysitting: nothing to switch on or off by hand.
 - Basic operating-cost estimate.
 
+## Where the work runs
+
+Everything runs inside the WSL Ubuntu distro `codex-dev`: tests, browser suite, image
+build, `gh`, `terraform`, `gcloud`. Windows is only the host. `codex-dev` has
+`[interop] enabled=false`, so Docker Desktop integration cannot reach it: the container
+part needs a native Docker Engine in the distro. `scripts/check.sh` replays the CI test
+job and the container smoke test locally; the Windows PyInstaller job stays GitHub-only.
+Playwright system libraries were installed in `codex-dev` on 2026-09-07
+(`playwright install-deps chromium`); the full suite (249 tests) passes there.
+
 ## Current state (verified 2026-09-06)
 
 **AstroChecker (`~/projects/letscheck`, branch `fix/deduplicate-window-copy`)**

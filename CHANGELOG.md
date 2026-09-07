@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `scripts/check.sh`, a local replica of the CI test job plus image build and
+  container smoke test for the Linux dev box.
 - Added an opt-in cloud mode for running behind an HTTPS proxy such as Cloud Run:
   `--host`, the `PORT` variable and `ASTROCHECKER_PUBLIC_HOST` in `run.py`, host and
   https-origin checks instead of the loopback check, no site file on the server and
