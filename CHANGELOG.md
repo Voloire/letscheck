@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added an opt-in cloud mode for running behind an HTTPS proxy such as Cloud Run:
+  `--host`, the `PORT` variable and `ASTROCHECKER_PUBLIC_HOST` in `run.py`, host and
+  https-origin checks instead of the loopback check, no site file on the server and
+  NINA sequences delivered as XML downloads.
+- Added `localStorage` fallback for the observing site when the server keeps none.
+- Added a `Dockerfile` with a digest-pinned Python base image and a `.dockerignore`.
 - Added a responsive candidate limit for Need Ideas so broad filters cannot
   leave the page waiting while every catalog record is evaluated.
 - Added native NINA Legacy target-set XML export for a complete Need Ideas plan,

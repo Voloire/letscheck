@@ -1,0 +1,16 @@
+.git
+.venv
+.runtime
+.worktrees
+.pytest_cache
+__pycache__
+*.pyc
+artifacts
+build
+dist
+tests
+packaging
+docs
+.github
+*.md
+debug.log

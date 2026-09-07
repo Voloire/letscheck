@@ -176,15 +176,11 @@ def _safe_filename(name):
     return slug[:80]
 
 
-def export_legacy_sequence(
-    target,
-    *,
-    duration_seconds,
-    sequence_name=None,
-    downloads_dir=None,
-    filename_timestamp=None,
-):
-    """Write a native NINA Legacy/Simple Sequencer XML file atomically."""
+def _timestamp(filename_timestamp):
+    return filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+def _sequence_document(target, *, duration_seconds, sequence_name, filename_timestamp):
     xml = build_legacy_sequence_xml(target, duration_seconds=duration_seconds)
     name, _ra_deg, _dec_deg = _target_values(target)
     if sequence_name is None:
@@ -192,11 +188,38 @@ def export_legacy_sequence(
     elif not isinstance(sequence_name, str) or not sequence_name.strip():
         raise NinaSequenceError("The NINA sequence name is required")
     sequence_name = _safe_filename(sequence_name.strip())
-    exposure_count = _duration_count(duration_seconds, DEFAULT_EXPOSURE_SECONDS)
+    base = f"{sequence_name}_{_timestamp(filename_timestamp)}"
+    details = {
+        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
+        "exposure_count": _duration_count(duration_seconds, DEFAULT_EXPOSURE_SECONDS),
+    }
+    return xml, base, details
+
+
+def _sequence_set_document(items, *, sequence_name, filename_timestamp):
+    if not isinstance(sequence_name, str) or not sequence_name.strip():
+        raise NinaSequenceError("The NINA sequence name is required")
+    xml = build_legacy_sequence_set_xml(items)
+    sequence_name = _safe_filename(sequence_name.strip())
+    base = f"{sequence_name}_{_timestamp(filename_timestamp)}"
+    counts = [
+        _duration_count(item.get("duration_seconds"), DEFAULT_EXPOSURE_SECONDS)
+        for item in items
+    ]
+    details = {
+        "sequence_name": sequence_name,
+        "target_count": len(items),
+        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
+        "exposure_count": sum(counts),
+        "exposure_counts": counts,
+    }
+    return xml, base, details
+
+
+def _write_document(xml, base, downloads_dir):
+    """Write ``base.xml`` atomically into the downloads folder, never overwriting."""
     directory = Path(downloads_dir) if downloads_dir is not None else default_downloads_dir()
     directory.mkdir(parents=True, exist_ok=True)
-    stamp = filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
-    base = f"{sequence_name}_{stamp}"
     path = directory / f"{base}.xml"
     suffix = 1
     while path.exists():
@@ -228,12 +251,58 @@ def export_legacy_sequence(
                 temporary_path.unlink(missing_ok=True)
             except OSError:
                 pass
-    return {
-        "path": str(path),
-        "filename": path.name,
-        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
-        "exposure_count": exposure_count,
-    }
+    return path
+
+
+def render_legacy_sequence(
+    target,
+    *,
+    duration_seconds,
+    sequence_name=None,
+    filename_timestamp=None,
+):
+    """Return the NINA Legacy/Simple Sequencer XML and its filename, writing nothing."""
+    xml, base, details = _sequence_document(
+        target,
+        duration_seconds=duration_seconds,
+        sequence_name=sequence_name,
+        filename_timestamp=filename_timestamp,
+    )
+    return {"xml": xml + "\n", "filename": f"{base}.xml", **details}
+
+
+def render_legacy_sequence_set(
+    items,
+    *,
+    sequence_name,
+    filename_timestamp=None,
+):
+    """Return the NINA Legacy target-set XML and its filename, writing nothing."""
+    xml, base, details = _sequence_set_document(
+        items,
+        sequence_name=sequence_name,
+        filename_timestamp=filename_timestamp,
+    )
+    return {"xml": xml + "\n", "filename": f"{base}.xml", **details}
+
+
+def export_legacy_sequence(
+    target,
+    *,
+    duration_seconds,
+    sequence_name=None,
+    downloads_dir=None,
+    filename_timestamp=None,
+):
+    """Write a native NINA Legacy/Simple Sequencer XML file atomically."""
+    xml, base, details = _sequence_document(
+        target,
+        duration_seconds=duration_seconds,
+        sequence_name=sequence_name,
+        filename_timestamp=filename_timestamp,
+    )
+    path = _write_document(xml, base, downloads_dir)
+    return {"path": str(path), "filename": path.name, **details}
 
 
 def export_legacy_sequence_set(
@@ -244,55 +313,10 @@ def export_legacy_sequence_set(
     filename_timestamp=None,
 ):
     """Write an ordered native NINA Legacy target-set XML file atomically."""
-    if not isinstance(sequence_name, str) or not sequence_name.strip():
-        raise NinaSequenceError("The NINA sequence name is required")
-    xml = build_legacy_sequence_set_xml(items)
-    sequence_name = _safe_filename(sequence_name.strip())
-    directory = Path(downloads_dir) if downloads_dir is not None else default_downloads_dir()
-    directory.mkdir(parents=True, exist_ok=True)
-    stamp = filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
-    base = f"{sequence_name}_{stamp}"
-    path = directory / f"{base}.xml"
-    suffix = 1
-    while path.exists():
-        path = directory / f"{base}-{suffix}.xml"
-        suffix += 1
-
-    temporary_path = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            dir=directory,
-            prefix=f".{path.name}-",
-            suffix=".tmp",
-            delete=False,
-        ) as temporary:
-            temporary_path = Path(temporary.name)
-            temporary.write(xml)
-            temporary.write("\n")
-            temporary.flush()
-            os.fsync(temporary.fileno())
-        os.replace(temporary_path, path)
-        temporary_path = None
-    except OSError as exc:
-        raise NinaSequenceError("The NINA sequence could not be saved") from exc
-    finally:
-        if temporary_path is not None:
-            try:
-                temporary_path.unlink(missing_ok=True)
-            except OSError:
-                pass
-    counts = [
-        _duration_count(item.get("duration_seconds"), DEFAULT_EXPOSURE_SECONDS)
-        for item in items
-    ]
-    return {
-        "path": str(path),
-        "filename": path.name,
-        "sequence_name": sequence_name,
-        "target_count": len(items),
-        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
-        "exposure_count": sum(counts),
-        "exposure_counts": counts,
-    }
+    xml, base, details = _sequence_set_document(
+        items,
+        sequence_name=sequence_name,
+        filename_timestamp=filename_timestamp,
+    )
+    path = _write_document(xml, base, downloads_dir)
+    return {"path": str(path), "filename": path.name, **details}

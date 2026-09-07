@@ -172,7 +172,23 @@ class AstroCheckerHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
 
 
-def make_handler(service):
+def normalize_public_host(value):
+    """Return the lowercase hostname the service is published at, or None for loopback mode."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError("Public host must be text")
+    host = value.strip().casefold().rstrip(".")
+    if not host:
+        return None
+    if any(character in host for character in "/:@?#\\ ") or urlparse("//" + host).hostname != host:
+        raise ValueError("Public host must be a bare hostname")
+    return host
+
+
+def make_handler(service, public_host=None):
+    public_host = normalize_public_host(public_host)
+
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(STATIC_DIRECTORY), **kwargs)
@@ -190,6 +206,8 @@ def make_handler(service):
             self.wfile.write(body)
 
         def _local_request(self):
+            if public_host is not None:
+                return self._public_request()
             if self.client_address[0] not in ("127.0.0.1", "::1"):
                 return False
             origin = self.headers.get("Origin")
@@ -213,13 +231,39 @@ def make_handler(service):
                 and origin_port == host_port
             )
 
+        def _public_request(self):
+            """Behind an HTTPS proxy: the request must target the public host.
+
+            The client address is the proxy, so it proves nothing. The Host
+            header must be the published hostname and a browser Origin, when
+            present, must be https on that same host. That keeps the CSRF
+            protection of the loopback mode without the loopback assumption.
+            """
+            host = urlparse("//" + self.headers.get("Host", ""))
+            if host.hostname is None or host.hostname.casefold() != public_host:
+                return False
+            origin = self.headers.get("Origin")
+            if not origin:
+                return True
+            parsed = urlparse(origin)
+            try:
+                origin_port = parsed.port
+            except ValueError:
+                return False
+            return (
+                parsed.scheme == "https"
+                and parsed.username is None
+                and parsed.password is None
+                and parsed.hostname is not None
+                and parsed.hostname.casefold() == public_host
+                and origin_port in (None, 443)
+            )
+
         def _reject_nonlocal(self):
             if self._local_request():
                 return False
-            self._early_json(
-                403,
-                {"error": "Non-local request rejected", "code": "validation"},
-            )
+            message = "Request rejected for this host" if public_host is not None else "Non-local request rejected"
+            self._early_json(403, {"error": message, "code": "validation"})
             return True
 
         def _declared_body_length(self):
@@ -262,9 +306,27 @@ def make_handler(service):
             self._drain_bounded_body()
             self._json(status, payload)
 
-        def _service_json(self, action, *, generic_message, generic_code="calculation"):
+        def _attachment(self, filename, text, content_type):
+            body = text.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def _send_nina(self, result):
+            if isinstance(result, dict) and "xml" in result:
+                self._attachment(result["filename"], result["xml"], "application/xml; charset=utf-8")
+                return
+            self._json(200, result)
+
+        def _service_json(self, action, *, generic_message, generic_code="calculation", send=None):
+            if send is None:
+                send = lambda result: self._json(200, result)  # noqa: E731
             try:
-                self._json(200, action())
+                send(action())
             except ValueError as exc:
                 self._json(400, {"error": str(exc), "code": "validation"})
             except ApiError as exc:
@@ -366,6 +428,7 @@ def make_handler(service):
                 self._service_json(
                     lambda: service.export_nina_sequence(payload),
                     generic_message="NINA sequence export failed",
+                    send=self._send_nina,
                 )
             else:
                 self._service_json(
@@ -374,11 +437,20 @@ def make_handler(service):
                     generic_code="site",
                 )
 
+    Handler.service = service
     return Handler
 
 
-def create_server(*, port=0, service=None):
+def create_server(*, host="127.0.0.1", port=0, service=None, public_host=None):
+    """Create the HTTP server.
+
+    The default binds loopback only, as the desktop program always did. Passing
+    a ``public_host`` switches on the mode used inside a container behind an
+    HTTPS proxy: requests must target that hostname, browser origins must be
+    https on it, and the default service keeps no state on the server.
+    """
+    public_host = normalize_public_host(public_host)
     if service is None:
         from .service import AstroCheckerService
-        service = AstroCheckerService()
-    return AstroCheckerHTTPServer(("127.0.0.1", port), make_handler(service))
+        service = AstroCheckerService(stateless=public_host is not None)
+    return AstroCheckerHTTPServer((host, port), make_handler(service, public_host))
