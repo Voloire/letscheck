@@ -23,6 +23,16 @@ node --check astrochecker/static/app.js
 echo "== pytest (includes the Playwright suite)"
 "$PYTHON" -m pytest -q
 
+if command -v terraform >/dev/null; then
+  echo "== terraform fmt, validate and tests (infra/gcp)"
+  terraform fmt -check -recursive infra
+  terraform -chdir=infra/gcp init -backend=false -input=false >/dev/null
+  terraform -chdir=infra/gcp validate >/dev/null
+  terraform -chdir=infra/gcp test
+else
+  echo "== terraform not found: infra/gcp checks skipped"
+fi
+
 if [[ "$WITH_DOCKER" == "0" ]]; then
   echo "== docker skipped (--no-docker)"
   exit 0

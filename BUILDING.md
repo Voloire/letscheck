@@ -32,6 +32,32 @@ Without `ASTROCHECKER_PUBLIC_HOST` the container behaves like the desktop
 program and rejects every non-loopback client, which is useless behind a proxy.
 Deployment to GCP is described in `docs/superpowers/plans/2026-09-06-gcp-cloud-run.md`.
 
+## Cloud Run release
+
+`infra/gcp/` is the Terraform root for the Cloud Run service (project
+`voloirex-lab`, region `europe-west1`, min 0 / max 1 instance, CPU only during
+requests). `.github/workflows/release-gcp.yml` runs on a Git tag `v*` only:
+
+1. the same tests as CI;
+2. image build and push to `europe-west1-docker.pkg.dev/voloirex-lab/lab/astrochecker`
+   with GitHub OIDC as `lab-build`; the digest is captured from the push;
+3. `terraform plan` as `lab-plan` with that digest, written to the job summary and
+   checked by `scripts/plan_policy.py`, which rejects any destroy and any image
+   that is not a digest from the lab registry;
+4. `terraform apply` of that exact saved plan as `lab-deploy`.
+
+The published URL is the `public_url` output,
+`https://astrochecker-262633132420.europe-west1.run.app/`. The app accepts that
+hostname only. Rollback: tag an earlier commit. Digests stay in the registry.
+The Windows executable workflow keeps running on the same tag.
+
+Terraform is checked offline with mocks, no credentials needed:
+
+```bash
+terraform -chdir=infra/gcp init -backend=false
+terraform -chdir=infra/gcp test
+```
+
 ## Checks from the Linux dev box
 
 `scripts/check.sh` replays the GitHub CI `test` job locally and then builds and

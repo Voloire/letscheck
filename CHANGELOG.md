@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added the Cloud Run release: Terraform root `infra/gcp/`, the `release-gcp.yml`
+  workflow on tags `v*` (tests, digest-pinned image, policy-checked plan, apply) and
+  `scripts/plan_policy.py`.
 - Added `scripts/check.sh`, a local replica of the CI test job plus image build and
   container smoke test for the Linux dev box.
 - Added an opt-in cloud mode for running behind an HTTPS proxy such as Cloud Run:

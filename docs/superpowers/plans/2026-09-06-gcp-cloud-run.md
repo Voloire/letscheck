@@ -97,15 +97,15 @@ Two variants. **Variant A chosen by the owner on 2026-09-08.** Fewer moving part
 
 **Variant A, one repository and one workflow (recommended)**
 
-- [ ] `infra/gcp/` in letscheck: one Terraform root with the Cloud Run v2 service (adapted copy of `voloirex-lab/infra/modules/cloud-run` with parametric memory, always `AUTOMATIC` scaling, and without the `lab`-only image regex), GCS backend on the same bucket with `prefix = "astrochecker"`, variables `project_id`, `region`, `image` (digest required by validation), `runtime_service_account`.
-- [ ] `.github/workflows/release-gcp.yml`, trigger `push: tags: ["v*"]` only, `permissions: contents: read, id-token: write`, `concurrency` group so two releases never overlap:
+- [x] `infra/gcp/` in letscheck (2026-09-08): Cloud Run v2 service, 512 MiB, always `AUTOMATIC`, `startup_cpu_boost`, startup probe on `/api/status`, `ASTROCHECKER_PUBLIC_HOST` set to the deterministic hostname `astrochecker-262633132420.europe-west1.run.app`. GCS backend `prefix = "lab/astrochecker"`. Image validation requires the lab registry path and a digest. Mock tests in `infra/gcp/tests/`.
+- [x] `.github/workflows/release-gcp.yml` (2026-09-08), trigger `push: tags: ["v*"]` only, `permissions: contents: read, id-token: write`, `concurrency` group so two releases never overlap:
   1. run the test job as in `ci.yml`;
   2. build the image and push it to `europe-west1-docker.pkg.dev/voloirex-lab/lab/astrochecker` with OIDC as `lab-build`; capture the digest from the push output;
   3. `terraform plan -var image=...@sha256:<digest>` as `lab-plan`, plan written to the job summary and checked by a small policy script that rejects any destroy and any image without digest;
   4. `terraform apply` of that exact saved plan as `lab-deploy`.
-- [ ] Rollback: tag an earlier commit, or apply with the previous digest (kept in the registry; no automatic cleanup).
-- [ ] The existing `release.yml` (Windows exe) keeps its trigger; the two workflows coexist on the same tag.
-- [ ] The tag is the opt-in: nothing runs from pushes or pull requests. Only the owner creates tags.
+- [x] Rollback: tag an earlier commit, or apply with the previous digest (kept in the registry; no automatic cleanup). Policy script: `scripts/plan_policy.py`, tests in `tests/test_plan_policy.py`.
+- [x] The existing `release.yml` (Windows exe) keeps its trigger; the two workflows coexist on the same tag.
+- [x] The tag is the opt-in: nothing runs from pushes or pull requests. Only the owner creates tags. **First tag not yet created: it performs the first public deploy and needs the owner's go.**
 
 **Variant B, everything in voloirex-lab**
 
