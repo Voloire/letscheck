@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The release plan policy now rejects any Cloud Run plan with `min_instance_count`
+  other than 0 or CPU always allocated, so the service can never become always-on.
 - Fixed the container image, which shipped without the bundled catalog; the local
   smoke test now requires `/api/status` to report the catalog ready.
 - Added the Cloud Run release: Terraform root `infra/gcp/`, the `release-gcp.yml`
