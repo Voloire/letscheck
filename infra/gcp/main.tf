@@ -65,6 +65,12 @@ resource "google_cloud_run_v2_service" "astrochecker" {
         http_get {
           path = "/api/status"
           port = 8080
+          # Cloud mode accepts the public hostname only; platform probes do not
+          # send it by themselves, so the probe sets it explicitly.
+          http_headers {
+            name  = "Host"
+            value = local.public_host
+          }
         }
         initial_delay_seconds = 0
         period_seconds        = 2

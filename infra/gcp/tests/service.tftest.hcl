@@ -55,9 +55,12 @@ run "scale_to_zero_public_service" {
   assert {
     condition = (
       google_cloud_run_v2_service.astrochecker.template[0].containers[0].startup_probe[0].http_get[0].path == "/api/status" &&
-      google_cloud_run_v2_service.astrochecker.template[0].containers[0].startup_probe[0].http_get[0].port == 8080
+      google_cloud_run_v2_service.astrochecker.template[0].containers[0].startup_probe[0].http_get[0].port == 8080 &&
+      { for h in google_cloud_run_v2_service.astrochecker.template[0].containers[0].startup_probe[0].http_get[0].http_headers : h.name => h.value } == {
+        Host = "astrochecker-262633132420.europe-west1.run.app"
+      }
     )
-    error_message = "Startup probe must use /api/status."
+    error_message = "Startup probe must call /api/status with the public Host header, or cloud mode answers 403."
   }
   assert {
     condition     = output.public_url == "https://astrochecker-262633132420.europe-west1.run.app/"
