@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed the container image, which shipped without the bundled catalog; the local
+  smoke test now requires `/api/status` to report the catalog ready.
 - Added the Cloud Run release: Terraform root `infra/gcp/`, the `release-gcp.yml`
   workflow on tags `v*` (tests, digest-pinned image, policy-checked plan, apply) and
   `scripts/plan_policy.py`.

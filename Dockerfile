@@ -13,6 +13,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY astrochecker ./astrochecker
+COPY data/catalog.sqlite3 ./data/catalog.sqlite3
 COPY run.py ./
 
 RUN useradd --system --uid 10001 --no-create-home astrochecker
