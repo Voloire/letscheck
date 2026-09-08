@@ -8,3 +8,10 @@ dist/
 .runtime/
 .worktrees/
 debug.log
+
+# Terraform
+.terraform/
+*.tfplan
+*.tfplan.json
+*.tfstate
+*.tfstate.*
