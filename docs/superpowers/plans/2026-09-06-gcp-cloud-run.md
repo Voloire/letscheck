@@ -68,7 +68,7 @@ This is native Cloud Run behavior with `min_instance_count = 0` and `scaling_mod
 
 ## Phase 1: application changes (repo letscheck)
 
-Implemented on 2026-09-07 on branch `feat/cloud-run` (not merged). Env name chosen: `ASTROCHECKER_PUBLIC_HOST`; the service flag is `AstroCheckerService(stateless=True)`; tests in `tests/test_cloud_mode.py`. The observing site keeps working on the desktop through `/api/site`; the browser copy is a fallback used when the server has none.
+Implemented on 2026-09-07 on branch `feat/cloud-run`, merged into `main` on 2026-09-08 as PR #8 (squash `4080148`). Env name chosen: `ASTROCHECKER_PUBLIC_HOST`; the service flag is `AstroCheckerService(stateless=True)`; tests in `tests/test_cloud_mode.py`. The observing site keeps working on the desktop through `/api/site`; the browser copy is a fallback used when the server has none.
 
 All behind an explicit cloud mode so the desktop program stays identical and the existing 159 tests keep passing.
 
@@ -86,14 +86,14 @@ Sizing: 1 vCPU, 512 MiB (astropy plus IERS import exceeds the 256 MiB of the dem
 
 This is the pending bootstrap of 2026-09-05 with two additions. Generate a new plan from the current state, present it, apply only with explicit authorization.
 
-- [ ] Remaining foundation resources: state bucket, Artifact Registry `lab`, four service accounts, WIF pool and provider `github`, 16 IAM bindings (the 28 resources left from the 32-add plan).
-- [ ] **Extend WIF trust to the letscheck repository.** Add letscheck's numeric repository ID and the exact ref of its release workflow to the provider attribute condition and to the federation bindings of `lab-build`, `lab-plan` and `lab-deploy`. This is a change to the bootstrap code in Git, reviewed like any other.
-- [ ] Runtime identity: AstroChecker touches no GCP API, so it runs as the roleless `lab-runtime`. Add no roles.
-- [ ] Migrate state to the bucket as described in `TERRAFORM.md` (`backend.tf` from the example, `init -migrate-state`), then verify the remote state is present and versioned.
+- [x] Remaining foundation resources (applied 2026-09-08, 31 added including the 3 letscheck bindings; the 4 already-enabled APIs joined the state).
+- [x] **Extend WIF trust to the letscheck repository** (code only, 2026-09-08, voloirex-lab branch `feat/letscheck-release-trust`). Repository ID `1358298240`; the provider condition gains a second clause: tag push, `ref` starting with `refs/tags/v`, `workflow_ref` starting with `Voloire/letscheck/.github/workflows/release-gcp.yml@refs/tags/v`. Because the tag name is part of `workflow_ref`, the bindings of `lab-build`, `lab-plan` and `lab-deploy` select a new mapped attribute `workflow` (the workflow path before `@`) rather than an exact ref. Applied 2026-09-08.
+- [x] Runtime identity: AstroChecker touches no GCP API, so it runs as the roleless `lab-runtime` (`lab-runtime@voloirex-lab.iam.gserviceaccount.com`). No roles added.
+- [x] State migrated 2026-09-08 to `gs://voloirex-lab-262633132420-tfstate/bootstrap/`, 36 resources, versioned, empty plan afterwards. WIF provider: `projects/262633132420/locations/global/workloadIdentityPools/github/providers/github`.
 
 ## Phase 3: pipeline and where the service Terraform lives
 
-Two variants. Variant A is recommended: fewer moving parts, and the release reaches GCP without manual steps.
+Two variants. **Variant A chosen by the owner on 2026-09-08.** Fewer moving parts, and the release reaches GCP without manual steps. State prefix: use `lab/astrochecker` instead of `astrochecker`, so the existing bucket IAM condition (`objects/lab/` only) covers it without widening CI access.
 
 **Variant A, one repository and one workflow (recommended)**
 
