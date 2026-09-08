@@ -4,7 +4,9 @@ Usage: python scripts/plan_policy.py plan.json
 
 Reads ``terraform show -json`` output. Allowed: create, update, read, no-op of the
 Cloud Run service with a digest-pinned image from the lab registry. Rejected: any
-destroy or replacement, any tag instead of a digest, any other resource type.
+destroy or replacement, any tag instead of a digest, any other resource type, and
+anything that would keep an instance always on: ``min_instance_count`` other than
+0 or ``cpu_idle`` false (owner's rule: the service costs nothing while unused).
 Prints one line per planned action for the job summary.
 """
 
@@ -43,7 +45,13 @@ def check_plan(plan):
             containers = templates[0].get("containers", []) if templates else []
             if not containers:
                 raise PolicyError(f"service without containers: {address}")
+            for scaling in (after.get("scaling") or []) + (templates[0].get("scaling") or []):
+                if scaling.get("min_instance_count") not in (0, None):
+                    raise PolicyError(f"min_instance_count must stay 0, never an always-on instance: {address}")
             for container in containers:
+                for resources in container.get("resources") or []:
+                    if resources.get("cpu_idle") is False:
+                        raise PolicyError(f"cpu_idle must stay true, CPU is billed only during requests: {address}")
                 image = container.get("image") or ""
                 if not image.startswith(IMAGE_PREFIX):
                     reason = "digest" if "@sha256:" not in image else "registry"

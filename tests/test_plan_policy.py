@@ -13,13 +13,19 @@ import plan_policy  # noqa: E402
 DIGEST = "europe-west1-docker.pkg.dev/voloirex-lab/lab/astrochecker@sha256:" + "a" * 64
 
 
-def service_change(actions, image):
+def service_change(actions, image, min_instances=0, cpu_idle=True):
     return {
         "address": "google_cloud_run_v2_service.astrochecker",
         "type": "google_cloud_run_v2_service",
         "change": {
             "actions": actions,
-            "after": {"template": [{"containers": [{"image": image}]}]},
+            "after": {
+                "scaling": [{"min_instance_count": min_instances, "max_instance_count": 1}],
+                "template": [{
+                    "scaling": [{"min_instance_count": min_instances, "max_instance_count": 1}],
+                    "containers": [{"image": image, "resources": [{"cpu_idle": cpu_idle}]}],
+                }],
+            },
         },
     }
 
@@ -56,6 +62,16 @@ def test_image_from_another_registry_is_rejected():
     foreign = "docker.io/library/python@sha256:" + "b" * 64
     with pytest.raises(plan_policy.PolicyError, match="registry"):
         plan_policy.check_plan(plan_with(service_change(["create"], foreign)))
+
+
+def test_always_on_instance_is_rejected():
+    with pytest.raises(plan_policy.PolicyError, match="min_instance_count"):
+        plan_policy.check_plan(plan_with(service_change(["update"], DIGEST, min_instances=1)))
+
+
+def test_cpu_always_allocated_is_rejected():
+    with pytest.raises(plan_policy.PolicyError, match="cpu_idle"):
+        plan_policy.check_plan(plan_with(service_change(["update"], DIGEST, cpu_idle=False)))
 
 
 def test_unknown_plan_format_is_rejected():
