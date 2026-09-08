@@ -1,8 +1,8 @@
-# Custom Domain for AstroChecker on Cloud Run Implementation Plan
+# Custom Domain spiraglio.voloirex.com for AstroChecker on Cloud Run Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Serve AstroChecker at `https://astrocheck.voloirex.com/` with a Google-managed certificate, at zero extra cost, through the existing tag-driven release.
+**Goal:** Serve AstroChecker, product name Spiraglio, at `https://spiraglio.voloirex.com/` with a Google-managed certificate, at zero extra cost, through the existing tag-driven release.
 
 **Architecture:** A `google_cloud_run_domain_mapping` in `infra/gcp/` maps the hostname to the existing service; Cloudflare holds one DNS-only CNAME to `ghs.googlehosted.com`. The app keeps accepting exactly one hostname (`ASTROCHECKER_PUBLIC_HOST`), so the cutover is two releases: the first creates the mapping and lets Google issue the certificate while the app still answers on the run.app hostname; the second switches the hostname. A `serve_on_domain` variable is the switch and doubles as the rollback lever, because the release policy forbids destroys.
 
@@ -56,14 +56,14 @@ Facts verified on 2026-09-08: `lab-deploy` has `roles/run.admin`, `lab-plan` has
 - Test: `tests/test_plan_policy.py`
 
 **Interfaces:**
-- Produces: constants `DOMAIN = "astrocheck.voloirex.com"` and `SERVICE_NAME = "astrochecker"` in `plan_policy`; `ALLOWED_TYPES` includes `google_cloud_run_domain_mapping`. Task 2 must use exactly these values in Terraform.
+- Produces: constants `DOMAIN = "spiraglio.voloirex.com"` and `SERVICE_NAME = "astrochecker"` in `plan_policy`; `ALLOWED_TYPES` includes `google_cloud_run_domain_mapping`. Task 2 must use exactly these values in Terraform.
 
 - [ ] **Step 1: Write the failing tests**
 
 Append to `tests/test_plan_policy.py` after `plan_with`:
 
 ```python
-def mapping_change(actions, name="astrocheck.voloirex.com", route_name="astrochecker"):
+def mapping_change(actions, name="spiraglio.voloirex.com", route_name="astrochecker"):
     return {
         "address": "google_cloud_run_domain_mapping.astrochecker",
         "type": "google_cloud_run_domain_mapping",
@@ -107,7 +107,7 @@ In `scripts/plan_policy.py` replace the constants block:
 ```python
 IMAGE_PREFIX = "europe-west1-docker.pkg.dev/voloirex-lab/lab/astrochecker@sha256:"
 DIGEST = re.compile(r"[a-f0-9]{64}\Z")
-DOMAIN = "astrocheck.voloirex.com"
+DOMAIN = "spiraglio.voloirex.com"
 SERVICE_NAME = "astrochecker"
 ALLOWED_TYPES = {"google_cloud_run_v2_service", "google_cloud_run_domain_mapping"}
 ALLOWED_ACTIONS = {"create", "update", "read", "no-op"}
@@ -126,7 +126,7 @@ Inside `check_plan`, after the `google_cloud_run_v2_service` block and before `i
                 raise PolicyError(f"domain mapping route must be the {SERVICE_NAME} service: {route!r}")
 ```
 
-Update the module docstring's "Allowed:" sentence to: `Allowed: create, update, read, no-op of the Cloud Run service with a digest-pinned image from the lab registry, and of the domain mapping astrocheck.voloirex.com to that service.`
+Update the module docstring's "Allowed:" sentence to: `Allowed: create, update, read, no-op of the Cloud Run service with a digest-pinned image from the lab registry, and of the domain mapping spiraglio.voloirex.com to that service.`
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
@@ -138,7 +138,7 @@ Expected: all pass (15 tests).
 ```bash
 git checkout -b feat/custom-domain
 git add scripts/plan_policy.py tests/test_plan_policy.py
-git commit -m "feat: release policy admits the astrocheck.voloirex.com domain mapping"
+git commit -m "feat: release policy admits the spiraglio.voloirex.com domain mapping"
 ```
 
 ---
@@ -152,8 +152,8 @@ git commit -m "feat: release policy admits the astrocheck.voloirex.com domain ma
 - Test: `infra/gcp/tests/service.tftest.hcl`
 
 **Interfaces:**
-- Consumes: `DOMAIN` and `SERVICE_NAME` from Task 1 (`astrocheck.voloirex.com`, `astrochecker`).
-- Produces: variables `domain` (default `astrocheck.voloirex.com`) and `serve_on_domain` (default `false` in this task, flipped to `true` in Task 5); outputs `public_url`, `domain_url`, `domain_dns_records`.
+- Consumes: `DOMAIN` and `SERVICE_NAME` from Task 1 (`spiraglio.voloirex.com`, `astrochecker`).
+- Produces: variables `domain` (default `spiraglio.voloirex.com`) and `serve_on_domain` (default `false` in this task, flipped to `true` in Task 5); outputs `public_url`, `domain_url`, `domain_dns_records`.
 
 - [ ] **Step 1: Write the failing Terraform tests**
 
@@ -164,16 +164,16 @@ run "domain_mapping_points_at_the_service" {
   command = plan
   assert {
     condition = (
-      google_cloud_run_domain_mapping.astrochecker.name == "astrocheck.voloirex.com" &&
+      google_cloud_run_domain_mapping.astrochecker.name == "spiraglio.voloirex.com" &&
       google_cloud_run_domain_mapping.astrochecker.location == "europe-west1" &&
       google_cloud_run_domain_mapping.astrochecker.metadata[0].namespace == "voloirex-lab" &&
       google_cloud_run_domain_mapping.astrochecker.spec[0].route_name == "astrochecker" &&
       google_cloud_run_domain_mapping.astrochecker.spec[0].certificate_mode == "AUTOMATIC"
     )
-    error_message = "The mapping must bind astrocheck.voloirex.com to the astrochecker service with a Google-managed certificate."
+    error_message = "The mapping must bind spiraglio.voloirex.com to the astrochecker service with a Google-managed certificate."
   }
   assert {
-    condition     = output.domain_url == "https://astrocheck.voloirex.com/"
+    condition     = output.domain_url == "https://spiraglio.voloirex.com/"
     error_message = "domain_url must be the custom hostname."
   }
 }
@@ -186,12 +186,12 @@ run "serves_on_domain_when_switched" {
   assert {
     condition = (
       { for e in google_cloud_run_v2_service.astrochecker.template[0].containers[0].env : e.name => e.value } == {
-        ASTROCHECKER_PUBLIC_HOST = "astrocheck.voloirex.com"
+        ASTROCHECKER_PUBLIC_HOST = "spiraglio.voloirex.com"
       } &&
       { for h in google_cloud_run_v2_service.astrochecker.template[0].containers[0].startup_probe[0].http_get[0].http_headers : h.name => h.value } == {
-        Host = "astrocheck.voloirex.com"
+        Host = "spiraglio.voloirex.com"
       } &&
-      output.public_url == "https://astrocheck.voloirex.com/"
+      output.public_url == "https://spiraglio.voloirex.com/"
     )
     error_message = "With serve_on_domain the env, the probe Host and public_url must all be the custom hostname."
   }
@@ -218,7 +218,7 @@ Append to `infra/gcp/variables.tf`:
 ```hcl
 variable "domain" {
   type        = string
-  default     = "astrocheck.voloirex.com"
+  default     = "spiraglio.voloirex.com"
   description = "Custom hostname mapped to the service. Cloudflare holds a DNS-only CNAME to ghs.googlehosted.com."
   validation {
     condition     = can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?\\.voloirex\\.com$", var.domain))
@@ -293,7 +293,7 @@ Expected: `Success! 6 passed, 0 failed.`
 
 ```bash
 git add infra/gcp
-git commit -m "feat: map astrocheck.voloirex.com to the Cloud Run service behind a hostname switch"
+git commit -m "feat: map spiraglio.voloirex.com to the Cloud Run service behind a hostname switch"
 ```
 
 ---
@@ -311,7 +311,7 @@ Replace the paragraph starting `The published URL is the` with:
 ```markdown
 The published URL is the `public_url` output. Until `serve_on_domain` is true it is
 `https://astrochecker-262633132420.europe-west1.run.app/`; afterwards it is
-`https://astrocheck.voloirex.com/`. The app accepts that one hostname only.
+`https://spiraglio.voloirex.com/`. The app accepts that one hostname only.
 Rollback: tag an earlier commit. Digests stay in the registry. Rolling the hostname
 back means a release with `serve_on_domain = false`, never a destroy of the mapping:
 the release policy rejects destroys.
@@ -323,12 +323,12 @@ The custom hostname needs two things outside Terraform, done once by the owner:
    Cloudflare DNS), then under Settings, Users and permissions add
    `lab-deploy@voloirex-lab.iam.gserviceaccount.com` as an Owner. Without this the
    apply fails with "Caller is not authorized to administer the domain".
-2. Cloudflare DNS: a CNAME `astrocheck` to `ghs.googlehosted.com`, proxy status
+2. Cloudflare DNS: a CNAME `spiraglio` to `ghs.googlehosted.com`, proxy status
    DNS only (grey cloud), TTL Auto. Proxying it breaks certificate issuance and
-   renewal. Check with `dig +short astrocheck.voloirex.com CNAME`.
+   renewal. Check with `dig +short spiraglio.voloirex.com CNAME`.
 
 Certificate status, with operator ADC:
-`gcloud beta run domain-mappings describe --domain astrocheck.voloirex.com --region europe-west1`.
+`gcloud beta run domain-mappings describe --domain spiraglio.voloirex.com --region europe-west1`.
 The Windows executable workflow keeps running on the same tag.
 ```
 
@@ -337,7 +337,7 @@ The Windows executable workflow keeps running on the same tag.
 Insert as the first bullet under `## Unreleased` in `CHANGELOG.md`:
 
 ```markdown
-- Added the custom hostname `astrocheck.voloirex.com`: a Cloud Run domain mapping
+- Added the custom hostname `spiraglio.voloirex.com`: a Cloud Run domain mapping
   with a Google-managed certificate, a `serve_on_domain` switch that moves the app's
   accepted hostname in a second release, and the release policy now admits that one
   mapping. DNS stays on Cloudflare, DNS-only.
@@ -363,19 +363,19 @@ git commit -m "docs: custom hostname prerequisites and cutover"
 
 ```bash
 git push -u origin feat/custom-domain
-gh pr create --title "Custom hostname astrocheck.voloirex.com (mapping, certificate first)" --body "Option A of the 2026-09-08 evaluation. Two-release cutover; this PR keeps the app on run.app. See docs/superpowers/plans/2026-09-08-custom-domain-cloud-run.md."
+gh pr create --title "Custom hostname spiraglio.voloirex.com (mapping, certificate first)" --body "Option A of the 2026-09-08 evaluation. Two-release cutover; this PR keeps the app on run.app. See docs/superpowers/plans/2026-09-08-custom-domain-cloud-run.md."
 ```
 
 Merge only after CI is green and the owner approves.
 
 - [ ] **Step 2: Owner completes the two prerequisites**
 
-The owner, in their browser and Cloudflare dashboard: Search Console verification of `voloirex.com` plus `lab-deploy@voloirex-lab.iam.gserviceaccount.com` as Owner; Cloudflare CNAME `astrocheck` to `ghs.googlehosted.com`, DNS only.
+The owner, in their browser and Cloudflare dashboard: Search Console verification of `voloirex.com` plus `lab-deploy@voloirex-lab.iam.gserviceaccount.com` as Owner; Cloudflare CNAME `spiraglio` to `ghs.googlehosted.com`, DNS only.
 
 Verify from WSL:
 
 ```bash
-dig +short astrocheck.voloirex.com CNAME
+dig +short spiraglio.voloirex.com CNAME
 ```
 
 Expected: `ghs.googlehosted.com.`
@@ -397,8 +397,8 @@ Then:
 
 ```bash
 curl -sS -o /dev/null -w '%{http_code}\n' https://astrochecker-262633132420.europe-west1.run.app/api/status
-curl -sS -o /dev/null -w '%{http_code}\n' https://astrocheck.voloirex.com/api/status
-curl -sSI https://astrocheck.voloirex.com/ 2>&1 | head -1
+curl -sS -o /dev/null -w '%{http_code}\n' https://spiraglio.voloirex.com/api/status
+curl -sSI https://spiraglio.voloirex.com/ 2>&1 | head -1
 ```
 
 Expected: `200`, then `403` (valid TLS, the app rejects the hostname on purpose), then a `HTTP/2 403` line with no certificate error. A TLS error instead of 403 means the certificate is not ready: check with the `gcloud beta run domain-mappings describe` command from BUILDING.md and wait.
@@ -416,7 +416,7 @@ If the workflow failed at apply with "Caller is not authorized to administer the
 
 - [ ] **Step 1: Update the Terraform tests first**
 
-In `service.tftest.hcl`, in run `scale_to_zero_public_service`, change the three expected hostnames from `astrochecker-262633132420.europe-west1.run.app` to `astrocheck.voloirex.com` (env map, probe `Host`, `output.public_url`). Rename run `serves_on_domain_when_switched` to `serves_on_run_app_when_switched_off`, set its `variables { serve_on_domain = false }`, and change its three expected values to `astrochecker-262633132420.europe-west1.run.app` with error message `"With serve_on_domain false the app must fall back to the run.app hostname (rollback path)."`.
+In `service.tftest.hcl`, in run `scale_to_zero_public_service`, change the three expected hostnames from `astrochecker-262633132420.europe-west1.run.app` to `spiraglio.voloirex.com` (env map, probe `Host`, `output.public_url`). Rename run `serves_on_domain_when_switched` to `serves_on_run_app_when_switched_off`, set its `variables { serve_on_domain = false }`, and change its three expected values to `astrochecker-262633132420.europe-west1.run.app` with error message `"With serve_on_domain false the app must fall back to the run.app hostname (rollback path)."`.
 
 Run: `terraform -chdir=infra/gcp test`
 Expected: FAIL on both changed run blocks (defaults still `false`).
@@ -430,16 +430,16 @@ Expected: `Success! 6 passed, 0 failed.`
 
 - [ ] **Step 3: Update BUILDING.md**
 
-Replace `Until \`serve_on_domain\` is true it is ... afterwards it is` sentence with: `The published URL is the \`public_url\` output, \`https://astrocheck.voloirex.com/\`. The app accepts that one hostname only; the run.app URL answers 403.`
+Replace `Until \`serve_on_domain\` is true it is ... afterwards it is` sentence with: `The published URL is the \`public_url\` output, \`https://spiraglio.voloirex.com/\`. The app accepts that one hostname only; the run.app URL answers 403.`
 
 - [ ] **Step 4: Commit, PR, merge**
 
 ```bash
 git checkout -b feat/serve-on-domain
 git add infra/gcp BUILDING.md
-git commit -m "feat: serve AstroChecker on astrocheck.voloirex.com"
+git commit -m "feat: serve AstroChecker on spiraglio.voloirex.com"
 git push -u origin feat/serve-on-domain
-gh pr create --title "Serve on astrocheck.voloirex.com" --body "Second half of the cutover: flips serve_on_domain. Requires v0.11.0 applied and the certificate verified."
+gh pr create --title "Serve on spiraglio.voloirex.com" --body "Second half of the cutover: flips serve_on_domain. Requires v0.11.0 applied and the certificate verified."
 ```
 
 - [ ] **Step 5: Owner authorizes and creates the tag**
@@ -454,18 +454,18 @@ git tag -a v0.11.1 -m "Release v0.11.1" && git push origin v0.11.1
 - [ ] **Step 6: Verify and record**
 
 ```bash
-curl -sS https://astrocheck.voloirex.com/api/status
+curl -sS https://spiraglio.voloirex.com/api/status
 curl -sS -o /dev/null -w '%{http_code}\n' https://astrochecker-262633132420.europe-west1.run.app/api/status
 ```
 
-Expected: JSON with `"ready": true`, then `403`. Open `https://astrocheck.voloirex.com/` in a browser and run one check, which exercises the https-origin CSRF path.
+Expected: JSON with `"ready": true`, then `403`. Open `https://spiraglio.voloirex.com/` in a browser and run one check, which exercises the https-origin CSRF path.
 
-Update the memory file `cloud-run-project-state.md`: live URL is `https://astrocheck.voloirex.com/`, run.app answers 403, rollback of the hostname is `serve_on_domain = false`.
+Update the memory file `cloud-run-project-state.md`: live URL is `https://spiraglio.voloirex.com/`, run.app answers 403, rollback of the hostname is `serve_on_domain = false`.
 
 ---
 
 ## Self-review
 
 - Spec coverage: certificate by Google (Task 2 `AUTOMATIC`), DNS-only CNAME (Task 3 docs, Task 4 step 2), Search Console owner (Task 3, Task 4), policy admits the mapping (Task 1), zero cost (no new billable resource), cutover without destroy (Tasks 2, 5), rollback path (`serve_on_domain = false`, tested in Task 5).
-- Type consistency: `DOMAIN`/`var.domain` = `astrocheck.voloirex.com`; `SERVICE_NAME`/`var.name`/`route_name` = `astrochecker`; the policy reads `after.spec[0].route_name`, matching the provider's plan JSON shape for `google_cloud_run_domain_mapping`.
+- Type consistency: `DOMAIN`/`var.domain` = `spiraglio.voloirex.com`; `SERVICE_NAME`/`var.name`/`route_name` = `astrochecker`; the policy reads `after.spec[0].route_name`, matching the provider's plan JSON shape for `google_cloud_run_domain_mapping`.
 - Known gap: the mock-provider tests cannot exercise `status[0].resource_records`; the first real apply is the check (compare `domain_dns_records` output with the Cloudflare record).
