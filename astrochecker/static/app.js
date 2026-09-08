@@ -206,14 +206,39 @@ function applySite(site) {
   updateTimeZoneNote();
 }
 
+const SITE_STORAGE_KEY = "astrochecker.site";
+
+function readStoredSite() {
+  try {
+    const raw = window.localStorage.getItem(SITE_STORAGE_KEY);
+    if (!raw) return null;
+    const site = JSON.parse(raw);
+    return site && typeof site === "object" && typeof site.name === "string" ? site : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function storeSite(site) {
+  try {
+    window.localStorage.setItem(SITE_STORAGE_KEY, JSON.stringify(site));
+  } catch (error) {
+    // Storage can be unavailable; the server copy, when there is one, still applies.
+  }
+}
+
 async function loadSite() {
   try {
     const response = await fetch("/api/site", {headers: {Accept: "application/json"}});
     const data = await readJson(response);
     if (!response.ok) throw new Error(data.error || "Could not load the saved site.");
+    const stored = data.site ? null : readStoredSite();
     if (data.site) {
       applySite(data.site);
       setSiteStatus(`Site ${data.site.name} loaded.`, "success");
+    } else if (stored) {
+      applySite(stored);
+      setSiteStatus(`Site ${stored.name} restored from this browser.`, "success");
     } else {
       setSiteStatus("No saved site yet. Rome values are editable defaults.");
     }
@@ -356,6 +381,7 @@ async function saveSite() {
     });
     const data = await readJson(response);
     if (!response.ok) throw new Error(data.error || "Could not save the site.");
+    storeSite(data.site);
     setSiteStatus(`Site ${data.site.name} saved.`, "success");
   } catch (error) {
     setSiteStatus(error instanceof Error ? error.message : "Could not save the site.", "error");
@@ -1061,10 +1087,10 @@ async function exportNightPlanToNina() {
         sequence_name: sequenceName,
       }),
     });
-    const data = await readJson(response);
+    const data = await deliverNinaResponse(response);
     if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
     nightNinaExportStatus.className = "status-message success";
-    nightNinaExportStatus.textContent = `Saved locally to Downloads: ${data.filename || data.path}`;
+    nightNinaExportStatus.textContent = ninaDeliveryMessage(data);
     resultLive.textContent = `NINA Legacy target set saved: ${data.filename || data.path}`;
   } catch (error) {
     nightNinaExportStatus.className = "status-message error";
@@ -1079,6 +1105,29 @@ async function exportNightPlanToNina() {
 }
 
 exportNightNina.addEventListener("click", exportNightPlanToNina);
+
+async function deliverNinaResponse(response) {
+  const contentType = response.headers.get("Content-Type") || "";
+  if (!response.ok || !contentType.includes("xml")) return readJson(response);
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = /filename="([^"]+)"/.exec(disposition);
+  const filename = match ? match[1] : "AstroChecker_sequence.xml";
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return {filename, downloaded: true};
+}
+
+function ninaDeliveryMessage(data) {
+  const name = data.filename || data.path;
+  return data.downloaded ? `Downloaded ${name}. Check your browser downloads.` : `Saved locally to Downloads: ${name}`;
+}
 
 function clearSuggestionAcknowledgement() {
   selectedSuggestion = null;
@@ -1120,10 +1169,10 @@ async function exportAcceptedSuggestion() {
         sequence_name: sequenceName,
       }),
     });
-    const data = await readJson(response);
+    const data = await deliverNinaResponse(response);
     if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
     ninaExportStatus.className = "status-message success";
-    ninaExportStatus.textContent = `Saved locally to Downloads: ${data.filename || data.path}`;
+    ninaExportStatus.textContent = ninaDeliveryMessage(data);
     resultLive.textContent = `NINA Legacy sequence saved: ${data.filename || data.path}`;
   } catch (error) {
     ninaExportStatus.className = "status-message error";

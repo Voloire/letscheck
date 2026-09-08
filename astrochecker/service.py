@@ -21,7 +21,13 @@ from .local_astronomy import (
     build_catalog_ephemerides,
     summarize_darkness,
 )
-from .nina import NinaSequenceError, export_legacy_sequence, export_legacy_sequence_set
+from .nina import (
+    NinaSequenceError,
+    export_legacy_sequence,
+    export_legacy_sequence_set,
+    render_legacy_sequence,
+    render_legacy_sequence_set,
+)
 from .planner import (
     MAX_FUTURE_SEARCH_DAYS,
     choose_suggestion,
@@ -83,9 +89,15 @@ def default_site_path():
 
 
 class AstroCheckerService:
-    def __init__(self, catalog=None, site_path=None):
+    def __init__(self, catalog=None, site_path=None, *, stateless=False):
         self.catalog = catalog if catalog is not None else Catalog()
-        self.site_path = Path(site_path) if site_path is not None else default_site_path()
+        self.stateless = bool(stateless)
+        if self.stateless:
+            # Cloud mode: nothing personal is kept on the server. The browser
+            # stores the site and receives NINA files as downloads.
+            self.site_path = None
+        else:
+            self.site_path = Path(site_path) if site_path is not None else default_site_path()
         self._site_lock = threading.Lock()
 
     def status(self):
@@ -103,7 +115,11 @@ class AstroCheckerService:
             raise ApiError(str(exc), "catalog", 503) from exc
 
     def export_nina_sequence(self, payload):
-        """Persist a native NINA Legacy/Simple Sequencer file locally."""
+        """Produce a native NINA Legacy/Simple Sequencer file.
+
+        Locally the file is written to the user's Downloads folder. In the
+        stateless cloud mode the XML is returned for the browser to download.
+        """
         if not isinstance(payload, dict):
             raise ValueError("JSON body must be an object")
         target = payload.get("object")
@@ -111,6 +127,14 @@ class AstroCheckerService:
         duration_seconds = payload.get("duration_seconds")
         sequence_name = payload.get("sequence_name")
         try:
+            if self.stateless:
+                if targets is not None:
+                    return render_legacy_sequence_set(targets, sequence_name=sequence_name)
+                return render_legacy_sequence(
+                    target,
+                    duration_seconds=duration_seconds,
+                    sequence_name=sequence_name,
+                )
             if targets is not None:
                 return export_legacy_sequence_set(
                     targets,
@@ -528,6 +552,8 @@ class AstroCheckerService:
         return summary
 
     def get_site(self):
+        if self.site_path is None:
+            return {"site": None}
         with self._site_lock:
             if not self.site_path.exists():
                 return {"site": None}
@@ -545,6 +571,8 @@ class AstroCheckerService:
 
     def save_site(self, payload):
         site = validate_site_request(payload)
+        if self.site_path is None:
+            return {"site": site}
         temporary_path = None
         with self._site_lock:
             try:
