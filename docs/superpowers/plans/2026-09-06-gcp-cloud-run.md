@@ -105,7 +105,8 @@ Two variants. **Variant A chosen by the owner on 2026-09-08.** Fewer moving part
   4. `terraform apply` of that exact saved plan as `lab-deploy`.
 - [x] Rollback: tag an earlier commit, or apply with the previous digest (kept in the registry; no automatic cleanup). Policy script: `scripts/plan_policy.py`, tests in `tests/test_plan_policy.py`.
 - [x] The existing `release.yml` (Windows exe) keeps its trigger; the two workflows coexist on the same tag.
-- [x] The tag is the opt-in: nothing runs from pushes or pull requests. Only the owner creates tags. **First tag not yet created: it performs the first public deploy and needs the owner's go.**
+- [x] The tag is the opt-in: nothing runs from pushes or pull requests. Only the owner creates tags.
+- [x] **Live since 2026-09-08.** `v0.10.0` created the service (plan 1 add, apply 1 added) but the image lacked `data/catalog.sqlite3`; `v0.10.1` fixed the Dockerfile and the local smoke test now requires the catalog ready. Both runs of `release-gcp.yml` succeeded end to end, which also verified the WIF `extract()` mapping and the `ref_type` claim live. URL: `https://astrochecker-262633132420.europe-west1.run.app/`, `/api/status` reports 6 catalogs ready, warm latency about 0.1 s.
 
 **Variant B, everything in voloirex-lab**
 
