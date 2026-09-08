@@ -59,11 +59,12 @@ for _ in $(seq 1 30); do
   sleep 1
 done
 status_ok=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: localhost" "http://127.0.0.1:$PORT/api/status")
+catalog_ready=$(curl -s -H "Host: localhost" "http://127.0.0.1:$PORT/api/status" | "$PYTHON" -c 'import json,sys; print(str(json.load(sys.stdin).get("ready")).lower())')
 status_wrong_host=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: 127.0.0.1" "http://127.0.0.1:$PORT/api/status")
 status_bad_origin=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: localhost" -H "Origin: http://localhost" \
   -H "Content-Type: application/json" -d '{}' "http://127.0.0.1:$PORT/api/site")
-echo "   public host -> $status_ok, wrong host -> $status_wrong_host, http origin -> $status_bad_origin"
-if [[ "$status_ok" != "200" || "$status_wrong_host" != "403" || "$status_bad_origin" != "403" ]]; then
+echo "   public host -> $status_ok (catalog ready: $catalog_ready), wrong host -> $status_wrong_host, http origin -> $status_bad_origin"
+if [[ "$status_ok" != "200" || "$catalog_ready" != "true" || "$status_wrong_host" != "403" || "$status_bad_origin" != "403" ]]; then
   echo "container smoke test failed" >&2
   docker logs "$NAME" >&2 || true
   exit 1
