@@ -180,6 +180,23 @@ def test_coarse_ephemeris_exposes_only_requested_probe_grid():
         ephemeris.position_at(15)
 
 
+def test_ephemeris_exposes_moon_position_illumination_and_target_separation():
+    astronomy = astronomy_module()
+    from astrochecker.planner import parse_start
+
+    ephemeris = astronomy.build_ephemeris(
+        213.915, 19.182, parse_start("2026-09-05T23:00", "Europe/Rome"),
+        43.9729, 7.9944, horizon_seconds=60, knot_step_seconds=30,
+        output_step_seconds=30,
+    )
+
+    position = ephemeris.position_at(30)
+    assert 0 <= position["moon_alt"] <= 90 or position["moon_alt"] < 0
+    assert 0 <= position["moon_az"] <= 360
+    assert 0 <= position["moon_illumination"] <= 1
+    assert 0 <= position["moon_separation"] <= 180
+
+
 def test_catalog_ephemerides_transform_multiple_targets_in_one_grid():
     astronomy = astronomy_module()
     from astrochecker.planner import parse_start

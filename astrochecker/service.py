@@ -19,8 +19,10 @@ from .local_astronomy import (
     AstronomyDataError,
     build_ephemeris,
     build_catalog_ephemerides,
+    summarize_moon,
     summarize_darkness,
 )
+from .moon import MoonPolicyError, policy_for_filter
 from .nina import (
     NinaSequenceError,
     export_legacy_sequence,
@@ -39,7 +41,15 @@ from .planner import (
     select_astronomical_night,
     solve_visibility,
 )
-from .server import ApiError, validate_check_request, validate_ideas_request, validate_site_request
+from .rig import RigError, validate_rig
+from .server import (
+    ApiError,
+    validate_check_request,
+    validate_ideas_request,
+    validate_site_request,
+    validate_v1_check_request,
+)
+from .sky_mask import SkyMask, SkyMaskError
 
 
 HORIZON_SECONDS = 86400
@@ -103,6 +113,9 @@ class AstroCheckerService:
     def status(self):
         return self.catalog.status()
 
+    def api_v1_status(self):
+        return {"version": 1, **self.status()}
+
     def objects(self, query):
         if not isinstance(query, str):
             raise ValueError("Object search must be text")
@@ -113,6 +126,135 @@ class AstroCheckerService:
             return {"objects": self.catalog.search(query, limit=10)}
         except CatalogError as exc:
             raise ApiError(str(exc), "catalog", 503) from exc
+
+    def api_v1_objects(self, query):
+        return {"version": 1, **self.objects(query)}
+
+    def api_v1_check(self, payload):
+        """Return a structured, Moon- and balcony-mask-aware single-target check."""
+        request = validate_v1_check_request(payload)
+        try:
+            selected = self._resolve(request["object"])
+            policy = policy_for_filter(request["filter"])
+            rig = validate_rig(request["profile"].get("rig"))
+            mask = None
+            if request["mask"] is not None:
+                mask = SkyMask.from_payload(request["mask"]).eroded(rig["mask_margin_deg"])
+            ephemeris = build_ephemeris(
+                selected["ra_deg"], selected["dec_deg"], request["start"],
+                request["latitude"], request["longitude"],
+                horizon_seconds=HORIZON_SECONDS,
+            )
+        except (SkyMaskError, RigError, MoonPolicyError) as exc:
+            raise ApiError(str(exc), "validation", 400) from exc
+        except AstronomyDataError as exc:
+            raise ApiError(str(exc), "calculation", 502) from exc
+
+        result = solve_visibility(
+            ephemeris.position_at,
+            duration_seconds=request["duration_seconds"],
+            horizon_seconds=HORIZON_SECONDS,
+            min_alt=0,
+            max_alt=90,
+            az_start=0,
+            az_end=360,
+            mask=mask,
+            moon_policy=policy,
+        )
+        future_windows = []
+        if not result["intervals"]:
+            future_request = {
+                **request,
+                "min_alt": 0,
+                "max_alt": 90,
+                "az_start": 0,
+                "az_end": 360,
+            }
+            future_windows = self._future_windows(
+                selected, future_request, result, mask=mask, moon_policy=policy
+            )
+        alternatives = []
+        for record in future_windows:
+            possible = [
+                interval for interval in record["intervals"]
+                if interval["end"] - interval["start"] >= request["duration_seconds"]
+            ]
+            if not possible:
+                continue
+            interval = max(possible, key=lambda item: (item["end"] - item["start"], -item["start"]))
+            start = elapsed_end(record["start"], interval["start"])
+            end = elapsed_end(record["start"], interval["start"] + request["duration_seconds"])
+            alternatives.append({
+                "date": start.date().isoformat(),
+                "start": start.isoformat(),
+                "end": end.isoformat(),
+                "label": "next_without_moon" if policy.filter == "broadband" else "next_window",
+            })
+            if len(alternatives) == 3:
+                break
+        samples = []
+        for offset in range(0, HORIZON_SECONDS + 1, CHART_STEP_SECONDS):
+            position = ephemeris.position_at(offset)
+            moon = policy.evaluate(
+                moon_alt=position["moon_alt"],
+                moon_illumination=position["moon_illumination"],
+                moon_separation=position["moon_separation"],
+            )
+            samples.append({
+                "offset": offset,
+                "altitude_deg": round(position["alt"], 4),
+                "azimuth_deg": round(position["az"], 4),
+                "sun_altitude_deg": round(position["sun_alt"], 4),
+                "moon_altitude_deg": round(position["moon_alt"], 4),
+                "moon_illumination": round(position["moon_illumination"], 6),
+                "moon_separation_deg": round(position["moon_separation"], 4),
+                "moon_factor": round(moon["moon_factor"], 6),
+                "visible": position_is_visible(
+                    position, min_alt=0, max_alt=90, az_start=0, az_end=360,
+                    mask=mask, moon_policy=policy,
+                ),
+            })
+        return {
+            "version": 1,
+            "status": result["status"],
+            "object": {
+                "name": selected["name"],
+                "ra_deg": selected["ra_deg"],
+                "dec_deg": selected["dec_deg"],
+                "type": selected["type"],
+            },
+            "start": request["start"].isoformat(),
+            "end": elapsed_end(request["start"], HORIZON_SECONDS).isoformat(),
+            "requested_duration_seconds": request["duration_seconds"],
+            "intervals": result["intervals"],
+            "never_here": not result["intervals"] and not alternatives,
+            "alternatives": alternatives,
+            "similar": [],
+            "rig": rig,
+            "mask": {
+                "provided": request["mask"] is not None,
+                "erosion_margin_deg": rig["mask_margin_deg"] if mask is not None else 0,
+            },
+            "moon": summarize_moon(ephemeris, mask),
+            "moon_policy": {
+                "filter": policy.filter,
+                "full_moon_separation_deg": policy.full_moon_separation_deg,
+                "width_days": policy.width_days,
+            },
+            "samples": samples,
+        }
+
+    def export_horizon(self, payload):
+        if not isinstance(payload, dict):
+            raise ApiError("JSON body must be an object", "validation", 400)
+        try:
+            mask = SkyMask.from_payload(payload.get("mask"))
+        except SkyMaskError as exc:
+            raise ApiError(str(exc), "mask", 400) from exc
+        return {
+            "filename": "astrochecker-horizon.txt",
+            "content": mask.to_nina_horizon(),
+        }
 
     def export_nina_sequence(self, payload):
         """Produce a native NINA Legacy/Simple Sequencer file.
@@ -158,7 +300,7 @@ class AstroCheckerService:
         except CatalogError as exc:
             raise ApiError(str(exc), "catalog", 503) from exc
 
-    def _future_windows(self, selected, request, current_result):
+    def _future_windows(self, selected, request, current_result, *, mask=None, moon_policy=None):
         """Search later dates locally, stopping at the first complete window."""
         records = []
         try:
@@ -187,6 +329,8 @@ class AstroCheckerService:
                 az_start=request["az_start"],
                 az_end=request["az_end"],
                 resolution_seconds=FUTURE_PROBE_STEP_SECONDS,
+                mask=mask,
+                moon_policy=moon_policy,
             )
             records.append({"start": future_start, "intervals": future_result["intervals"]})
             candidate = choose_suggestion(
@@ -213,6 +357,8 @@ class AstroCheckerService:
                         max_alt=request["max_alt"],
                         az_start=request["az_start"],
                         az_end=request["az_end"],
+                        mask=mask,
+                        moon_policy=moon_policy,
                     )
                     records[-1]["intervals"] = exact_result["intervals"]
                 except AstronomyDataError:
@@ -249,6 +395,8 @@ class AstroCheckerService:
                     max_alt=request["max_alt"],
                     az_start=request["az_start"],
                     az_end=request["az_end"],
+                    mask=mask,
+                    moon_policy=moon_policy,
                 )
                 widest_record["intervals"] = exact_result["intervals"]
             except AstronomyDataError:

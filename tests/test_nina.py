@@ -58,7 +58,7 @@ def test_build_legacy_sequence_xml_matches_nina_capture_sequence_shape():
     assert root.tag == "CaptureSequenceList"
     assert root.attrib["TargetName"] == "M 42"
     assert root.attrib["Mode"] == "STANDARD"
-    assert root.attrib["NegativeDec"] == "True"
+    assert root.attrib["NegativeDec"] == "true"
     assert root.attrib["RAHours"] == "5"
     assert root.attrib["DecDegrees"] == "-5"
 
@@ -81,6 +81,26 @@ def test_build_legacy_sequence_xml_matches_nina_capture_sequence_shape():
     assert capture.findtext("DitherAmount") == "1"
     assert capture.find("Binning/X").text == "1"
     assert capture.find("Binning/Y").text == "1"
+
+
+def test_legacy_xml_emits_only_the_documented_nina_fields_and_structure():
+    root = ET.fromstring(build_legacy_sequence_xml(TARGET, duration_seconds=300))
+
+    assert set(root.attrib) == {
+        "TargetName", "Mode", "RAHours", "RAMinutes", "RASeconds",
+        "NegativeDec", "DecDegrees", "DecMinutes", "DecSeconds", "PositionAngle",
+    }
+    assert [child.tag for child in root] == ["CaptureSequence", "Coordinates"]
+    capture = root.find("CaptureSequence")
+    assert {child.tag for child in capture} == {
+        "Enabled", "ExposureTime", "ImageType", "Binning", "TotalExposureCount",
+        "ProgressExposureCount", "Gain", "Offset", "Dither", "DitherAmount",
+    }
+    assert {child.tag for child in capture.find("Binning")} == {"X", "Y"}
+    assert {child.tag for child in root.find("Coordinates")} == {"RA", "Dec", "Epoch"}
+    assert root.attrib["NegativeDec"] in {"true", "false"}
+    assert capture.findtext("Enabled") in {"true", "false"}
+    assert capture.findtext("Dither") in {"true", "false"}
 
 
 def test_export_legacy_sequence_writes_to_requested_download_directory(tmp_path):

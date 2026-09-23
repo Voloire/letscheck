@@ -11,7 +11,14 @@ import warnings
 
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord, get_sun
+from astropy.coordinates import (
+    AltAz,
+    EarthLocation,
+    NonRotationTransformationWarning,
+    SkyCoord,
+    get_body,
+    get_sun,
+)
 from astropy.time import Time, TimeDelta
 from astropy.utils import iers
 
@@ -40,6 +47,10 @@ class LocalEphemeris:
     iers_coverage_start: str
     iers_coverage_end_exclusive: str
     sample_offsets: np.ndarray | None = None
+    moon_alt: np.ndarray | None = None
+    moon_az: np.ndarray | None = None
+    moon_illumination: np.ndarray | None = None
+    moon_separation: np.ndarray | None = None
 
     def position_at(self, offset):
         try:
@@ -56,11 +67,21 @@ class LocalEphemeris:
             sample_index = int(np.searchsorted(self.sample_offsets, index))
             if sample_index >= len(self.sample_offsets) or int(self.sample_offsets[sample_index]) != index:
                 raise ValueError("Astronomical offset does not match the calculated grid")
-        return {
+        result = {
             "alt": float(self.target_alt[sample_index]),
             "az": float(self.target_az[sample_index]),
             "sun_alt": float(self.sun_alt[sample_index]),
         }
+        optional = (
+            ("moon_alt", self.moon_alt),
+            ("moon_az", self.moon_az),
+            ("moon_illumination", self.moon_illumination),
+            ("moon_separation", self.moon_separation),
+        )
+        for name, values in optional:
+            if values is not None:
+                result[name] = float(values[sample_index])
+        return result
 
 
 @lru_cache(maxsize=1)
@@ -194,8 +215,16 @@ def build_ephemeris(
             table
         ):
             warnings.simplefilter("error", iers.IERSWarning)
+            warnings.simplefilter("ignore", NonRotationTransformationWarning)
+            moon = get_body("moon", times, location=location)
+            sun_icrs = get_sun(times)
             target_knots = _horizontal_vectors(target.transform_to(frame))
-            sun_knots = _horizontal_vectors(get_sun(times).transform_to(frame))
+            sun_knots = _horizontal_vectors(sun_icrs.transform_to(frame))
+            moon_knots = _horizontal_vectors(moon.transform_to(frame))
+            moon_separation_knots = target.transform_to(moon.frame).separation(moon).to_value(u.deg)
+            moon_illumination_knots = 0.5 * (
+                1 - np.cos(np.deg2rad(sun_icrs.separation(moon).to_value(u.deg)))
+            )
     except iers.IERSWarning as exc:
         raise AstronomyDataError(
             "Astropy ha segnalato un limite nei dati IERS locali"
@@ -207,12 +236,20 @@ def build_ephemeris(
 
     target_vectors = _interpolate_vectors(knot_offsets, target_knots, offsets)
     sun_vectors = _interpolate_vectors(knot_offsets, sun_knots, offsets)
+    moon_vectors = _interpolate_vectors(knot_offsets, moon_knots, offsets)
     target_alt, target_az = _altitude_azimuth(target_vectors)
     sun_alt, _ = _altitude_azimuth(sun_vectors)
+    moon_alt, moon_az = _altitude_azimuth(moon_vectors)
+    moon_illumination = np.interp(offsets, knot_offsets, moon_illumination_knots)
+    moon_separation = np.interp(offsets, knot_offsets, moon_separation_knots)
     if not (
         np.all(np.isfinite(target_alt))
         and np.all(np.isfinite(target_az))
         and np.all(np.isfinite(sun_alt))
+        and np.all(np.isfinite(moon_alt))
+        and np.all(np.isfinite(moon_az))
+        and np.all(np.isfinite(moon_illumination))
+        and np.all(np.isfinite(moon_separation))
     ):
         raise AstronomyDataError("Calculated astronomical coordinates are not finite")
 
@@ -224,6 +261,10 @@ def build_ephemeris(
         iers_coverage_start=coverage_start,
         iers_coverage_end_exclusive=coverage_end,
         sample_offsets=offsets.astype(int),
+        moon_alt=moon_alt,
+        moon_az=moon_az,
+        moon_illumination=moon_illumination,
+        moon_separation=moon_separation,
     )
 
 
@@ -275,8 +316,16 @@ def build_catalog_ephemerides(
         frame = AltAz(obstime=times, location=location, pressure=0 * u.hPa)
         with _ASTROPY_LOCK, warnings.catch_warnings(), iers.earth_orientation_table.set(table):
             warnings.simplefilter("error", iers.IERSWarning)
+            warnings.simplefilter("ignore", NonRotationTransformationWarning)
+            moon = get_body("moon", times, location=location)
+            sun_icrs = get_sun(times)
             horizontal = targets.transform_to(frame)
-            sun = get_sun(times).transform_to(frame)
+            sun = sun_icrs.transform_to(frame)
+            moon_horizontal = moon.transform_to(frame)
+            moon_separation_knots = targets.transform_to(moon.frame).separation(moon).to_value(u.deg)
+            moon_illumination_knots = 0.5 * (
+                1 - np.cos(np.deg2rad(sun_icrs.separation(moon).to_value(u.deg)))
+            )
     except iers.IERSWarning as exc:
         raise AstronomyDataError("Astropy ha segnalato un limite nei dati IERS locali") from exc
     except (IndexError, TypeError, ValueError) as exc:
@@ -293,6 +342,7 @@ def build_catalog_ephemerides(
         axis=-1,
     )
     sun_vectors = _horizontal_vectors(sun)
+    moon_vectors = _horizontal_vectors(moon_horizontal)
 
     def interpolate_rows(values):
         return np.vstack([np.interp(offsets, knot_offsets, row) for row in values])
@@ -308,6 +358,12 @@ def build_catalog_ephemerides(
     target_az = np.degrees(np.arctan2(target_vectors[:, :, 1], target_vectors[:, :, 0])) % 360.0
     sun_vectors = _interpolate_vectors(knot_offsets, sun_vectors, offsets)
     sun_alt, _ = _altitude_azimuth(sun_vectors)
+    moon_vectors = _interpolate_vectors(knot_offsets, moon_vectors, offsets)
+    moon_alt, moon_az = _altitude_azimuth(moon_vectors)
+    moon_illumination = np.interp(offsets, knot_offsets, moon_illumination_knots)
+    moon_separation = np.vstack([
+        np.interp(offsets, knot_offsets, row) for row in moon_separation_knots
+    ])
     grid = offsets.astype(int)
     return [
         LocalEphemeris(
@@ -318,6 +374,10 @@ def build_catalog_ephemerides(
             iers_coverage_start=coverage_start,
             iers_coverage_end_exclusive=coverage_end,
             sample_offsets=grid,
+            moon_alt=moon_alt,
+            moon_az=moon_az,
+            moon_illumination=moon_illumination,
+            moon_separation=moon_separation[index],
         )
         for index in range(len(ras))
     ]
@@ -353,4 +413,64 @@ def summarize_darkness(sun_altitudes, limit=SUN_LIMIT_DEGREES):
         "at_start": bool(dark[0]),
         "intervals": intervals,
         "events": events,
+    }
+
+
+def summarize_moon(ephemeris, mask=None):
+    """Summarize Moon altitude, illumination and mask occupancy on a grid."""
+    values = (
+        getattr(ephemeris, "moon_alt", None),
+        getattr(ephemeris, "moon_az", None),
+        getattr(ephemeris, "moon_illumination", None),
+    )
+    if any(value is None for value in values):
+        raise ValueError("Moon ephemeris is incomplete")
+    moon_alt, moon_az, illumination = (
+        np.asarray(value, dtype=float) for value in values
+    )
+    if any(value.ndim != 1 for value in (moon_alt, moon_az, illumination)):
+        raise ValueError("Moon ephemeris must be one-dimensional")
+    if not (len(moon_alt) == len(moon_az) == len(illumination)) or not len(moon_alt):
+        raise ValueError("Moon ephemeris arrays must have the same non-zero length")
+    if not all(np.all(np.isfinite(value)) for value in (moon_alt, moon_az, illumination)):
+        raise ValueError("Moon ephemeris must contain finite values")
+    if np.any((illumination < 0) | (illumination > 1)):
+        raise ValueError("Moon illumination must be between 0 and 1")
+
+    offsets = getattr(ephemeris, "sample_offsets", None)
+    if offsets is None:
+        offsets = np.arange(len(moon_alt), dtype=int)
+    else:
+        offsets = np.asarray(offsets, dtype=int)
+    if len(offsets) != len(moon_alt):
+        raise ValueError("Moon sample offsets must match the ephemeris")
+
+    def intervals_for(visible):
+        intervals = []
+        start = None
+        for index, is_visible in enumerate([*visible, False]):
+            if is_visible and start is None:
+                start = index
+            elif not is_visible and start is not None:
+                intervals.append({
+                    "start": int(offsets[start]),
+                    "end": int(offsets[index - 1]),
+                })
+                start = None
+        return intervals
+
+    above = moon_alt > 0
+    inside = np.array(
+        [altitude >= 0 and mask.contains(azimuth, altitude)
+         for azimuth, altitude in zip(moon_az, moon_alt)],
+        dtype=bool,
+    ) if mask is not None else np.zeros(len(moon_alt), dtype=bool)
+    highest = int(np.argmax(moon_alt))
+    return {
+        "illumination": float(illumination[highest]),
+        "maximum_altitude": float(moon_alt[highest]),
+        "above_horizon": intervals_for(above),
+        "inside_mask": intervals_for(inside) if mask is not None else [],
+        "above_horizon_at_start": bool(above[0]),
+        "above_horizon_at_end": bool(above[-1]),
     }

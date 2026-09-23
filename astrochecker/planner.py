@@ -8,6 +8,7 @@ from numbers import Real
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .idea_profiles import IDEA_MIN_BLOCK_SECONDS
+from .moon import MoonPolicy
 
 
 RESOLUTION_SECONDS = 1
@@ -435,7 +436,8 @@ def azimuth_is_visible(azimuth: object, start: float, end: float) -> bool:
 
 
 def position_is_visible(position: object, *, min_alt: float, max_alt: float,
-                        az_start: float, az_end: float) -> bool:
+                        az_start: float, az_end: float, mask=None,
+                        moon_policy: MoonPolicy | None = None) -> bool:
     if not isinstance(position, dict):
         raise ValueError("SkyChart returned an invalid position")
     try:
@@ -444,16 +446,27 @@ def position_is_visible(position: object, *, min_alt: float, max_alt: float,
         azimuth = position["az"]
     except KeyError as exc:
         raise ValueError("SkyChart ha restituito una posizione incompleta") from exc
-    return (
+    in_balcony = mask.contains(azimuth, altitude) if mask is not None else (
         min_alt <= altitude <= max_alt
         and azimuth_is_visible(azimuth, az_start, az_end)
-        and sun_altitude <= SUN_LIMIT_DEGREES
     )
+    moon_open = True
+    if moon_policy is not None:
+        try:
+            moon_open = not moon_policy.evaluate(
+                moon_alt=position["moon_alt"],
+                moon_illumination=position["moon_illumination"],
+                moon_separation=position["moon_separation"],
+            )["closed"]
+        except KeyError as exc:
+            raise ValueError("Astronomical position has incomplete Moon data") from exc
+    return in_balcony and sun_altitude <= SUN_LIMIT_DEGREES and moon_open
 
 
 def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
                      min_alt, max_alt, az_start, az_end,
-                     resolution_seconds=RESOLUTION_SECONDS):
+                     resolution_seconds=RESOLUTION_SECONDS, mask=None,
+                     moon_policy: MoonPolicy | None = None):
     """Search valid continuous intervals using conservative one-second samples."""
     values = validate_limits(
         duration_seconds=duration_seconds,
@@ -486,6 +499,8 @@ def solve_visibility(position_at, *, duration_seconds, horizon_seconds=86400,
             max_alt=values["max_alt"],
             az_start=values["az_start"],
             az_end=values["az_end"],
+            mask=mask,
+            moon_policy=moon_policy,
         )
         if visible and current_start is None:
             current_start = elapsed

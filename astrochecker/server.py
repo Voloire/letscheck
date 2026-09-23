@@ -94,6 +94,66 @@ def validate_check_request(payload):
     }
 
 
+def validate_v1_check_request(payload):
+    """Validate the version-one structured check context."""
+    if not isinstance(payload, dict):
+        raise ValueError("JSON body must be an object")
+    object_name = payload.get("object")
+    if not isinstance(object_name, str) or not object_name.strip():
+        raise ValueError("Object name is required")
+    object_name = object_name.strip()
+    if len(object_name) > 200 or any(c in object_name for c in ('"', "\r", "\n", "\x00")):
+        raise ValueError("Object name contains unsupported characters")
+
+    site = payload.get("site")
+    if not isinstance(site, dict):
+        raise ValueError("Site is required")
+    latitude = _number(site, "latitude", "latitude")
+    longitude = _number(site, "longitude", "longitude")
+    if not -90 <= latitude <= 90:
+        raise ValueError("Latitude must be between -90 and 90 degrees")
+    if not -180 <= longitude <= 180:
+        raise ValueError("Longitude must be between -180 and 180 degrees")
+    timezone_name = _timezone(site)
+
+    profile = payload.get("profile", {})
+    if not isinstance(profile, dict):
+        raise ValueError("Profile must be an object")
+    filter_name = profile.get("filter", "broadband")
+    if filter_name not in ("broadband", "narrowband"):
+        raise ValueError("Filter must be broadband or narrowband")
+
+    duration_seconds = payload.get("duration_seconds")
+    if duration_seconds is None:
+        duration_seconds = _number(payload, "duration_minutes", "duration") * 60
+    else:
+        duration_seconds = _number(payload, "duration_seconds", "duration")
+    if duration_seconds <= 0 or duration_seconds > 86400:
+        raise ValueError("Duration must be between 0 and 86400 seconds")
+
+    start_value = payload.get("start")
+    if start_value is None:
+        date_value = payload.get("date")
+        if not isinstance(date_value, str) or not date_value.strip():
+            raise ValueError("Start or date is required")
+        ready_at = profile.get("ready_at", "18:00")
+        if not isinstance(ready_at, str) or len(ready_at) != 5 or ready_at[2] != ":":
+            raise ValueError("ready_at must be HH:MM")
+        start_value = f"{date_value.strip()}T{ready_at}"
+    start = parse_start(start_value, timezone_name)
+    return {
+        "object": object_name,
+        "latitude": latitude,
+        "longitude": longitude,
+        "timezone": timezone_name,
+        "start": start,
+        "duration_seconds": duration_seconds,
+        "filter": filter_name,
+        "profile": profile,
+        "mask": payload.get("mask"),
+    }
+
+
 def validate_site_request(payload):
     if not isinstance(payload, dict):
         raise ValueError("Site JSON body must be an object")
@@ -322,6 +382,12 @@ def make_handler(service, public_host=None):
                 return
             self._json(200, result)
 
+        def _send_horizon(self, result):
+            if isinstance(result, dict) and "content" in result:
+                self._attachment(result["filename"], result["content"], "text/plain; charset=utf-8")
+                return
+            self._json(200, result)
+
         def _service_json(self, action, *, generic_message, generic_code="calculation", send=None):
             if send is None:
                 send = lambda result: self._json(200, result)  # noqa: E731
@@ -367,6 +433,25 @@ def make_handler(service, public_host=None):
             if self._reject_nonlocal():
                 return
             parsed = urlparse(self.path)
+            if parsed.path == "/api/v1/status":
+                self._service_json(
+                    service.api_v1_status,
+                    generic_message="Internal error while checking the local catalog",
+                    generic_code="catalog",
+                )
+                return
+            if parsed.path == "/api/v1/objects":
+                parameters = parse_qs(parsed.query, keep_blank_values=True)
+                queries = parameters.get("q", [""])
+                if len(queries) != 1:
+                    self._json(400, {"error": "Exactly one object query is required", "code": "validation"})
+                    return
+                self._service_json(
+                    lambda: service.api_v1_objects(queries[0]),
+                    generic_message="Local catalog search failed",
+                    generic_code="catalog",
+                )
+                return
             if parsed.path == "/api/status":
                 self._service_json(
                     service.status,
@@ -405,7 +490,10 @@ def make_handler(service, public_host=None):
             if self._reject_nonlocal():
                 return
             parsed = urlparse(self.path)
-            if parsed.path not in ("/api/check", "/api/ideas", "/api/site", "/api/nina/legacy-sequence"):
+            if parsed.path not in (
+                "/api/check", "/api/ideas", "/api/site", "/api/nina/legacy-sequence",
+                "/api/v1/check", "/api/v1/horizon",
+            ):
                 self._early_json(
                     404,
                     {"error": "Resource not found", "code": "validation"},
@@ -429,6 +517,18 @@ def make_handler(service, public_host=None):
                     lambda: service.export_nina_sequence(payload),
                     generic_message="NINA sequence export failed",
                     send=self._send_nina,
+                )
+            elif parsed.path == "/api/v1/horizon":
+                self._service_json(
+                    lambda: service.export_horizon(payload),
+                    generic_message="Horizon export failed",
+                    generic_code="mask",
+                    send=self._send_horizon,
+                )
+            elif parsed.path == "/api/v1/check":
+                self._service_json(
+                    lambda: service.api_v1_check(payload),
+                    generic_message="Structured target check failed",
                 )
             else:
                 self._service_json(

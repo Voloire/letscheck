@@ -64,7 +64,7 @@ def _coordinates_attributes(ra_deg, dec_deg):
         "RAHours": str(ra_hours_component),
         "RAMinutes": str(ra_minutes),
         "RASeconds": _number(ra_seconds),
-        "NegativeDec": "True" if dec_deg < 0 else "False",
+        "NegativeDec": "true" if dec_deg < 0 else "false",
         "DecDegrees": str(dec_degrees),
         "DecMinutes": str(dec_minutes),
         "DecSeconds": _number(dec_seconds),

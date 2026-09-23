@@ -23,4 +23,10 @@ Gain, offset, filter, binning, dithering, and workflow switches stay at NINA's
 defaults. NINA Legacy does not store the astronomical window in these files,
 so apply the planned start and end times manually.
 
+The exporter is deliberately limited to the Legacy/Simple Sequencer fields
+shown in N.I.N.A.'s user guide: target coordinates and rotation, exposure
+progress/total, exposure time and type, binning, dither, gain, and offset.
+It does not emit Advanced Sequencer entities, planner metadata, Moon data,
+mask data, or unrecognised XML fields.
+
 All primary calculations run locally after dependencies and bundled data are present. The optional browser geolocation button can query the browser’s location service, but manual coordinates always remain available.
