@@ -175,7 +175,7 @@ def build_legacy_sequence_set_xml(items, *, exposure_seconds=DEFAULT_EXPOSURE_SE
         child = ET.fromstring(build_legacy_sequence_xml(
             target,
             duration_seconds=duration_seconds,
-            exposure_seconds=exposure_seconds,
+            exposure_seconds=item.get("exposure_seconds", exposure_seconds),
         ))
         root.append(child)
     ET.indent(root, space="  ")
@@ -197,8 +197,10 @@ def _timestamp(filename_timestamp):
     return filename_timestamp or datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-def _sequence_document(target, *, duration_seconds, sequence_name, filename_timestamp):
-    xml = build_legacy_sequence_xml(target, duration_seconds=duration_seconds)
+def _sequence_document(target, *, duration_seconds, sequence_name, filename_timestamp, exposure_seconds=DEFAULT_EXPOSURE_SECONDS):
+    xml = build_legacy_sequence_xml(
+        target, duration_seconds=duration_seconds, exposure_seconds=exposure_seconds
+    )
     name, _ra_deg, _dec_deg = _target_values(target)
     if sequence_name is None:
         sequence_name = f"AstroChecker_{name}"
@@ -207,26 +209,26 @@ def _sequence_document(target, *, duration_seconds, sequence_name, filename_time
     sequence_name = _safe_filename(sequence_name.strip())
     base = f"{sequence_name}_{_timestamp(filename_timestamp)}"
     details = {
-        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
-        "exposure_count": _duration_count(duration_seconds, DEFAULT_EXPOSURE_SECONDS),
+        "exposure_seconds": exposure_seconds,
+        "exposure_count": _duration_count(duration_seconds, exposure_seconds),
     }
     return xml, base, details
 
 
-def _sequence_set_document(items, *, sequence_name, filename_timestamp):
+def _sequence_set_document(items, *, sequence_name, filename_timestamp, exposure_seconds=DEFAULT_EXPOSURE_SECONDS):
     if not isinstance(sequence_name, str) or not sequence_name.strip():
         raise NinaSequenceError("The NINA sequence name is required")
-    xml = build_legacy_sequence_set_xml(items)
+    xml = build_legacy_sequence_set_xml(items, exposure_seconds=exposure_seconds)
     sequence_name = _safe_filename(sequence_name.strip())
     base = f"{sequence_name}_{_timestamp(filename_timestamp)}"
     counts = [
-        _duration_count(item.get("duration_seconds"), DEFAULT_EXPOSURE_SECONDS)
+        _duration_count(item.get("duration_seconds"), item.get("exposure_seconds", exposure_seconds))
         for item in items
     ]
     details = {
         "sequence_name": sequence_name,
         "target_count": len(items),
-        "exposure_seconds": DEFAULT_EXPOSURE_SECONDS,
+        "exposure_seconds": exposure_seconds,
         "exposure_count": sum(counts),
         "exposure_counts": counts,
     }
@@ -279,6 +281,7 @@ def render_legacy_sequence(
     duration_seconds,
     sequence_name=None,
     filename_timestamp=None,
+    exposure_seconds=DEFAULT_EXPOSURE_SECONDS,
 ):
     """Return the NINA Legacy/Simple Sequencer XML and its filename, writing nothing."""
     xml, base, details = _sequence_document(
@@ -286,6 +289,7 @@ def render_legacy_sequence(
         duration_seconds=duration_seconds,
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
+        exposure_seconds=exposure_seconds,
     )
     return {"xml": xml + "\n", "filename": f"{base}.xml", **details}
 
@@ -295,12 +299,14 @@ def render_legacy_sequence_set(
     *,
     sequence_name,
     filename_timestamp=None,
+    exposure_seconds=DEFAULT_EXPOSURE_SECONDS,
 ):
     """Return the NINA Legacy target-set XML and its filename, writing nothing."""
     xml, base, details = _sequence_set_document(
         items,
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
+        exposure_seconds=exposure_seconds,
     )
     return {"xml": xml + "\n", "filename": f"{base}.ninaTargetSet", **details}
 
@@ -312,6 +318,7 @@ def export_legacy_sequence(
     sequence_name=None,
     downloads_dir=None,
     filename_timestamp=None,
+    exposure_seconds=DEFAULT_EXPOSURE_SECONDS,
 ):
     """Write a native NINA Legacy/Simple Sequencer XML file atomically."""
     xml, base, details = _sequence_document(
@@ -319,6 +326,7 @@ def export_legacy_sequence(
         duration_seconds=duration_seconds,
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
+        exposure_seconds=exposure_seconds,
     )
     path = _write_document(xml, base, downloads_dir)
     return {"path": str(path), "filename": path.name, **details}
@@ -330,12 +338,14 @@ def export_legacy_sequence_set(
     sequence_name,
     downloads_dir=None,
     filename_timestamp=None,
+    exposure_seconds=DEFAULT_EXPOSURE_SECONDS,
 ):
     """Write an ordered native NINA Legacy target-set XML file atomically."""
     xml, base, details = _sequence_set_document(
         items,
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
+        exposure_seconds=exposure_seconds,
     )
     path = _write_document(xml, base, downloads_dir, extension=".ninaTargetSet")
     return {"path": str(path), "filename": path.name, **details}

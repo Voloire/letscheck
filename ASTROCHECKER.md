@@ -9,12 +9,16 @@ Visibility uses ICRS coordinates, geometric altitude and azimuth, and astronomic
 When a result needs a different window, the local planner returns up to three
 real alternatives. They are ranked as **The Best** and additional alternatives
 with an explainable one-to-five-star fit score. Each card shows its continuous
-duration next to the rank and stars. Selecting an option only highlights it;
-the user must accept the option before export is enabled.
+duration next to the rank and stars. A calculated interval can be selected
+directly; ranked alternatives still require explicit acceptance before export.
 
 The accepted option can be given a custom sequence name and exported as a
 native `CaptureSequenceList` XML file for NINA's Legacy/Simple Sequencer in the
-current user's `Downloads` folder. The **Need ideas?** planner can instead
+current user's `Downloads` folder. The continuous-window list is also directly
+selectable: selecting one opens an explicit format chooser for a single target,
+a target set, or the manual composer. The composer lets the user edit ordered
+target blocks, coordinates, block durations, and exposure times; it does not
+generate additional targets or automatic suggestions. The **Need ideas?** planner can instead
 export the complete ordered target set as NINA's native
 `ArrayOfCaptureSequenceList` XML. Each target contains J2000 coordinates and a
 STANDARD sequence with 300-second LIGHT exposures. The exposure count is the

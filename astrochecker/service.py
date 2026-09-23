@@ -268,24 +268,30 @@ class AstroCheckerService:
         targets = payload.get("targets")
         duration_seconds = payload.get("duration_seconds")
         sequence_name = payload.get("sequence_name")
+        exposure_seconds = payload.get("exposure_seconds", 300)
         try:
             if self.stateless:
                 if targets is not None:
-                    return render_legacy_sequence_set(targets, sequence_name=sequence_name)
+                    return render_legacy_sequence_set(
+                        targets, sequence_name=sequence_name, exposure_seconds=exposure_seconds
+                    )
                 return render_legacy_sequence(
                     target,
                     duration_seconds=duration_seconds,
                     sequence_name=sequence_name,
+                    exposure_seconds=exposure_seconds,
                 )
             if targets is not None:
                 return export_legacy_sequence_set(
                     targets,
                     sequence_name=sequence_name,
+                    exposure_seconds=exposure_seconds,
                 )
             return export_legacy_sequence(
                 target,
                 duration_seconds=duration_seconds,
                 sequence_name=sequence_name,
+                exposure_seconds=exposure_seconds,
             )
         except NinaSequenceError as exc:
             raise ApiError(str(exc), "validation", 400) from exc

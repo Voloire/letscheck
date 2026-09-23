@@ -12,6 +12,7 @@ const calculateButton = document.querySelector("#calculate");
 const ideasButton = document.querySelector("#ideas");
 const saveSiteButton = document.querySelector("#save-site");
 const detectLocationButton = document.querySelector("#detect-location");
+const cityPreset = document.querySelector("#city-preset");
 const connectionStatus = document.querySelector("#connection-status");
 const headerConnection = document.querySelector("#header-connection");
 const unlockNote = document.querySelector("#unlock-note");
@@ -56,9 +57,30 @@ let proposedLocation = null;
 let selectedSuggestion = null;
 let acceptedSuggestion = null;
 let selectedResult = null;
+let selectedExportFormat = "single";
+let composerBlocks = [];
 let ninaExportRunning = false;
 let nightPlanData = null;
 let nightNinaExportRunning = false;
+
+const CITY_PRESETS = {
+  rome: [41.9028, 12.4964, "Europe/Rome", "Rome observing site"],
+  london: [51.5074, -0.1278, "Europe/London", "London observing site"],
+  "new-york": [40.7128, -74.006, "America/New_York", "New York observing site"],
+  "los-angeles": [34.0522, -118.2437, "America/Los_Angeles", "Los Angeles observing site"],
+  "mexico-city": [19.4326, -99.1332, "America/Mexico_City", "Mexico City observing site"],
+  "sao-paulo": [-23.5505, -46.6333, "America/Sao_Paulo", "São Paulo observing site"],
+  "buenos-aires": [-34.6037, -58.3816, "America/Argentina/Buenos_Aires", "Buenos Aires observing site"],
+  reykjavik: [64.1466, -21.9426, "Atlantic/Reykjavik", "Reykjavík observing site"],
+  johannesburg: [-26.2041, 28.0473, "Africa/Johannesburg", "Johannesburg observing site"],
+  cairo: [30.0444, 31.2357, "Africa/Cairo", "Cairo observing site"],
+  dubai: [25.2048, 55.2708, "Asia/Dubai", "Dubai observing site"],
+  mumbai: [19.076, 72.8777, "Asia/Kolkata", "Mumbai observing site"],
+  singapore: [1.3521, 103.8198, "Asia/Singapore", "Singapore observing site"],
+  tokyo: [35.6762, 139.6503, "Asia/Tokyo", "Tokyo observing site"],
+  sydney: [-33.8688, 151.2093, "Australia/Sydney", "Sydney observing site"],
+  auckland: [-36.8509, 174.7645, "Pacific/Auckland", "Auckland observing site"],
+};
 
 function localDateAtTenPm(timeZone = DEFAULT_TIME_ZONE) {
   let formatter;
@@ -596,9 +618,12 @@ function requestLocation() {
     },
     (error) => {
       setButtonLoading(detectLocationButton, false, "");
-      setSiteStatus(locationErrorMessage(error), "error");
+      const message = locationErrorMessage(error);
+      setSiteStatus(`${message} Choose a city below if browser location is unavailable.`, "error");
     },
-    {enableHighAccuracy: true, timeout: 10000, maximumAge: 0}
+    // Wi-Fi/cell positioning is much more reliable for a desktop browser than
+    // forcing a GPS-quality fix. A recent cached fix is also acceptable here.
+    {enableHighAccuracy: false, timeout: 5000, maximumAge: 300000}
   );
 }
 
@@ -623,6 +648,30 @@ function acceptLocationProposal() {
 detectLocationButton.addEventListener("click", requestLocation);
 field("#cancel-location").addEventListener("click", cancelLocationProposal);
 field("#accept-location").addEventListener("click", acceptLocationProposal);
+
+function applyCityPreset(cityKey) {
+  const preset = CITY_PRESETS[cityKey];
+  if (!preset) return;
+  const [latitude, longitude, timeZone, name] = preset;
+  field("#latitude").value = String(latitude);
+  field("#longitude").value = String(longitude);
+  field("#site-name").value = name;
+  timezoneInput.value = timeZone;
+  field("#latitude").removeAttribute("aria-invalid");
+  field("#longitude").removeAttribute("aria-invalid");
+  setSiteStatus(`${name} selected. Save the site if you want to keep it.`, "success");
+  markStale();
+}
+
+cityPreset.addEventListener("click", (event) => {
+  const option = event.target.closest(".city-option");
+  if (!option) return;
+  cityPreset.querySelectorAll(".city-option").forEach((candidate) => {
+    candidate.classList.toggle("selected", candidate === option);
+    candidate.setAttribute("aria-selected", String(candidate === option));
+  });
+  applyCityPreset(option.dataset.city);
+});
 
 function formatInstant(startIso, offsetSeconds, timeZone = DEFAULT_TIME_ZONE, includeWeekday = true) {
   const instant = new Date(new Date(startIso).getTime() + Number(offsetSeconds) * 1000);
@@ -829,10 +878,149 @@ function renderIntervals(data) {
     const duration = document.createElement("span");
     duration.className = "interval-duration";
     duration.textContent = formatDuration(Number(item.end) - Number(item.start));
-    row.append(number, time, duration);
+    const choose = document.createElement("button");
+    choose.className = "button button-secondary button-compact interval-choose";
+    choose.type = "button";
+    choose.textContent = "Choose";
+    choose.addEventListener("click", () => chooseInterval(data, item, index));
+    row.append(number, time, duration, choose);
     list.append(row);
   });
 }
+
+function intervalSuggestion(data, item) {
+  const start = new Date(Date.parse(data.start) + Number(item.start) * 1000);
+  const end = new Date(Date.parse(data.start) + Number(item.end) * 1000);
+  return {
+    tier: "interval",
+    start: start.toISOString(),
+    end: end.toISOString(),
+    duration_seconds: Number(item.end) - Number(item.start),
+    available_duration_seconds: Number(item.end) - Number(item.start),
+    requested_duration_seconds: Number(item.end) - Number(item.start),
+  };
+}
+
+function chooseInterval(data, item, index) {
+  const suggestion = intervalSuggestion(data, item);
+  const suggestionsCard = field("#suggestions-card");
+  suggestionsCard.hidden = false;
+  field("#suggestions-note").textContent = "A continuous window was selected from the calculated intervals.";
+  suggestionsEmpty.hidden = true;
+  acceptedSuggestion = suggestion;
+  selectedSuggestion = suggestion;
+  acceptedPlan.hidden = false;
+  acceptedPlanSummary.textContent = `${formatTargetLabel(data.object, "Target")} · ${formatInstant(suggestion.start, 0, data.timezone)} – ${formatInstant(suggestion.end, 0, data.timezone)} · ${formatDuration(suggestion.duration_seconds)}`;
+  ninaSequenceName.value = `AstroChecker_${(data.object?.name || "target").replace(/[^A-Za-z0-9._-]+/g, "-")}`;
+  ninaSequenceName.removeAttribute("aria-invalid");
+  selectedExportFormat = "single";
+  initializeComposer(data, suggestion);
+  setExportFormat("single");
+  document.querySelectorAll(".interval-list li").forEach((candidate, candidateIndex) => {
+    candidate.classList.toggle("selected", candidateIndex === index);
+  });
+  ninaExportStatus.className = "status-message";
+  ninaExportStatus.textContent = "Window selected. Choose an export format.";
+  renderTimeline(data);
+  acceptedPlan.scrollIntoView({behavior: "smooth", block: "nearest"});
+  resultLive.textContent = "Continuous window selected. Choose an export format.";
+}
+
+function objectCoordinate(object, key, fallback = "") {
+  const value = object?.[key] ?? object?.[`${key}_deg`] ?? fallback;
+  return value === null || value === undefined ? fallback : value;
+}
+
+function initializeComposer(data, suggestion) {
+  composerBlocks = [{
+    name: data.object?.name || "Target",
+    ra: objectCoordinate(data.object, "ra"),
+    dec: objectCoordinate(data.object, "dec"),
+    duration_seconds: Math.round(Number(suggestion.duration_seconds)),
+    exposure_seconds: 300,
+  }];
+  renderComposerBlocks();
+}
+
+function composerInput(label, value, type = "text", step = "any") {
+  const wrapper = document.createElement("label");
+  wrapper.className = "composer-field";
+  const caption = document.createElement("span");
+  caption.textContent = label;
+  const input = document.createElement("input");
+  input.type = type;
+  input.value = value;
+  if (type === "number") input.step = step;
+  wrapper.append(caption, input);
+  return {wrapper, input};
+}
+
+function renderComposerBlocks() {
+  const host = field("#composer-blocks");
+  host.replaceChildren();
+  composerBlocks.forEach((block, index) => {
+    const card = document.createElement("article");
+    card.className = "composer-block";
+    const heading = document.createElement("div");
+    heading.className = "composer-block-heading";
+    const title = document.createElement("strong");
+    title.textContent = `Block ${index + 1}`;
+    heading.append(title);
+    if (composerBlocks.length > 1) {
+      const remove = document.createElement("button");
+      remove.className = "button button-secondary button-compact";
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", () => {
+        composerBlocks.splice(index, 1);
+        renderComposerBlocks();
+      });
+      heading.append(remove);
+    }
+    const grid = document.createElement("div");
+    grid.className = "composer-grid";
+    const name = composerInput("Target name", block.name);
+    const ra = composerInput("RA (degrees)", block.ra, "number");
+    const dec = composerInput("Dec (degrees)", block.dec, "number");
+    const duration = composerInput("Block duration (seconds)", block.duration_seconds, "number", "1");
+    const exposure = composerInput("Exposure (seconds)", block.exposure_seconds, "number", "1");
+    [[name, "name"], [ra, "ra"], [dec, "dec"], [duration, "duration_seconds"], [exposure, "exposure_seconds"]].forEach(([fieldControl, key]) => {
+      fieldControl.input.addEventListener("input", () => { composerBlocks[index][key] = fieldControl.input.value; });
+      grid.append(fieldControl.wrapper);
+    });
+    card.append(heading, grid);
+    host.append(card);
+  });
+}
+
+function setExportFormat(format) {
+  selectedExportFormat = format;
+  const choices = {
+    single: ["#format-single", "Exports the selected target and selected window as a NINA Legacy XML.", "Export accepted window to NINA"],
+    set: ["#format-set", "Exports the selected block list as NINA’s native target-set file.", "Export target set to NINA"],
+    composer: ["#format-composer", "Compose the ordered blocks and export them as a NINA target set.", "Export composed sequence to NINA"],
+  };
+  Object.keys(choices).forEach((key) => {
+    const button = field(choices[key][0]);
+    button.classList.toggle("selected", key === format);
+    button.setAttribute("aria-pressed", String(key === format));
+  });
+  field("#manual-composer").hidden = format !== "composer";
+  field("#format-note").textContent = choices[format]?.[1] || "Advanced Sequencer JSON is not available yet.";
+  exportAcceptedNina.querySelector(".button-label").textContent = choices[format]?.[2] || "Export to NINA";
+  ninaExportStatus.textContent = format === "advanced"
+    ? "Advanced Sequencer JSON is not available yet."
+    : "Window selected. Ready to export.";
+}
+
+field("#format-single").addEventListener("click", () => setExportFormat("single"));
+field("#format-set").addEventListener("click", () => setExportFormat("set"));
+field("#format-composer").addEventListener("click", () => setExportFormat("composer"));
+field("#add-composer-block").addEventListener("click", () => {
+  const source = composerBlocks[composerBlocks.length - 1] || {name: "Target", ra: "", dec: "", duration_seconds: 300, exposure_seconds: 300};
+  composerBlocks.push({...source, name: "New target"});
+  renderComposerBlocks();
+});
 
 function azimuthVisible(azimuth, start, end) {
   if (start === 0 && end === 360) return true;
@@ -961,6 +1149,8 @@ function acceptSuggestion(suggestion, item) {
   acceptedPlanSummary.textContent = `${formatTargetLabel(selectedResult?.object, "Target")} · ${formatInstant(suggestion.start, 0, selectedResult.timezone)} – ${formatInstant(suggestion.end, 0, selectedResult.timezone)} · ${formatDuration(suggestion.duration_seconds)}`;
   ninaSequenceName.value = `AstroChecker_${(selectedResult?.object?.name || "target").replace(/[^A-Za-z0-9._-]+/g, "-")}`;
   ninaSequenceName.removeAttribute("aria-invalid");
+  initializeComposer(selectedResult, suggestion);
+  setExportFormat("single");
   ninaExportStatus.className = "status-message";
   ninaExportStatus.textContent = "Accepted locally. Choose a sequence name, then export it to NINA.";
   renderTimeline(selectedResult);
@@ -1157,23 +1347,68 @@ async function exportAcceptedSuggestion() {
   exportAcceptedNina.setAttribute("aria-busy", "true");
   ninaExportStatus.className = "status-message";
   ninaExportStatus.textContent = "Creating the NINA Legacy XML locally…";
+  let blocks;
+  if (selectedExportFormat === "composer") {
+    blocks = composerBlocks.map((block) => ({
+      target: {
+        name: String(block.name || "").trim(),
+        ra_deg: Number(block.ra),
+        dec_deg: Number(block.dec),
+      },
+      duration_seconds: Number(block.duration_seconds),
+      exposure_seconds: Number(block.exposure_seconds),
+    }));
+  } else {
+    blocks = [{
+      target: selectedResult.object,
+      duration_seconds: Number(acceptedSuggestion.duration_seconds),
+      exposure_seconds: 300,
+    }];
+  }
+  const invalidBlock = blocks.find((block) => (
+    !block.target.name
+    || !Number.isFinite(block.target.ra_deg ?? Number(block.target.ra))
+    || !Number.isFinite(block.target.dec_deg ?? Number(block.target.dec))
+    || Number(block.target.dec_deg ?? block.target.dec) < -90
+    || Number(block.target.dec_deg ?? block.target.dec) > 90
+    || Number(block.duration_seconds) < Number(block.exposure_seconds)
+    || Number(block.exposure_seconds) <= 0
+  ));
+  if (invalidBlock) {
+    ninaExportRunning = false;
+    exportAcceptedNina.disabled = false;
+    exportAcceptedNina.classList.remove("loading");
+    exportAcceptedNina.removeAttribute("aria-busy");
+    ninaExportStatus.className = "status-message error";
+    ninaExportStatus.textContent = "Each block needs a name, valid coordinates, and a duration at least as long as its exposure.";
+    return;
+  }
+  const requestPayload = selectedExportFormat === "single"
+    ? {
+        object: blocks[0].target,
+        duration_seconds: blocks[0].duration_seconds,
+        exposure_seconds: blocks[0].exposure_seconds,
+        suggestion_start: acceptedSuggestion.start,
+        suggestion_end: acceptedSuggestion.end,
+        sequence_name: sequenceName,
+      }
+    : {
+        targets: blocks,
+        sequence_name: sequenceName,
+        exposure_seconds: blocks[0].exposure_seconds,
+      };
   try {
     const response = await fetch("/api/nina/legacy-sequence", {
       method: "POST",
       headers: {"Content-Type": "application/json", Accept: "application/json"},
-      body: JSON.stringify({
-        object: selectedResult.object,
-        duration_seconds: acceptedSuggestion.duration_seconds,
-        suggestion_start: acceptedSuggestion.start,
-        suggestion_end: acceptedSuggestion.end,
-        sequence_name: sequenceName,
-      }),
+      body: JSON.stringify(requestPayload),
     });
     const data = await deliverNinaResponse(response);
     if (!response.ok) throw new Error(data.error || "NINA sequence export failed.");
     ninaExportStatus.className = "status-message success";
     ninaExportStatus.textContent = ninaDeliveryMessage(data);
-    resultLive.textContent = `NINA Legacy sequence saved: ${data.filename || data.path}`;
+    const label = selectedExportFormat === "single" ? "NINA Legacy sequence" : "NINA Legacy target set";
+    resultLive.textContent = `${label} saved: ${data.filename || data.path}`;
   } catch (error) {
     ninaExportStatus.className = "status-message error";
     ninaExportStatus.textContent = error instanceof Error ? error.message : "NINA sequence export failed.";

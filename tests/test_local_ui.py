@@ -589,6 +589,43 @@ def test_priority_suggestion_exports_a_nina_legacy_sequence(tmp_path, ui_browser
         page.close()
 
 
+def test_interval_choice_exposes_explicit_target_set_and_manual_composer(tmp_path, ui_browser):
+    service = UiService(tmp_path / "interval-choice-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        submit_object(page, "M 13")
+        page.locator(".interval-choose").first.click()
+        expect(page.locator("#accepted-plan")).to_be_visible()
+        page.locator("#format-set").click()
+        expect(page.get_by_role("button", name="Export target set to NINA", exact=True)).to_be_visible()
+        page.locator("#nina-sequence-name").fill("Selected target set")
+        page.get_by_role("button", name="Export target set to NINA", exact=True).click()
+        expect(page.locator("#result-live")).to_contain_text("NINA Legacy target set saved")
+        assert service.export_payloads[0]["targets"][0]["target"]["name"] == "NGC 6205"
+
+        page.locator("#format-composer").click()
+        expect(page.locator("#manual-composer")).to_be_visible()
+        page.get_by_role("button", name="Add target block", exact=True).click()
+        expect(page.locator(".composer-block")).to_have_count(2)
+        assert not errors
+        page.close()
+
+
+def test_major_city_listbox_applies_coordinates_and_timezone(tmp_path, ui_browser):
+    service = UiService(tmp_path / "city-preset-site.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        page.locator(".city-option[data-city='tokyo']").click()
+        expect(page.locator("#latitude")).to_have_value("35.6762")
+        expect(page.locator("#longitude")).to_have_value("139.6503")
+        expect(page.locator("#timezone")).to_have_value("Asia/Tokyo")
+        expect(page.locator("#site-status")).to_contain_text("Tokyo observing site")
+        assert not errors
+        page.close()
+
+
 def test_adjust_suggestion_is_overlaid_on_the_green_timeline(tmp_path, ui_browser):
     service = UiService(tmp_path / "suggestion-overlay-site.json")
     with serve_ui(service) as url:
