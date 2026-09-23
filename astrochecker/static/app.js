@@ -12,7 +12,7 @@ const calculateButton = document.querySelector("#calculate");
 const ideasButton = document.querySelector("#ideas");
 const saveSiteButton = document.querySelector("#save-site");
 const detectLocationButton = document.querySelector("#detect-location");
-const cityPreset = document.querySelector("#city-preset");
+const cityPreset = document.querySelector("#city-preset-select");
 const connectionStatus = document.querySelector("#connection-status");
 const headerConnection = document.querySelector("#header-connection");
 const unlockNote = document.querySelector("#unlock-note");
@@ -663,14 +663,8 @@ function applyCityPreset(cityKey) {
   markStale();
 }
 
-cityPreset.addEventListener("click", (event) => {
-  const option = event.target.closest(".city-option");
-  if (!option) return;
-  cityPreset.querySelectorAll(".city-option").forEach((candidate) => {
-    candidate.classList.toggle("selected", candidate === option);
-    candidate.setAttribute("aria-selected", String(candidate === option));
-  });
-  applyCityPreset(option.dataset.city);
+cityPreset.addEventListener("change", () => {
+  if (cityPreset.value) applyCityPreset(cityPreset.value);
 });
 
 function formatInstant(startIso, offsetSeconds, timeZone = DEFAULT_TIME_ZONE, includeWeekday = true) {
@@ -932,13 +926,17 @@ function objectCoordinate(object, key, fallback = "") {
 }
 
 function initializeComposer(data, suggestion) {
+  const duration = Math.max(0, Math.floor(Number(suggestion.duration_seconds)));
   composerBlocks = [{
     name: data.object?.name || "Target",
     ra: objectCoordinate(data.object, "ra"),
     dec: objectCoordinate(data.object, "dec"),
-    duration_seconds: Math.round(Number(suggestion.duration_seconds)),
+    count: Math.max(1, Math.floor(duration / 300)),
     exposure_seconds: 300,
+    enabled: true,
   }];
+  field("#single-exposure-seconds").value = "300";
+  field("#single-exposure-count").value = String(composerBlocks[0].count);
   renderComposerBlocks();
 }
 
@@ -955,72 +953,166 @@ function composerInput(label, value, type = "text", step = "any") {
   return {wrapper, input};
 }
 
+function composerTarget(block) {
+  return {
+    name: String(block.name || "").trim(),
+    ra_deg: Number(block.ra),
+    dec_deg: Number(block.dec),
+  };
+}
+
+function composerPayloadBlocks() {
+  return composerBlocks
+    .filter((block) => block.enabled !== false)
+    .map((block) => ({
+      target: composerTarget(block),
+      exposure_seconds: Number(block.exposure_seconds),
+      count: Number(block.count),
+      duration_seconds: Number(block.exposure_seconds) * Number(block.count),
+    }));
+}
+
+function validationForBlocks(blocks) {
+  const windowSeconds = Number(acceptedSuggestion?.duration_seconds || 0);
+  const errors = [];
+  if (!blocks.length) errors.push("Add at least one enabled target block.");
+  blocks.forEach((block, index) => {
+    const target = block.target;
+    if (!target.name) errors.push(`Block ${index + 1}: enter a target name.`);
+    if (!Number.isFinite(target.ra_deg) || target.ra_deg < 0 || target.ra_deg >= 360) {
+      errors.push(`Block ${index + 1}: RA must be between 0 and 360 degrees.`);
+    }
+    if (!Number.isFinite(target.dec_deg) || target.dec_deg < -90 || target.dec_deg > 90) {
+      errors.push(`Block ${index + 1}: Dec must be between -90 and 90 degrees.`);
+    }
+    if (!Number.isFinite(block.exposure_seconds) || block.exposure_seconds <= 0) {
+      errors.push(`Block ${index + 1}: exposure must be positive.`);
+    }
+    if (!Number.isInteger(block.count) || block.count < 1) {
+      errors.push(`Block ${index + 1}: complete exposures must be at least 1.`);
+    }
+  });
+  const totalSeconds = blocks.reduce((sum, block) => sum + block.duration_seconds, 0);
+  if (windowSeconds > 0 && totalSeconds > windowSeconds) {
+    errors.push(`The sequence needs ${formatDuration(totalSeconds)}, but the selected window is only ${formatDuration(windowSeconds)}.`);
+  }
+  return {errors, totalSeconds, unusedSeconds: Math.max(0, windowSeconds - totalSeconds)};
+}
+
+function updateExportReview() {
+  const blocks = composerPayloadBlocks();
+  const validation = validationForBlocks(blocks);
+  const formatLabel = selectedExportFormat === "single" ? "Single target (.xml)" : "Target set (.ninaTargetSet)";
+  field("#review-document").textContent = formatLabel;
+  field("#review-targets").textContent = `${blocks.length} enabled`;
+  field("#review-integration").textContent = blocks.length ? formatDuration(validation.totalSeconds) : "—";
+  field("#review-unused").textContent = blocks.length ? formatDuration(validation.unusedSeconds) : "—";
+  field("#single-settings-help").textContent = blocks.length
+    ? `${formatDuration(validation.totalSeconds)} integration. ${formatDuration(validation.unusedSeconds)} remains unused in the selected window.`
+    : "Enter a valid exposure and count.";
+  field("#export-validation").textContent = validation.errors[0] || "";
+  field("#export-validation").classList.toggle("error", validation.errors.length > 0);
+  exportAcceptedNina.disabled = !acceptedSuggestion || validation.errors.length > 0;
+  return validation;
+}
+
 function renderComposerBlocks() {
   const host = field("#composer-blocks");
   host.replaceChildren();
   composerBlocks.forEach((block, index) => {
     const card = document.createElement("article");
     card.className = "composer-block";
+    card.classList.toggle("disabled", block.enabled === false);
     const heading = document.createElement("div");
     heading.className = "composer-block-heading";
     const title = document.createElement("strong");
-    title.textContent = `Block ${index + 1}`;
+    title.textContent = `${index + 1}. ${block.name || "New target"}`;
     heading.append(title);
-    if (composerBlocks.length > 1) {
-      const remove = document.createElement("button");
-      remove.className = "button button-secondary button-compact";
-      remove.type = "button";
-      remove.textContent = "Remove";
-      remove.addEventListener("click", () => {
-        composerBlocks.splice(index, 1);
-        renderComposerBlocks();
-      });
-      heading.append(remove);
-    }
     const grid = document.createElement("div");
     grid.className = "composer-grid";
     const name = composerInput("Target name", block.name);
     const ra = composerInput("RA (degrees)", block.ra, "number");
     const dec = composerInput("Dec (degrees)", block.dec, "number");
-    const duration = composerInput("Block duration (seconds)", block.duration_seconds, "number", "1");
     const exposure = composerInput("Exposure (seconds)", block.exposure_seconds, "number", "1");
-    [[name, "name"], [ra, "ra"], [dec, "dec"], [duration, "duration_seconds"], [exposure, "exposure_seconds"]].forEach(([fieldControl, key]) => {
-      fieldControl.input.addEventListener("input", () => { composerBlocks[index][key] = fieldControl.input.value; });
+    const count = composerInput("Complete exposures", block.count, "number", "1");
+    [[name, "name"], [ra, "ra"], [dec, "dec"], [exposure, "exposure_seconds"], [count, "count"]].forEach(([fieldControl, key]) => {
+      fieldControl.input.addEventListener("input", () => {
+        composerBlocks[index][key] = key === "name" ? fieldControl.input.value : Number(fieldControl.input.value);
+        title.textContent = `${index + 1}. ${composerBlocks[index].name || "New target"}`;
+        updateExportReview();
+      });
       grid.append(fieldControl.wrapper);
     });
-    card.append(heading, grid);
+    const actions = document.createElement("div");
+    actions.className = "composer-block-actions";
+    const enabled = document.createElement("label");
+    enabled.className = "composer-check";
+    const enabledInput = document.createElement("input");
+    enabledInput.type = "checkbox";
+    enabledInput.checked = block.enabled !== false;
+    enabledInput.addEventListener("change", () => {
+      composerBlocks[index].enabled = enabledInput.checked;
+      card.classList.toggle("disabled", !enabledInput.checked);
+      updateExportReview();
+    });
+    enabled.append(enabledInput, "Enabled");
+    actions.append(enabled);
+    [["Up", -1], ["Down", 1], ["Duplicate", 0], ["Remove", null]].forEach(([label, direction]) => {
+      const button = document.createElement("button");
+      button.className = "button button-secondary button-compact";
+      button.type = "button";
+      button.textContent = label;
+      button.disabled = (label === "Up" && index === 0) || (label === "Down" && index === composerBlocks.length - 1) || (label === "Remove" && composerBlocks.length === 1);
+      button.addEventListener("click", () => {
+        if (label === "Remove") composerBlocks.splice(index, 1);
+        else if (label === "Duplicate") composerBlocks.splice(index + 1, 0, {...composerBlocks[index], name: `${composerBlocks[index].name || "Target"} copy`});
+        else {
+          const nextIndex = index + direction;
+          [composerBlocks[index], composerBlocks[nextIndex]] = [composerBlocks[nextIndex], composerBlocks[index]];
+        }
+        renderComposerBlocks();
+      });
+      actions.append(button);
+    });
+    card.append(heading, grid, actions);
     host.append(card);
   });
+  updateExportReview();
 }
 
 function setExportFormat(format) {
   selectedExportFormat = format;
   const choices = {
     single: ["#format-single", "Exports the selected target and selected window as a NINA Legacy XML.", "Export accepted window to NINA"],
-    set: ["#format-set", "Exports the selected block list as NINA’s native target-set file.", "Export target set to NINA"],
-    composer: ["#format-composer", "Compose the ordered blocks and export them as a NINA target set.", "Export composed sequence to NINA"],
+    set: ["#format-set", "Edit the ordered target blocks below, then export NINA's native target-set file.", "Export target set to NINA"],
   };
   Object.keys(choices).forEach((key) => {
     const button = field(choices[key][0]);
     button.classList.toggle("selected", key === format);
     button.setAttribute("aria-pressed", String(key === format));
   });
-  field("#manual-composer").hidden = format !== "composer";
+  field("#manual-composer").hidden = format !== "set";
+  field("#single-settings").hidden = format !== "single";
   field("#format-note").textContent = choices[format]?.[1] || "Advanced Sequencer JSON is not available yet.";
   exportAcceptedNina.querySelector(".button-label").textContent = choices[format]?.[2] || "Export to NINA";
-  ninaExportStatus.textContent = format === "advanced"
-    ? "Advanced Sequencer JSON is not available yet."
-    : "Window selected. Ready to export.";
+  ninaExportStatus.textContent = "Review the export summary before downloading.";
+  updateExportReview();
 }
 
 field("#format-single").addEventListener("click", () => setExportFormat("single"));
 field("#format-set").addEventListener("click", () => setExportFormat("set"));
-field("#format-composer").addEventListener("click", () => setExportFormat("composer"));
 field("#add-composer-block").addEventListener("click", () => {
-  const source = composerBlocks[composerBlocks.length - 1] || {name: "Target", ra: "", dec: "", duration_seconds: 300, exposure_seconds: 300};
-  composerBlocks.push({...source, name: "New target"});
+  composerBlocks.push({name: "", ra: "", dec: "", count: 1, exposure_seconds: 300, enabled: true});
   renderComposerBlocks();
 });
+function updateSingleSettings() {
+  if (!composerBlocks[0]) return;
+  composerBlocks[0].exposure_seconds = Number(field("#single-exposure-seconds").value);
+  composerBlocks[0].count = Number(field("#single-exposure-count").value);
+  updateExportReview();
+}
+field("#single-exposure-seconds").addEventListener("input", updateSingleSettings);
+field("#single-exposure-count").addEventListener("input", updateSingleSettings);
 
 function azimuthVisible(azimuth, start, end) {
   if (start === 0 && end === 360) return true;
@@ -1323,11 +1415,14 @@ function clearSuggestionAcknowledgement() {
   selectedSuggestion = null;
   acceptedSuggestion = null;
   selectedResult = null;
+  composerBlocks = [];
+  selectedExportFormat = "single";
   acceptedPlan.hidden = true;
   ninaExportStatus.textContent = "";
   nightPlanData = null;
   nightNinaExportStatus.textContent = "";
   exportNightNina.disabled = true;
+  exportAcceptedNina.disabled = true;
 }
 
 async function exportAcceptedSuggestion() {
@@ -1347,42 +1442,17 @@ async function exportAcceptedSuggestion() {
   exportAcceptedNina.setAttribute("aria-busy", "true");
   ninaExportStatus.className = "status-message";
   ninaExportStatus.textContent = "Creating the NINA Legacy XML locally…";
-  let blocks;
-  if (selectedExportFormat === "composer") {
-    blocks = composerBlocks.map((block) => ({
-      target: {
-        name: String(block.name || "").trim(),
-        ra_deg: Number(block.ra),
-        dec_deg: Number(block.dec),
-      },
-      duration_seconds: Number(block.duration_seconds),
-      exposure_seconds: Number(block.exposure_seconds),
-    }));
-  } else {
-    blocks = [{
-      target: selectedResult.object,
-      duration_seconds: Number(acceptedSuggestion.duration_seconds),
-      exposure_seconds: 300,
-    }];
-  }
-  const invalidBlock = blocks.find((block) => (
-    !block.target.name
-    || !Number.isFinite(block.target.ra_deg ?? Number(block.target.ra))
-    || !Number.isFinite(block.target.dec_deg ?? Number(block.target.dec))
-    || Number(block.target.dec_deg ?? block.target.dec) < -90
-    || Number(block.target.dec_deg ?? block.target.dec) > 90
-    || Number(block.duration_seconds) < Number(block.exposure_seconds)
-    || Number(block.exposure_seconds) <= 0
-  ));
-  if (invalidBlock) {
+  const validation = updateExportReview();
+  if (validation.errors.length) {
     ninaExportRunning = false;
     exportAcceptedNina.disabled = false;
     exportAcceptedNina.classList.remove("loading");
     exportAcceptedNina.removeAttribute("aria-busy");
     ninaExportStatus.className = "status-message error";
-    ninaExportStatus.textContent = "Each block needs a name, valid coordinates, and a duration at least as long as its exposure.";
+    ninaExportStatus.textContent = validation.errors[0];
     return;
   }
+  const blocks = composerPayloadBlocks();
   const requestPayload = selectedExportFormat === "single"
     ? {
         object: blocks[0].target,

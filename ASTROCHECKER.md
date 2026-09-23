@@ -16,8 +16,8 @@ The accepted option can be given a custom sequence name and exported as a
 native `CaptureSequenceList` XML file for NINA's Legacy/Simple Sequencer in the
 current user's `Downloads` folder. The continuous-window list is also directly
 selectable: selecting one opens an explicit format chooser for a single target,
-a target set, or the manual composer. The composer lets the user edit ordered
-target blocks, coordinates, block durations, and exposure times; it does not
+a target set; choosing the target set opens the ordered-block editor. The editor
+lets the user edit target blocks, coordinates, exposure lengths, and counts; it does not
 generate additional targets or automatic suggestions. The **Need ideas?** planner can instead
 export the complete ordered target set as NINA's native
 `ArrayOfCaptureSequenceList` XML. Each target contains J2000 coordinates and a

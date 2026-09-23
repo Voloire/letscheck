@@ -111,26 +111,36 @@
                     <span class="spinner" aria-hidden="true"></span>
                   </button>
                 </div>
-                <div class="city-preset-field">
-                  <span class="city-preset-label">Or choose a major city</span>
-                  <div class="city-listbox" id="city-preset" role="listbox" aria-label="Major city presets">
-                    <button type="button" class="city-option" data-city="rome">Rome · Italy</button>
-                    <button type="button" class="city-option" data-city="london">London · United Kingdom</button>
-                    <button type="button" class="city-option" data-city="new-york">New York · United States</button>
-                    <button type="button" class="city-option" data-city="los-angeles">Los Angeles · United States</button>
-                    <button type="button" class="city-option" data-city="mexico-city">Mexico City · Mexico</button>
-                    <button type="button" class="city-option" data-city="sao-paulo">São Paulo · Brazil</button>
-                    <button type="button" class="city-option" data-city="buenos-aires">Buenos Aires · Argentina</button>
-                    <button type="button" class="city-option" data-city="reykjavik">Reykjavík · Iceland</button>
-                    <button type="button" class="city-option" data-city="johannesburg">Johannesburg · South Africa</button>
-                    <button type="button" class="city-option" data-city="cairo">Cairo · Egypt</button>
-                    <button type="button" class="city-option" data-city="dubai">Dubai · United Arab Emirates</button>
-                    <button type="button" class="city-option" data-city="mumbai">Mumbai · India</button>
-                    <button type="button" class="city-option" data-city="singapore">Singapore</button>
-                    <button type="button" class="city-option" data-city="tokyo">Tokyo · Japan</button>
-                    <button type="button" class="city-option" data-city="sydney">Sydney · Australia</button>
-                    <button type="button" class="city-option" data-city="auckland">Auckland · New Zealand</button>
-                  </div>
+                <div class="city-select-field">
+                  <label for="city-preset-select">Choose a major city</label>
+                  <select id="city-preset-select" aria-describedby="city-preset-help">
+                    <option value="">Select a city as a fallback...</option>
+                    <optgroup label="Europe">
+                      <option value="rome">Rome - Italy</option>
+                      <option value="london">London - United Kingdom</option>
+                      <option value="reykjavik">Reykjavik - Iceland</option>
+                    </optgroup>
+                    <optgroup label="Americas">
+                      <option value="new-york">New York - United States</option>
+                      <option value="los-angeles">Los Angeles - United States</option>
+                      <option value="mexico-city">Mexico City - Mexico</option>
+                      <option value="sao-paulo">Sao Paulo - Brazil</option>
+                      <option value="buenos-aires">Buenos Aires - Argentina</option>
+                    </optgroup>
+                    <optgroup label="Africa and Middle East">
+                      <option value="johannesburg">Johannesburg - South Africa</option>
+                      <option value="cairo">Cairo - Egypt</option>
+                      <option value="dubai">Dubai - United Arab Emirates</option>
+                    </optgroup>
+                    <optgroup label="Asia-Pacific">
+                      <option value="mumbai">Mumbai - India</option>
+                      <option value="singapore">Singapore</option>
+                      <option value="tokyo">Tokyo - Japan</option>
+                      <option value="sydney">Sydney - Australia</option>
+                      <option value="auckland">Auckland - New Zealand</option>
+                    </optgroup>
+                  </select>
+                  <p class="field-help" id="city-preset-help">Coordinates and IANA time zone are included.</p>
                 </div>
                 <div class="location-proposal" id="location-proposal" hidden>
                   <div>
@@ -274,8 +284,8 @@
             <section class="accepted-plan" id="accepted-plan" hidden aria-labelledby="accepted-plan-title">
               <div class="accepted-heading">
                 <div>
-                  <p class="section-kicker">ACCEPTED PLAN</p>
-                  <h4 id="accepted-plan-title">Ready to export</h4>
+                    <p class="section-kicker">EXPORT PLAN</p>
+                    <h4 id="accepted-plan-title">Configure and review</h4>
                 </div>
                 <span class="accepted-badge">Accepted</span>
               </div>
@@ -292,21 +302,48 @@
                 <button class="format-choice" id="format-advanced" type="button" aria-pressed="false" disabled>
                   <strong>Advanced Sequencer</strong><span>.json · not available yet</span>
                 </button>
-                <button class="format-choice" id="format-composer" type="button" aria-pressed="false">
-                  <strong>Manual composer</strong><span>Build the blocks yourself</span>
-                </button>
               </fieldset>
-              <p class="field-help format-note" id="format-note">Exports the selected target and selected window as a NINA Legacy XML.</p>
+                <p class="field-help format-note" id="format-note">Choose a document type to continue.</p>
+              <section class="single-settings" id="single-settings" aria-labelledby="single-settings-title">
+                <div>
+                  <p class="section-kicker">SINGLE TARGET</p>
+                  <h4 id="single-settings-title">Legacy capture block</h4>
+                </div>
+                <div class="single-settings-grid">
+                  <div class="field">
+                    <label for="single-exposure-seconds">Exposure length</label>
+                    <div class="input-unit"><input id="single-exposure-seconds" type="number" min="1" step="1" value="300"><span>s</span></div>
+                  </div>
+                  <div class="field">
+                    <label for="single-exposure-count">Complete exposures</label>
+                    <input id="single-exposure-count" type="number" min="1" step="1" value="1">
+                  </div>
+                </div>
+                <p class="field-help" id="single-settings-help"></p>
+              </section>
               <section class="manual-composer" id="manual-composer" hidden aria-labelledby="composer-title">
                 <div class="composer-heading">
                   <div>
-                    <p class="section-kicker">MANUAL COMPOSER</p>
-                    <h4 id="composer-title">Sequence blocks</h4>
+                    <p class="section-kicker">TARGET SET EDITOR</p>
+                    <h4 id="composer-title">Build the ordered sequence</h4>
                   </div>
-                  <button class="button button-secondary button-compact" id="add-composer-block" type="button">Add target block</button>
+                  <button class="button button-secondary button-compact" id="add-composer-block" type="button">Add blank target</button>
                 </div>
-                <p class="field-help">Edit the ordered blocks. Coordinates are the values sent to NINA; AstroChecker does not invent additional targets.</p>
+                <p class="field-help">Add, remove, and reorder targets. Each enabled block becomes one NINA Legacy target. The selected window is a planning limit; NINA starts when you start the sequence.</p>
                 <div class="composer-blocks" id="composer-blocks"></div>
+              </section>
+              <section class="export-review" id="export-review" aria-labelledby="export-review-title">
+                <div>
+                  <p class="section-kicker">REVIEW</p>
+                  <h4 id="export-review-title">Ready to download</h4>
+                </div>
+                <dl class="review-summary">
+                  <div><dt>Document</dt><dd id="review-document">Choose a format</dd></div>
+                  <div><dt>Targets</dt><dd id="review-targets">—</dd></div>
+                  <div><dt>Integration</dt><dd id="review-integration">—</dd></div>
+                  <div><dt>Unused window</dt><dd id="review-unused">—</dd></div>
+                </dl>
+                <p class="status-message error" id="export-validation" aria-live="polite"></p>
               </section>
               <div class="field sequence-name-field">
                 <label for="nina-sequence-name">NINA sequence name</label>

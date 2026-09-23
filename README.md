@@ -34,8 +34,8 @@ When a result needs a different observing window, AstroChecker shows up to
 three real alternatives ranked from **The Best** down with one to five stars.
 Each card shows the usable continuous duration immediately. Choose an interval
 explicitly, then choose a document type before exporting. Single targets use
-NINA Legacy `.xml`; target sets use `.ninaTargetSet`. A manual composer can
-build ordered blocks with their own coordinates, durations, and exposure times.
+NINA Legacy `.xml`; target sets use `.ninaTargetSet`. The target-set editor can
+build ordered blocks with their own coordinates, exposure lengths, and counts.
 Advanced Sequencer `.json` is shown as unavailable until its factory-based NINA
 serialization is implemented and verified.
 
