@@ -13,6 +13,11 @@ const ideasButton = document.querySelector("#ideas");
 const saveSiteButton = document.querySelector("#save-site");
 const detectLocationButton = document.querySelector("#detect-location");
 const cityPreset = document.querySelector("#city-preset-select");
+const siteModeCity = document.querySelector("#site-mode-city");
+const siteModeManual = document.querySelector("#site-mode-manual");
+const majorCityPanel = document.querySelector("#major-city-panel");
+const manualSitePanel = document.querySelector("#manual-site-panel");
+const localTimezoneButton = document.querySelector("#use-local-timezone");
 const connectionStatus = document.querySelector("#connection-status");
 const headerConnection = document.querySelector("#header-connection");
 const unlockNote = document.querySelector("#unlock-note");
@@ -36,6 +41,11 @@ const acceptedPlanSummary = document.querySelector("#accepted-plan-summary");
 const ninaSequenceName = document.querySelector("#nina-sequence-name");
 const exportAcceptedNina = document.querySelector("#export-accepted-nina");
 const ninaExportStatus = document.querySelector("#nina-export-status");
+const visibleTargetPicker = document.querySelector("#visible-target-picker");
+const visibleTargetSelect = document.querySelector("#visible-target-select");
+const addVisibleTargetButton = document.querySelector("#add-composer-block");
+const confirmAddVisibleTargetButton = document.querySelector("#confirm-add-visible-target");
+const addCustomTargetButton = document.querySelector("#add-custom-target");
 const nightPlan = document.querySelector("#night-plan");
 const nightBlocks = document.querySelector("#night-blocks");
 const nightGaps = document.querySelector("#night-gaps");
@@ -59,6 +69,9 @@ let acceptedSuggestion = null;
 let selectedResult = null;
 let selectedExportFormat = "single";
 let composerBlocks = [];
+let visibleTargetCandidates = [];
+let observingSiteMode = "city";
+let siteChangeInProgress = false;
 let ninaExportRunning = false;
 let nightPlanData = null;
 let nightNinaExportRunning = false;
@@ -216,6 +229,31 @@ function field(selector) {
   return document.querySelector(selector);
 }
 
+function setSiteMode(mode) {
+  observingSiteMode = mode === "manual" ? "manual" : "city";
+  const cityMode = observingSiteMode === "city";
+  siteModeCity.classList.toggle("selected", cityMode);
+  siteModeManual.classList.toggle("selected", !cityMode);
+  siteModeCity.setAttribute("aria-pressed", String(cityMode));
+  siteModeManual.setAttribute("aria-pressed", String(!cityMode));
+  majorCityPanel.hidden = !cityMode;
+  manualSitePanel.hidden = cityMode;
+}
+
+function matchingCityKey(site) {
+  return Object.entries(CITY_PRESETS).find(([, preset]) => (
+    Number(preset[0]) === Number(site.latitude)
+    && Number(preset[1]) === Number(site.longitude)
+    && preset[2] === String(site.timezone)
+  ))?.[0] || "";
+}
+
+function syncSiteModeFromValues(site) {
+  const cityKey = matchingCityKey(site);
+  cityPreset.value = cityKey;
+  setSiteMode(cityKey ? "city" : "manual");
+}
+
 function applySite(site) {
   field("#site-name").value = String(site.name);
   field("#latitude").value = String(site.latitude);
@@ -225,6 +263,7 @@ function applySite(site) {
   field("#max-alt").value = String(site.max_alt);
   field("#az-start").value = String(site.az_start);
   field("#az-end").value = String(site.az_end);
+  syncSiteModeFromValues(site);
   updateTimeZoneNote();
 }
 
@@ -424,6 +463,29 @@ function markStale() {
   ninaExportStatus.textContent = "Recalculate before exporting this plan.";
 }
 
+function invalidatePlanningForSiteChange() {
+  if (!hasResult && !acceptedSuggestion && !selectedResult) return;
+  acceptedSuggestion = null;
+  selectedSuggestion = null;
+  selectedResult = null;
+  composerBlocks = [];
+  visibleTargetCandidates = [];
+  acceptedPlan.hidden = true;
+  field("#composer-blocks").replaceChildren();
+  visibleTargetPicker.hidden = true;
+  addVisibleTargetButton.setAttribute("aria-expanded", "false");
+  exportAcceptedNina.disabled = true;
+  ninaExportStatus.textContent = "Recalculate after changing the observing site.";
+}
+
+function markManualSiteChange() {
+  if (siteChangeInProgress) return;
+  cityPreset.value = "";
+  setSiteMode("manual");
+  invalidatePlanningForSiteChange();
+  markStale();
+}
+
 function updateTimeZoneNote() {
   field("#time-zone-note").textContent = timezoneInput.value.trim() || "—";
 }
@@ -578,6 +640,7 @@ form.addEventListener("input", (event) => {
     scheduleObjectSearch();
   }
   if (event.target === timezoneInput) updateTimeZoneNote();
+  if (["site-name", "latitude", "longitude", "timezone"].includes(event.target.id)) markManualSiteChange();
   markStale();
 });
 
@@ -639,9 +702,12 @@ function acceptLocationProposal() {
   field("#longitude").value = String(proposedLocation.longitude);
   field("#latitude").removeAttribute("aria-invalid");
   field("#longitude").removeAttribute("aria-invalid");
+  cityPreset.value = "";
+  setSiteMode("manual");
   proposedLocation = null;
   field("#location-proposal").hidden = true;
   setSiteStatus("Location applied. Save the site if you want to keep it.", "success");
+  invalidatePlanningForSiteChange();
   markStale();
 }
 
@@ -653,18 +719,39 @@ function applyCityPreset(cityKey) {
   const preset = CITY_PRESETS[cityKey];
   if (!preset) return;
   const [latitude, longitude, timeZone, name] = preset;
+  siteChangeInProgress = true;
   field("#latitude").value = String(latitude);
   field("#longitude").value = String(longitude);
   field("#site-name").value = name;
   timezoneInput.value = timeZone;
+  setSiteMode("city");
   field("#latitude").removeAttribute("aria-invalid");
   field("#longitude").removeAttribute("aria-invalid");
+  siteChangeInProgress = false;
   setSiteStatus(`${name} selected. Save the site if you want to keep it.`, "success");
+  invalidatePlanningForSiteChange();
   markStale();
 }
 
+siteModeCity.addEventListener("click", () => {
+  setSiteMode("city");
+  cityPreset.focus();
+});
+
+siteModeManual.addEventListener("click", () => {
+  markManualSiteChange();
+  field("#site-name").focus();
+});
+
 cityPreset.addEventListener("change", () => {
   if (cityPreset.value) applyCityPreset(cityPreset.value);
+});
+
+localTimezoneButton.addEventListener("click", () => {
+  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  timezoneInput.value = localTimeZone;
+  timezoneInput.dispatchEvent(new Event("input", {bubbles: true}));
+  setSiteStatus(`Using ${localTimeZone}. Save the site if you want to keep it.`, "success");
 });
 
 function formatInstant(startIso, offsetSeconds, timeZone = DEFAULT_TIME_ZONE, includeWeekday = true) {
@@ -927,17 +1014,60 @@ function objectCoordinate(object, key, fallback = "") {
 
 function initializeComposer(data, suggestion) {
   const duration = Math.max(0, Math.floor(Number(suggestion.duration_seconds)));
+  visibleTargetCandidates = resultTargetCandidates(data);
   composerBlocks = [{
-    name: data.object?.name || "Target",
-    ra: objectCoordinate(data.object, "ra"),
-    dec: objectCoordinate(data.object, "dec"),
-    count: Math.max(1, Math.floor(duration / 300)),
-    exposure_seconds: 300,
+    ...targetBlockFromCandidate(visibleTargetCandidates[0], duration, true),
     enabled: true,
   }];
-  field("#single-exposure-seconds").value = "300";
+  field("#single-exposure-seconds").value = String(composerBlocks[0].exposure_seconds);
   field("#single-exposure-count").value = String(composerBlocks[0].count);
+  renderVisibleTargetPicker();
   renderComposerBlocks();
+}
+
+function normalizeTargetCandidate(candidate) {
+  const source = candidate?.target || candidate || {};
+  const name = String(source.name || source.object || "").trim();
+  const ra = objectCoordinate(source, "ra");
+  const dec = objectCoordinate(source, "dec");
+  if (!name || !Number.isFinite(Number(ra)) || !Number.isFinite(Number(dec))) return null;
+  return {name, ra: Number(ra), dec: Number(dec)};
+}
+
+function resultTargetCandidates(data) {
+  const candidates = [data.object];
+  for (const collection of [data.visible_targets, data.visibleTargets, data.candidates]) {
+    if (Array.isArray(collection)) candidates.push(...collection);
+  }
+  const unique = new Map();
+  candidates.map(normalizeTargetCandidate).filter(Boolean).forEach((candidate) => {
+    const key = `${candidate.name}|${candidate.ra}|${candidate.dec}`;
+    if (!unique.has(key)) unique.set(key, candidate);
+  });
+  return [...unique.values()];
+}
+
+function targetBlockFromCandidate(candidate, duration = 300, fillWindow = false) {
+  const safeDuration = Math.max(1, Math.floor(Number(duration) || 300));
+  const exposure = Math.max(1, Math.min(300, safeDuration));
+  return {
+    name: candidate?.name || "Custom target",
+    ra: candidate?.ra ?? "",
+    dec: candidate?.dec ?? "",
+    count: fillWindow ? Math.max(1, Math.floor(safeDuration / exposure)) : 1,
+    exposure_seconds: exposure,
+  };
+}
+
+function renderVisibleTargetPicker() {
+  visibleTargetSelect.replaceChildren();
+  visibleTargetCandidates.forEach((candidate, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = `${candidate.name} (RA ${candidate.ra}, Dec ${candidate.dec})`;
+    visibleTargetSelect.append(option);
+  });
+  confirmAddVisibleTargetButton.disabled = visibleTargetCandidates.length === 0;
 }
 
 function composerInput(label, value, type = "text", step = "any") {
@@ -956,8 +1086,8 @@ function composerInput(label, value, type = "text", step = "any") {
 function composerTarget(block) {
   return {
     name: String(block.name || "").trim(),
-    ra_deg: Number(block.ra),
-    dec_deg: Number(block.dec),
+    ra_deg: String(block.ra).trim() === "" ? NaN : Number(block.ra),
+    dec_deg: String(block.dec).trim() === "" ? NaN : Number(block.dec),
   };
 }
 
@@ -1026,7 +1156,7 @@ function renderComposerBlocks() {
     const heading = document.createElement("div");
     heading.className = "composer-block-heading";
     const title = document.createElement("strong");
-    title.textContent = `${index + 1}. ${block.name || "New target"}`;
+    title.textContent = `${index + 1}. ${block.name || "Custom target"}`;
     heading.append(title);
     const grid = document.createElement("div");
     grid.className = "composer-grid";
@@ -1038,7 +1168,7 @@ function renderComposerBlocks() {
     [[name, "name"], [ra, "ra"], [dec, "dec"], [exposure, "exposure_seconds"], [count, "count"]].forEach(([fieldControl, key]) => {
       fieldControl.input.addEventListener("input", () => {
         composerBlocks[index][key] = key === "name" ? fieldControl.input.value : Number(fieldControl.input.value);
-        title.textContent = `${index + 1}. ${composerBlocks[index].name || "New target"}`;
+        title.textContent = `${index + 1}. ${composerBlocks[index].name || "Custom target"}`;
         updateExportReview();
       });
       grid.append(fieldControl.wrapper);
@@ -1093,6 +1223,8 @@ function setExportFormat(format) {
   });
   field("#manual-composer").hidden = format !== "set";
   field("#single-settings").hidden = format !== "single";
+  visibleTargetPicker.hidden = true;
+  addVisibleTargetButton.setAttribute("aria-expanded", "false");
   field("#format-note").textContent = choices[format]?.[1] || "Advanced Sequencer JSON is not available yet.";
   exportAcceptedNina.querySelector(".button-label").textContent = choices[format]?.[2] || "Export to NINA";
   ninaExportStatus.textContent = "Review the export summary before downloading.";
@@ -1101,9 +1233,26 @@ function setExportFormat(format) {
 
 field("#format-single").addEventListener("click", () => setExportFormat("single"));
 field("#format-set").addEventListener("click", () => setExportFormat("set"));
-field("#add-composer-block").addEventListener("click", () => {
-  composerBlocks.push({name: "", ra: "", dec: "", count: 1, exposure_seconds: 300, enabled: true});
+addVisibleTargetButton.addEventListener("click", () => {
+  visibleTargetPicker.hidden = !visibleTargetPicker.hidden;
+  addVisibleTargetButton.setAttribute("aria-expanded", String(!visibleTargetPicker.hidden));
+  if (!visibleTargetPicker.hidden) visibleTargetSelect.focus();
+});
+confirmAddVisibleTargetButton.addEventListener("click", () => {
+  const candidate = visibleTargetCandidates[Number(visibleTargetSelect.value)];
+  if (!candidate || !acceptedSuggestion) return;
+  composerBlocks.push({...targetBlockFromCandidate(candidate, acceptedSuggestion.duration_seconds), enabled: true});
   renderComposerBlocks();
+  visibleTargetPicker.hidden = true;
+  addVisibleTargetButton.setAttribute("aria-expanded", "false");
+});
+addCustomTargetButton.addEventListener("click", () => {
+  composerBlocks.push({name: "Custom target", ra: "", dec: "", count: 1, exposure_seconds: 300, enabled: true});
+  renderComposerBlocks();
+  visibleTargetPicker.hidden = true;
+  addVisibleTargetButton.setAttribute("aria-expanded", "false");
+  const lastName = field("#composer-blocks .composer-block:last-child input");
+  lastName?.focus();
 });
 function updateSingleSettings() {
   if (!composerBlocks[0]) return;
@@ -1416,6 +1565,7 @@ function clearSuggestionAcknowledgement() {
   acceptedSuggestion = null;
   selectedResult = null;
   composerBlocks = [];
+  visibleTargetCandidates = [];
   selectedExportFormat = "single";
   acceptedPlan.hidden = true;
   ninaExportStatus.textContent = "";

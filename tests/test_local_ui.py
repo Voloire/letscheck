@@ -589,7 +589,7 @@ def test_priority_suggestion_exports_a_nina_legacy_sequence(tmp_path, ui_browser
         page.close()
 
 
-def test_interval_choice_exposes_explicit_target_set_and_manual_composer(tmp_path, ui_browser):
+def test_interval_choice_uses_local_visible_target_picker_and_exports_one_target_set(tmp_path, ui_browser):
     service = UiService(tmp_path / "interval-choice-site.json")
     with serve_ui(service) as url:
         page, errors = open_page(ui_browser, url)
@@ -599,23 +599,35 @@ def test_interval_choice_exposes_explicit_target_set_and_manual_composer(tmp_pat
         expect(page.locator("#accepted-plan")).to_be_visible()
         page.locator("#format-set").click()
         expect(page.get_by_role("button", name="Export target set to NINA", exact=True)).to_be_visible()
+        requests_before_picker = len(page.context.pages)
+        request_urls = []
+        page.on("request", lambda request: request_urls.append(request.url))
         page.locator("#nina-sequence-name").fill("Selected target set")
         page.get_by_role("button", name="Export target set to NINA", exact=True).click()
         expect(page.locator("#result-live")).to_contain_text("NINA Legacy target set saved")
         assert service.export_payloads[0]["targets"][0]["target"]["name"] == "NGC 6205"
+        assert len(service.export_payloads[0]["targets"]) == 1
 
         page.locator("#format-set").click()
         expect(page.locator("#manual-composer")).to_be_visible()
         expect(page.locator("#export-accepted-nina")).to_be_enabled()
-        page.get_by_role("button", name="Add blank target", exact=True).click()
+        page.get_by_role("button", name="Add visible target", exact=True).click()
+        expect(page.locator("#visible-target-picker")).to_be_visible()
+        expect(page.locator("#visible-target-select")).to_have_count(1)
+        assert len(page.context.pages) == requests_before_picker
+        assert not any(url.endswith("/api/check") or url.endswith("/api/objects") for url in request_urls)
+        page.get_by_role("button", name="Add selected target", exact=True).click()
         expect(page.locator(".composer-block")).to_have_count(2)
+        assert page.locator(".composer-block").nth(1).get_by_label("Target name", exact=True).input_value() == "NGC 6205"
+        assert page.locator(".composer-block").nth(1).get_by_label("RA (degrees)", exact=True).input_value() == "250.423455"
+        page.locator(".composer-block").first.get_by_label("Complete exposures", exact=True).fill("22")
+        page.get_by_role("button", name="Add visible target", exact=True).click()
+        page.get_by_role("button", name="Add custom target", exact=True).click()
         expect(page.locator("#export-accepted-nina")).to_be_disabled()
-        expect(page.locator("#export-validation")).to_contain_text("enter a target name")
-        page.locator(".composer-block").first.get_by_label("Complete exposures", exact=True).fill("12")
-        page.locator(".composer-block").nth(1).get_by_label("Target name", exact=True).fill("M 31")
-        page.locator(".composer-block").nth(1).get_by_label("RA (degrees)", exact=True).fill("10")
-        page.locator(".composer-block").nth(1).get_by_label("Dec (degrees)", exact=True).fill("20")
+        expect(page.locator("#export-validation")).to_contain_text("RA must be between")
+        page.get_by_role("button", name="Remove", exact=True).last.click()
         expect(page.locator("#export-accepted-nina")).to_be_enabled()
+        expect(page.locator("#review-targets")).to_have_text("2 enabled")
         page.set_viewport_size({"width": 390, "height": 844})
         assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
         assert not errors
@@ -632,6 +644,33 @@ def test_major_city_listbox_applies_coordinates_and_timezone(tmp_path, ui_browse
         expect(page.locator("#longitude")).to_have_value("139.6503")
         expect(page.locator("#timezone")).to_have_value("Asia/Tokyo")
         expect(page.locator("#site-status")).to_contain_text("Tokyo observing site")
+        assert not errors
+        page.close()
+
+
+def test_manual_site_mode_sends_normalized_payload_and_invalidates_accepted_plan(tmp_path, ui_browser):
+    service = UiService(tmp_path / "manual-site-mode.json")
+    with serve_ui(service) as url:
+        page, errors = open_page(ui_browser, url)
+        wait_until_ready(page)
+        page.get_by_role("button", name="Manual site", exact=True).click()
+        expect(page.locator("#manual-site-panel")).to_be_visible()
+        expect(page.locator("#major-city-panel")).to_be_hidden()
+        page.get_by_label("Site name", exact=True).fill("Balcony Genoa")
+        page.get_by_label("Latitude", exact=True).fill("44.4196")
+        page.get_by_label("Longitude", exact=True).fill("8.9444")
+        page.get_by_label("Site time zone (IANA)", exact=True).fill("Europe/Rome")
+        submit_object(page, "M 13")
+        expect(page.locator("#result-content")).to_be_visible()
+        assert service.check_payloads[-1]["latitude"] == 44.4196
+        assert service.check_payloads[-1]["longitude"] == 8.9444
+        assert service.check_payloads[-1]["timezone"] == "Europe/Rome"
+        page.locator(".interval-choose").first.click()
+        expect(page.locator("#accepted-plan")).to_be_visible()
+        page.get_by_label("Latitude", exact=True).fill("44.4200")
+        expect(page.locator("#site-mode-manual")).to_have_attribute("aria-pressed", "true")
+        expect(page.locator("#accepted-plan")).to_be_hidden()
+        expect(page.locator(".composer-block")).to_have_count(0)
         assert not errors
         page.close()
 

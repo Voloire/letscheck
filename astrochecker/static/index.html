@@ -86,6 +86,10 @@
 
               <div class="field-group field-wide" role="group" aria-labelledby="position-group-label">
                 <p class="group-label" id="position-group-label">Observing site</p>
+                <div class="site-mode-switch" role="group" aria-label="Observing site mode">
+                  <button class="site-mode-choice selected" id="site-mode-city" type="button" aria-pressed="true">Major city</button>
+                  <button class="site-mode-choice" id="site-mode-manual" type="button" aria-pressed="false">Manual site</button>
+                </div>
                 <div class="field site-name-field">
                   <label for="site-name">Site name</label>
                   <input id="site-name" name="site_name" type="text" value="Rome observing site" maxlength="80" autocomplete="off">
@@ -111,12 +115,12 @@
                     <span class="spinner" aria-hidden="true"></span>
                   </button>
                 </div>
-                <div class="city-select-field">
-                  <label for="city-preset-select">Choose a major city</label>
+                <div class="city-select-field" id="major-city-panel">
+                  <label for="city-preset-select">Major city</label>
                   <select id="city-preset-select" aria-describedby="city-preset-help">
-                    <option value="">Select a city as a fallback...</option>
+                    <option value="">Select a major city...</option>
                     <optgroup label="Europe">
-                      <option value="rome">Rome - Italy</option>
+                      <option value="rome" selected>Rome - Italy</option>
                       <option value="london">London - United Kingdom</option>
                       <option value="reykjavik">Reykjavik - Iceland</option>
                     </optgroup>
@@ -141,6 +145,10 @@
                     </optgroup>
                   </select>
                   <p class="field-help" id="city-preset-help">Coordinates and IANA time zone are included.</p>
+                </div>
+                <div class="manual-site-panel" id="manual-site-panel" hidden>
+                  <p class="field-help">Edit the site fields above for your balcony or observing spot. Manual changes clear the city selection.</p>
+                  <button class="button button-compact button-secondary" id="use-local-timezone" type="button">Use system/local time zone</button>
                 </div>
                 <div class="location-proposal" id="location-proposal" hidden>
                   <div>
@@ -327,9 +335,19 @@
                     <p class="section-kicker">TARGET SET EDITOR</p>
                     <h4 id="composer-title">Build the ordered sequence</h4>
                   </div>
-                  <button class="button button-secondary button-compact" id="add-composer-block" type="button">Add blank target</button>
-                </div>
-                <p class="field-help">Add, remove, and reorder targets. Each enabled block becomes one NINA Legacy target. The selected window is a planning limit; NINA starts when you start the sequence.</p>
+                    <button class="button button-secondary button-compact" id="add-composer-block" type="button" aria-expanded="false" aria-controls="visible-target-picker">Add visible target</button>
+                  </div>
+                  <p class="field-help">Blocks run from top to bottom. Each enabled block becomes one NINA Legacy target. The selected window is a planning limit; NINA starts when you start the sequence.</p>
+                  <div class="visible-target-picker" id="visible-target-picker" hidden aria-labelledby="visible-target-picker-title">
+                    <strong id="visible-target-picker-title">Choose a target already in this result</strong>
+                    <label for="visible-target-select">Visible target candidate</label>
+                    <select id="visible-target-select"></select>
+                    <div class="visible-target-actions">
+                      <button class="button button-primary button-compact" id="confirm-add-visible-target" type="button">Add selected target</button>
+                      <button class="button button-secondary button-compact" id="add-custom-target" type="button">Add custom target</button>
+                    </div>
+                    <p class="field-help" id="visible-target-help">Only candidates from the accepted calculation are listed. Custom target is a separate manual action.</p>
+                  </div>
                 <div class="composer-blocks" id="composer-blocks"></div>
               </section>
               <section class="export-review" id="export-review" aria-labelledby="export-review-title">

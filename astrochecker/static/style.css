@@ -243,6 +243,10 @@ fieldset:disabled { opacity: .42; }
 .object-type { flex: 0 0 auto; color: var(--amber); font-size: .65rem; }
 .object-aliases { min-width: 0; color: var(--text-dim); overflow-wrap: anywhere; }
 .site-name-field { margin-bottom: 10px; }
+.site-mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 9px 0 12px; }
+.site-mode-choice { min-height: 38px; padding: 8px 10px; border: 1px solid rgba(80,105,130,.5); border-radius: 7px; color: var(--text-soft); background: rgba(23,34,49,.62); cursor: pointer; font: inherit; font-size: .72rem; font-weight: 700; }
+.site-mode-choice:hover, .site-mode-choice:focus-visible, .site-mode-choice.selected { border-color: var(--teal); }
+.site-mode-choice.selected { color: var(--text); background: var(--teal-soft); }
 .site-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .location-proposal {
   display: grid;
@@ -366,6 +370,12 @@ fieldset:disabled { opacity: .42; }
 .manual-composer { margin-top: 12px; padding: 12px; border: 1px solid rgba(139,196,255,.28); border-radius: 8px; background: rgba(23,34,49,.45); }
 .composer-heading, .composer-block-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .composer-heading h4 { margin: 3px 0 0; font-size: .86rem; }
+.visible-target-picker { display: grid; gap: 7px; margin-top: 10px; padding: 10px; border: 1px solid rgba(105,215,201,.28); border-radius: 7px; background: rgba(105,215,201,.06); }
+.visible-target-picker strong { color: var(--teal); font-size: .75rem; }
+.visible-target-picker label { color: var(--text-dim); font-size: .65rem; }
+.visible-target-picker select { width: 100%; }
+.visible-target-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.visible-target-actions .button { width: auto; }
 .composer-blocks { display: grid; gap: 8px; margin-top: 10px; }
 .composer-block { padding: 9px; border: 1px solid rgba(80,105,130,.4); border-radius: 7px; background: rgba(11,18,26,.4); }
 .composer-block-heading strong { color: var(--teal); font-size: .75rem; }
