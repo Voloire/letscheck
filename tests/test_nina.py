@@ -35,6 +35,8 @@ def test_build_legacy_sequence_set_xml_uses_ninas_native_target_set_shape():
     targets = root.findall("CaptureSequenceList")
     assert [item.attrib["TargetName"] for item in targets] == ["M 42", "M 31"]
     assert [item.findtext("CaptureSequence/TotalExposureCount") for item in targets] == ["3", "4"]
+    assert xml.count("xmlns:xsi=") == 1
+    assert xml.count("xmlns:xsd=") == 1
 
 
 def test_export_legacy_sequence_set_uses_the_sequence_name_for_the_file(tmp_path):
@@ -45,7 +47,7 @@ def test_export_legacy_sequence_set_uses_the_sequence_name_for_the_file(tmp_path
         filename_timestamp="20260906-130215",
     )
 
-    assert result["filename"] == "Rome-night-plan_20260906-130215.xml"
+    assert result["filename"] == "Rome-night-plan_20260906-130215.ninaTargetSet"
     root = ET.parse(result["path"]).getroot()
     assert root.tag == "ArrayOfCaptureSequenceList"
     assert root.find("CaptureSequenceList").attrib["TargetName"] == "M 42"
@@ -58,7 +60,7 @@ def test_build_legacy_sequence_xml_matches_nina_capture_sequence_shape():
     assert root.tag == "CaptureSequenceList"
     assert root.attrib["TargetName"] == "M 42"
     assert root.attrib["Mode"] == "STANDARD"
-    assert root.attrib["NegativeDec"] == "true"
+    assert root.findtext("NegativeDec") == "true"
     assert root.attrib["RAHours"] == "5"
     assert root.attrib["DecDegrees"] == "-5"
 
@@ -88,19 +90,26 @@ def test_legacy_xml_emits_only_the_documented_nina_fields_and_structure():
 
     assert set(root.attrib) == {
         "TargetName", "Mode", "RAHours", "RAMinutes", "RASeconds",
-        "NegativeDec", "DecDegrees", "DecMinutes", "DecSeconds", "PositionAngle",
+        "DecDegrees", "DecMinutes", "DecSeconds", "PositionAngle", "Delay",
+        "SlewToTarget", "AutoFocusOnStart", "CenterTarget", "RotateTarget",
+        "StartGuiding", "AutoFocusOnFilterChange", "AutoFocusAfterSetTime",
+        "AutoFocusSetTime", "AutoFocusAfterSetExposures", "AutoFocusSetExposures",
+        "AutoFocusAfterTemperatureChange", "AutoFocusAfterTemperatureChangeAmount",
+        "AutoFocusAfterHFRChange", "AutoFocusAfterHFRChangeAmount",
     }
-    assert [child.tag for child in root] == ["CaptureSequence", "Coordinates"]
+    assert [child.tag for child in root] == ["CaptureSequence", "Coordinates", "NegativeDec"]
     capture = root.find("CaptureSequence")
     assert {child.tag for child in capture} == {
-        "Enabled", "ExposureTime", "ImageType", "Binning", "TotalExposureCount",
-        "ProgressExposureCount", "Gain", "Offset", "Dither", "DitherAmount",
+        "Enabled", "ExposureTime", "ImageType", "Binning", "Gain", "Offset",
+        "TotalExposureCount", "ProgressExposureCount", "Dither", "DitherAmount",
     }
     assert {child.tag for child in capture.find("Binning")} == {"X", "Y"}
     assert {child.tag for child in root.find("Coordinates")} == {"RA", "Dec", "Epoch"}
-    assert root.attrib["NegativeDec"] in {"true", "false"}
+    assert root.findtext("NegativeDec") in {"true", "false"}
     assert capture.findtext("Enabled") in {"true", "false"}
     assert capture.findtext("Dither") in {"true", "false"}
+    assert 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' in build_legacy_sequence_xml(TARGET, duration_seconds=300)
+    assert 'xmlns:xsd="http://www.w3.org/2001/XMLSchema"' in build_legacy_sequence_xml(TARGET, duration_seconds=300)
 
 
 def test_export_legacy_sequence_writes_to_requested_download_directory(tmp_path):

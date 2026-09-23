@@ -56,19 +56,35 @@ def _coordinates_attributes(ra_deg, dec_deg):
     dec_minutes_total = (absolute_dec - dec_degrees) * 60
     dec_minutes = int(math.floor(dec_minutes_total))
     dec_seconds = (dec_minutes_total - dec_minutes) * 60
-    # CaptureSequenceList's NegativeDec setter expects the signed degree value.
+    # CaptureSequenceList stores the sign separately in the NegativeDec element.
     if dec_deg < 0:
         dec_degrees = -dec_degrees
 
     return {
+        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
         "RAHours": str(ra_hours_component),
         "RAMinutes": str(ra_minutes),
         "RASeconds": _number(ra_seconds),
-        "NegativeDec": "true" if dec_deg < 0 else "false",
         "DecDegrees": str(dec_degrees),
         "DecMinutes": str(dec_minutes),
         "DecSeconds": _number(dec_seconds),
         "PositionAngle": "0",
+        "Delay": "0",
+        "SlewToTarget": "false",
+        "AutoFocusOnStart": "false",
+        "CenterTarget": "false",
+        "RotateTarget": "false",
+        "StartGuiding": "false",
+        "AutoFocusOnFilterChange": "false",
+        "AutoFocusAfterSetTime": "false",
+        "AutoFocusSetTime": "30",
+        "AutoFocusAfterSetExposures": "false",
+        "AutoFocusSetExposures": "10",
+        "AutoFocusAfterTemperatureChange": "false",
+        "AutoFocusAfterTemperatureChangeAmount": "5",
+        "AutoFocusAfterHFRChange": "false",
+        "AutoFocusAfterHFRChangeAmount": "10",
     }
 
 
@@ -121,10 +137,10 @@ def build_legacy_sequence_xml(
     ET.SubElement(binning, "X").text = "1"
     ET.SubElement(binning, "Y").text = "1"
     for tag, value in (
-        ("TotalExposureCount", str(exposure_count)),
-        ("ProgressExposureCount", "0"),
         ("Gain", "-1"),
         ("Offset", "-1"),
+        ("TotalExposureCount", str(exposure_count)),
+        ("ProgressExposureCount", "0"),
         ("Dither", "false"),
         ("DitherAmount", "1"),
     ):
@@ -134,6 +150,7 @@ def build_legacy_sequence_xml(
     ET.SubElement(coordinates, "RA").text = _number(ra_deg / 15.0)
     ET.SubElement(coordinates, "Dec").text = _number(dec_deg)
     ET.SubElement(coordinates, "Epoch").text = "J2000"
+    ET.SubElement(root, "NegativeDec").text = "true" if dec_deg < 0 else "false"
 
     ET.indent(root, space="  ")
     return ET.tostring(root, encoding="unicode", xml_declaration=True)
@@ -216,14 +233,16 @@ def _sequence_set_document(items, *, sequence_name, filename_timestamp):
     return xml, base, details
 
 
-def _write_document(xml, base, downloads_dir):
-    """Write ``base.xml`` atomically into the downloads folder, never overwriting."""
+def _write_document(xml, base, downloads_dir, *, extension=".xml"):
+    """Write one NINA document atomically, never overwriting an existing file."""
+    if not isinstance(extension, str) or not extension.startswith("."):
+        raise NinaSequenceError("The NINA document extension is invalid")
     directory = Path(downloads_dir) if downloads_dir is not None else default_downloads_dir()
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / f"{base}.xml"
+    path = directory / f"{base}{extension}"
     suffix = 1
     while path.exists():
-        path = directory / f"{base}-{suffix}.xml"
+        path = directory / f"{base}-{suffix}{extension}"
         suffix += 1
 
     temporary_path = None
@@ -283,7 +302,7 @@ def render_legacy_sequence_set(
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
     )
-    return {"xml": xml + "\n", "filename": f"{base}.xml", **details}
+    return {"xml": xml + "\n", "filename": f"{base}.ninaTargetSet", **details}
 
 
 def export_legacy_sequence(
@@ -318,5 +337,5 @@ def export_legacy_sequence_set(
         sequence_name=sequence_name,
         filename_timestamp=filename_timestamp,
     )
-    path = _write_document(xml, base, downloads_dir)
+    path = _write_document(xml, base, downloads_dir, extension=".ninaTargetSet")
     return {"path": str(path), "filename": path.name, **details}

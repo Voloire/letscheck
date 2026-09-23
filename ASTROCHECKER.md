@@ -19,6 +19,8 @@ export the complete ordered target set as NINA's native
 `ArrayOfCaptureSequenceList` XML. Each target contains J2000 coordinates and a
 STANDARD sequence with 300-second LIGHT exposures. The exposure count is the
 integer number of complete exposures that fits that target's planned block.
+Single targets are written as `.xml`; target sets are written as NINA's
+`.ninaTargetSet` format with the XML Schema declarations required by NINA.
 Gain, offset, filter, binning, dithering, and workflow switches stay at NINA's
 defaults. NINA Legacy does not store the astronomical window in these files,
 so apply the planned start and end times manually.
@@ -27,6 +29,7 @@ The exporter is deliberately limited to the Legacy/Simple Sequencer fields
 shown in N.I.N.A.'s user guide: target coordinates and rotation, exposure
 progress/total, exposure time and type, binning, dither, gain, and offset.
 It does not emit Advanced Sequencer entities, planner metadata, Moon data,
-mask data, or unrecognised XML fields.
+mask data, or unrecognised XML fields. Advanced Sequencer `.json` export is not
+implemented yet.
 
 All primary calculations run locally after dependencies and bundled data are present. The optional browser geolocation button can query the browser’s location service, but manual coordinates always remain available.
